@@ -33,7 +33,7 @@
     ::-webkit-scrollbar-track { background:transparent; }
     ::-webkit-scrollbar-thumb { background:var(--border); border-radius:3px; }
     
-    /* === HEADER STYLES (Consistent Across All Pages) === */
+    /* === HEADER STYLES === */
     .header {
       position: sticky; top: 0; z-index: 100;
       display: flex; align-items: center; justify-content: space-between;
@@ -42,15 +42,15 @@
       border-bottom: 1px solid var(--border);
       box-shadow: 0 1px 0 rgba(0,0,0,.02);
     }
-    .logo { display: flex; align-items: center; gap: 16px; cursor: pointer; user-select: none; pointer-events: auto; }
-    .logo-img { height: 64px; width: auto; object-fit: contain; pointer-events: none; }
+    .logo { display: flex; align-items: center; gap: 16px; cursor: pointer; user-select: none; }
+    .logo-img { height: 64px; width: auto; object-fit: contain; }
     .logo-text { font-size: 1.6rem; font-weight: 800; letter-spacing: -.3px; color: var(--text); }
     .logo-subtitle { font-size: .65rem; color: var(--text-muted); letter-spacing: 2px; text-transform: uppercase; margin-top: -4px; }
     .nav { display: flex; gap: 4px; }
     .nav-btn {
       position: relative; padding: 10px 18px; border: none; background: transparent;
       color: var(--text-secondary); font-size: .88rem; font-weight: 500;
-      border-radius: var(--radius-sm); cursor: pointer; transition: var(--transition); pointer-events: auto;
+      border-radius: var(--radius-sm); cursor: pointer; transition: var(--transition);
     }
     .nav-btn:hover { background: var(--primary-glow); color: var(--primary); }
     .nav-btn.active { background: var(--primary-glow); color: var(--primary); font-weight: 600; }
@@ -63,24 +63,29 @@
     .status-dot { width: 8px; height: 8px; background: var(--accent); border-radius: 50%; box-shadow: 0 0 8px rgba(5,150,105,.4); }
     .status-text { font-size: .75rem; color: var(--accent); font-weight: 600; }
     
-    /* === PAGE-SPECIFIC STYLES === */
+    /* === PAGE STYLES === */
     .main { padding: 2rem; max-width: 1440px; margin: 0 auto; }
     .page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem; }
     .page-title { font-size: 1.5rem; font-weight: 700; letter-spacing: -.3px; color: var(--text); }
     .page-desc { font-size: .85rem; color: var(--text-muted); margin-top: 2px; }
-    .btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; border: none; border-radius: var(--radius-sm); font-size: .85rem; font-weight: 600; cursor: pointer; transition: var(--transition); pointer-events: auto; user-select: none; }
+    
+    .btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; border: none; border-radius: var(--radius-sm); font-size: .85rem; font-weight: 600; cursor: pointer; transition: var(--transition); pointer-events: auto; }
     .btn-primary { background: var(--primary); color: #fff; box-shadow: 0 2px 8px rgba(37,99,235,.2); }
     .btn-primary:hover { background: #1d4ed8; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(37,99,235,.3); }
     .btn-outline { background: transparent; color: var(--text-secondary); border: 1px solid var(--border); }
     .btn-outline:hover { border-color: var(--primary); color: var(--primary); background: var(--primary-glow); }
+    .btn-sm { padding: 6px 14px; font-size: .78rem; }
+    .btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none !important; }
+    
     .card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.5rem; transition: var(--transition); box-shadow: var(--shadow); }
     .card:hover { border-color: rgba(37,99,235,.3); box-shadow: var(--shadow-hover); }
     .card-title { font-size: .8rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; font-weight: 600; }
     .card-value { font-size: 1.8rem; font-weight: 800; letter-spacing: -.5px; color: var(--text); }
     .card-sub { font-size: .78rem; color: var(--text-muted); margin-top: 4px; }
+    
     .grid { display: grid; gap: 1rem; }
     .grid-3 { grid-template-columns: repeat(3, 1fr); }
-    @media (max-width: 1024px) { .grid-3 { grid-template-columns: 1fr; } }
+    
     .table-wrapper { overflow-x: auto; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); }
     table { width: 100%; border-collapse: collapse; font-size: .85rem; }
     thead { background: var(--card-hover); }
@@ -89,8 +94,10 @@
     tr:last-child td { border-bottom: none; }
     tbody tr { transition: var(--transition); cursor: default; }
     tbody tr:hover { background: var(--card-hover); }
+    
     .empty-state { text-align: center; padding: 3rem 1rem; color: var(--text-muted); }
     .empty-icon { font-size: 3rem; margin-bottom: .75rem; opacity: .4; }
+    
     .badge { display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: 20px; font-size: .72rem; font-weight: 600; letter-spacing: .3px; }
     .badge-green { background: var(--accent-glow); color: var(--accent); }
     .badge-yellow { background: rgba(217,119,6,.12); color: var(--warning); }
@@ -98,10 +105,16 @@
     .badge-blue { background: var(--primary-glow); color: var(--primary); }
     .badge-gray { background: rgba(100,116,139,.12); color: var(--text-muted); }
     .badge-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+    
     .price-main { font-weight: 700; font-size: .88rem; color: var(--text); }
     .price-sub { font-size: .7rem; color: var(--text-muted); margin-left: 4px; }
     
-    /* === UTILITY CLASSES === */
+    .toast-container { position: fixed; top: 100px; right: 16px; z-index: 300; display: flex; flex-direction: column; gap: 8px; }
+    .toast { background: var(--surface); border: 1px solid var(--border); border-left: 3px solid var(--accent); border-radius: var(--radius-sm); padding: 12px 16px; font-size: .82rem; box-shadow: var(--shadow-hover); animation: slideIn .3s ease; max-width: 320px; color: var(--text); }
+    .toast.success { border-left-color: var(--accent); }
+    .toast.error { border-left-color: var(--danger); }
+    @keyframes slideIn { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+    
     .text-green { color: var(--accent); }
     .text-yellow { color: var(--warning); }
     .text-red { color: var(--danger); }
@@ -119,8 +132,8 @@
     .gap-2 { gap: 1rem; }
     .wrap { flex-wrap: wrap; }
     
-    /* === RESPONSIVE === */
     @media (max-width: 1024px) {
+      .grid-3 { grid-template-columns: 1fr; }
       .header { padding: 0 1rem; height: 80px; }
       .logo-img { height: 52px; }
       .nav { gap: 0; flex-wrap: wrap; }
@@ -133,20 +146,16 @@
 </head>
 <body>
 
-<!-- === CONSISTENT HEADER (Matches Finance Page) === -->
 <header class="header">
   <div class="logo" id="logoBtn">
-    <img 
-      src="https://i.ibb.co/p6GCfY1x/Screenshot-2026-05-30-at-17-06-41.png" 
-      alt="Drafts Dashboard Logo" 
-      class="logo-img"
-      loading="lazy"
-    >
+    <img src="https://i.ibb.co/p6GCfY1x/Screenshot-2026-05-30-at-17-06-41.png" alt="Drafts Dashboard Logo" class="logo-img" loading="lazy">
   </div>
   <nav class="nav">
     <a href="index.html" class="nav-btn">Dashboard</a>
     <a href="projects.html" class="nav-btn">Projects</a>
     <a href="payments.html" class="nav-btn">Payments</a>
+    <a href="clients.html" class="nav-btn">Clients</a>
+    <a href="reports.html" class="nav-btn">Reports</a>
     <a href="performance.html" class="nav-btn active">Performance</a>
     <a href="finance.html" class="nav-btn">Finance</a>
   </nav>
@@ -155,6 +164,8 @@
     <span class="status-text">Online</span>
   </div>
 </header>
+
+<div class="toast-container" id="toastContainer"></div>
 
 <main class="main">
   <div class="page-header">
@@ -198,14 +209,7 @@
           </tr>
         </thead>
         <tbody id="performanceTable">
-          <tr>
-            <td colspan="7">
-              <div class="empty-state">
-                <div class="empty-icon">📊</div>
-                <p>Performance data will appear once you have projects and payments.</p>
-              </div>
-            </td>
-          </tr>
+          <tr><td colspan="7"><div class="empty-state"><div class="empty-icon">📊</div><p>Loading performance data...</p></div></td></tr>
         </tbody>
       </table>
     </div>
@@ -213,93 +217,117 @@
 </main>
 
 <script>
-  // === SUPABASE CONFIG ===
-  const SUPABASE_URL = 'https://hnbzerhoqqsmzqxcbnxv.supabase.co';
-  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhuYnplcmhvcXFzbXpxeGNibnh2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkwNDg1MjksImV4cCI6MjA5NDYyNDUyOX0.a4rM51DQGih9SXMr71PREngZ_pT6dJFgv_fG9j5jAGc';
-  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-  const USD_RATE = 0.00027;
-
-  // === FORMATTING UTILS ===
-  function formatUGX(n) { if (!n) return 'UGX 0'; return 'UGX ' + Number(n).toLocaleString(); }
-  function formatUSD(n) { if (!n) return '$0.00'; return '$' + (n * USD_RATE).toFixed(2); }
-  function priceHTML(ugx) { return `<span class="price-main">${formatUGX(ugx)}</span><span class="price-sub">${formatUSD(ugx)}</span>`; }
-
-  // === HEADER NAVIGATION ===
-  document.getElementById('logoBtn').addEventListener('click', () => {
-    window.location.href = 'index.html';
-  });
-
-  // === LOAD PERFORMANCE METRICS ===
-  async function loadPerformance() {
-    const { data: projects } = await supabase.from('projects').select('*');
-    const { data: payments } = await supabase.from('payments').select('*');
+  (function() {
+    'use strict';
     
-    if (!projects || projects.length === 0) return;
+    // === CONFIG ===
+    const SUPABASE_URL = 'https://hnbzerhoqqsmzqxcbnxv.supabase.co';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhuYnplcmhvcXFzbXpxeGNibnh2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkwNDg1MjksImV4cCI6MjA5NDYyNDUyOX0.a4rM51DQGih9SXMr71PREngZ_pT6dJFgv_fG9j5jAGc';
+    const USD_RATE = 0.00027;
 
-    let totalExpected = 0, totalPaid = 0, extendedCount = 0, lifespans = [];
-    
-    projects.forEach(p => {
-      const pPayments = (payments || []).filter(py => py.project_id === p.id && py.status === 'paid');
-      const paidAmount = pPayments.reduce((s, py) => s + py.amount, 0);
-      const expected = p.monthly_rate * p.plan_months;
-      
-      totalExpected += expected;
-      totalPaid += paidAmount;
-      
-      if (p.plan_months > 12) extendedCount++;
-      
-      const start = new Date(p.start_date);
-      const end = new Date(start);
-      end.setMonth(end.getMonth() + p.plan_months);
-      lifespans.push(Math.round((end - start) / (1000*60*60*24*30)));
-    });
-
-    const collectionRate = totalExpected > 0 ? Math.round((totalPaid / totalExpected) * 100) : 0;
-    const avgLifespan = lifespans.length > 0 ? Math.round(lifespans.reduce((a,b) => a+b, 0) / lifespans.length) : 0;
-    const retention = projects.length > 0 ? Math.round((extendedCount / projects.length) * 100) : 0;
-
-    document.getElementById('perfCollectionRate').textContent = collectionRate + '%';
-    document.getElementById('perfAvgLifespan').textContent = avgLifespan + ' mo';
-    document.getElementById('perfRetention').textContent = retention + '%';
-
-    // === RENDER PERFORMANCE TABLE ===
-    const tbody = document.getElementById('performanceTable');
-    tbody.innerHTML = projects.map(p => {
-      const pPayments = (payments || []).filter(py => py.project_id === p.id && py.status === 'paid');
-      const paid = pPayments.reduce((s, py) => s + py.amount, 0);
-      const expected = p.monthly_rate * p.plan_months;
-      const pct = expected > 0 ? Math.round((paid / expected) * 100) : 0;
-      const color = pct >= 100 ? 'var(--accent)' : pct >= 50 ? 'var(--warning)' : 'var(--danger)';
-      
-      return `<tr>
-        <td><strong>${p.name}</strong></td>
-        <td>${p.client}</td>
-        <td><strong>${formatUGX(paid)}</strong></td>
-        <td>${formatUGX(expected)}</td>
-        <td><span style="color:${color}; font-weight:700">${pct}%</span></td>
-        <td>${pPayments.length}</td>
-        <td>${p.plan_months > 12 
-          ? `<span class="badge badge-green"><span class="badge-dot"></span>Extended</span>` 
-          : '<span class="badge badge-gray">Standard</span>'}
-        </td>
-      </tr>`;
-    }).join('');
-  }
-
-  // === AUTO-HIGHLIGHT ACTIVE NAV ===
-  document.addEventListener('DOMContentLoaded', () => {
-    const path = window.location.pathname.split('/').pop() || 'index.html';
-    document.querySelectorAll('.nav-btn').forEach(btn => {
-      if (btn.getAttribute('href') === path) {
-        btn.classList.add('active');
-      } else {
-        btn.classList.remove('active');
+    document.addEventListener('DOMContentLoaded', async function() {
+      if (!window.supabase) {
+        showToast('Database SDK failed to load', 'error');
+        return;
       }
-    });
-  });
 
-  // === INITIALIZE ===
-  (async () => { await loadPerformance(); })();
+      const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+      // === UTILS ===
+      function formatUGX(n) { if (!n) return 'UGX 0'; return 'UGX ' + Number(n).toLocaleString(); }
+      function formatUSD(n) { if (!n) return '$0.00'; return '$' + (n * USD_RATE).toFixed(2); }
+      
+      function showToast(msg, type = 'success') {
+        const c = document.getElementById('toastContainer');
+        const t = document.createElement('div');
+        t.className = `toast ${type}`;
+        t.textContent = msg;
+        c.appendChild(t);
+        setTimeout(() => t.remove(), 3500);
+      }
+
+      // === LOAD PERFORMANCE METRICS ===
+      async function loadPerformance() {
+        try {
+          const { data: projects, error: projErr } = await supabase.from('projects').select('*');
+          if (projErr) throw projErr;
+          
+          const { data: payments, error: payErr } = await supabase.from('payments').select('*');
+          if (payErr) throw payErr;
+          
+          const tbody = document.getElementById('performanceTable');
+          
+          if (!projects || projects.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state"><div class="empty-icon">📊</div><p>No projects found. Add projects to see performance metrics.</p></div></td></tr>`;
+            document.getElementById('perfCollectionRate').textContent = '0%';
+            document.getElementById('perfAvgLifespan').textContent = '0 mo';
+            document.getElementById('perfRetention').textContent = '0%';
+            return;
+          }
+
+          let totalExpected = 0, totalPaid = 0, extendedCount = 0, lifespans = [];
+          
+          projects.forEach(p => {
+            const pPayments = (payments || []).filter(py => py.project_id === p.id && py.status === 'paid');
+            const paidAmount = pPayments.reduce((s, py) => s + (py.amount || 0), 0);
+            const expected = (p.monthly_rate || 0) * (p.plan_months || 1);
+            
+            totalExpected += expected;
+            totalPaid += paidAmount;
+            
+            if ((p.plan_months || 1) > 12) extendedCount++;
+            
+            const start = new Date(p.start_date);
+            const end = new Date(start);
+            end.setMonth(end.getMonth() + (p.plan_months || 1));
+            lifespans.push(Math.round((end - start) / (1000*60*60*24*30)));
+          });
+
+          const collectionRate = totalExpected > 0 ? Math.round((totalPaid / totalExpected) * 100) : 0;
+          const avgLifespan = lifespans.length > 0 ? Math.round(lifespans.reduce((a,b) => a+b, 0) / lifespans.length) : 0;
+          const retention = projects.length > 0 ? Math.round((extendedCount / projects.length) * 100) : 0;
+
+          document.getElementById('perfCollectionRate').textContent = collectionRate + '%';
+          document.getElementById('perfAvgLifespan').textContent = avgLifespan + ' mo';
+          document.getElementById('perfRetention').textContent = retention + '%';
+
+          // === RENDER PERFORMANCE TABLE ===
+          tbody.innerHTML = projects.map(p => {
+            const pPayments = (payments || []).filter(py => py.project_id === p.id && py.status === 'paid');
+            const paid = pPayments.reduce((s, py) => s + (py.amount || 0), 0);
+            const expected = (p.monthly_rate || 0) * (p.plan_months || 1);
+            const pct = expected > 0 ? Math.round((paid / expected) * 100) : 0;
+            const color = pct >= 100 ? 'var(--accent)' : pct >= 50 ? 'var(--warning)' : 'var(--danger)';
+            
+            return `<tr>
+              <td><strong>${p.name || 'Untitled'}</strong></td>
+              <td>${p.client || '—'}</td>
+              <td><strong>${formatUGX(paid)}</strong></td>
+              <td>${formatUGX(expected)}</td>
+              <td><span style="color:${color}; font-weight:700">${pct}%</span></td>
+              <td>${pPayments.length}</td>
+              <td>${(p.plan_months || 1) > 12 
+                ? `<span class="badge badge-green"><span class="badge-dot"></span>Extended</span>` 
+                : '<span class="badge badge-gray">Standard</span>'}
+              </td>
+            </tr>`;
+          }).join('');
+          
+        } catch (err) {
+          console.error('Performance load error:', err);
+          showToast('Failed to load performance data', 'error');
+          document.getElementById('performanceTable').innerHTML = 
+            `<tr><td colspan="7"><div class="empty-state"><div class="empty-icon">⚠️</div><p>Error: ${err.message}</p></div></td></tr>`;
+        }
+      }
+
+      // === EVENT LISTENERS ===
+      document.getElementById('logoBtn').addEventListener('click', () => window.location.href = 'index.html');
+
+      // === INIT ===
+      await loadPerformance();
+    });
+  })();
 </script>
 </body>
 </html>
