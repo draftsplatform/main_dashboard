@@ -4,26 +4,66 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Performance — Drafts</title>
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- Supabase JS (v2) -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  
   <style>
-    /* Same CSS as index.html - abbreviated */
-    :root { --bg: #f8fafc; --surface: #ffffff; --card: #ffffff; --card-hover: #f1f5f9; --border: #e2e8f0; --primary: #2563eb; --primary-glow: rgba(37,99,235,.1); --accent: #059669; --accent-glow: rgba(5,150,105,.1); --warning: #d97706; --danger: #dc2626; --text: #1e293b; --text-secondary: #475569; --text-muted: #64748b; --radius: 12px; --radius-sm: 8px; --shadow: 0 4px 24px rgba(0,0,0,.08); --shadow-hover: 0 8px 32px rgba(0,0,0,.12); --transition: .2s cubic-bezier(.4,0,.2,1); }
+    :root {
+      --bg: #f8fafc; --surface: #ffffff; --card: #ffffff; --card-hover: #f1f5f9;
+      --border: #e2e8f0; --primary: #2563eb; --primary-glow: rgba(37,99,235,.1);
+      --accent: #059669; --accent-glow: rgba(5,150,105,.1);
+      --warning: #d97706; --danger: #dc2626;
+      --text: #1e293b; --text-secondary: #475569; --text-muted: #64748b;
+      --radius: 12px; --radius-sm: 8px;
+      --shadow: 0 4px 24px rgba(0,0,0,.08); --shadow-hover: 0 8px 32px rgba(0,0,0,.12);
+      --transition: .2s cubic-bezier(.4,0,.2,1);
+    }
     * { margin:0; padding:0; box-sizing:border-box; }
-    body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; line-height: 1.5; }
-    ::-webkit-scrollbar { width:6px; } ::-webkit-scrollbar-track { background:transparent; } ::-webkit-scrollbar-thumb { background:var(--border); border-radius:3px; }
-    .header { position: sticky; top: 0; z-index: 100; display: flex; align-items: center; justify-content: space-between; padding: 0 2rem; height: 88px; background: rgba(255,255,255,.95); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); box-shadow: 0 1px 0 rgba(0,0,0,.02); }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+      background: var(--bg); color: var(--text); min-height: 100vh; line-height: 1.5;
+    }
+    ::-webkit-scrollbar { width:6px; }
+    ::-webkit-scrollbar-track { background:transparent; }
+    ::-webkit-scrollbar-thumb { background:var(--border); border-radius:3px; }
+    
+    /* === HEADER STYLES (Consistent Across All Pages) === */
+    .header {
+      position: sticky; top: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 2rem; height: 88px;
+      background: rgba(255,255,255,.95); backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      box-shadow: 0 1px 0 rgba(0,0,0,.02);
+    }
     .logo { display: flex; align-items: center; gap: 16px; cursor: pointer; user-select: none; pointer-events: auto; }
     .logo-img { height: 64px; width: auto; object-fit: contain; pointer-events: none; }
     .logo-text { font-size: 1.6rem; font-weight: 800; letter-spacing: -.3px; color: var(--text); }
     .logo-subtitle { font-size: .65rem; color: var(--text-muted); letter-spacing: 2px; text-transform: uppercase; margin-top: -4px; }
     .nav { display: flex; gap: 4px; }
-    .nav-btn { position: relative; padding: 10px 18px; border: none; background: transparent; color: var(--text-secondary); font-size: .88rem; font-weight: 500; border-radius: var(--radius-sm); cursor: pointer; transition: var(--transition); pointer-events: auto; }
+    .nav-btn {
+      position: relative; padding: 10px 18px; border: none; background: transparent;
+      color: var(--text-secondary); font-size: .88rem; font-weight: 500;
+      border-radius: var(--radius-sm); cursor: pointer; transition: var(--transition); pointer-events: auto;
+    }
     .nav-btn:hover { background: var(--primary-glow); color: var(--primary); }
     .nav-btn.active { background: var(--primary-glow); color: var(--primary); font-weight: 600; }
-    .nav-btn.active::after { content: ''; position: absolute; bottom: -1px; left: 50%; transform: translateX(-50%); width: 60%; height: 2px; background: var(--primary); border-radius: 1px; }
+    .nav-btn.active::after {
+      content: ''; position: absolute; bottom: -1px; left: 50%;
+      transform: translateX(-50%); width: 60%; height: 2px;
+      background: var(--primary); border-radius: 1px;
+    }
     .header-right { display: flex; align-items: center; gap: 12px; }
     .status-dot { width: 8px; height: 8px; background: var(--accent); border-radius: 50%; box-shadow: 0 0 8px rgba(5,150,105,.4); }
     .status-text { font-size: .75rem; color: var(--accent); font-weight: 600; }
+    
+    /* === PAGE-SPECIFIC STYLES === */
     .main { padding: 2rem; max-width: 1440px; margin: 0 auto; }
     .page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem; }
     .page-title { font-size: 1.5rem; font-weight: 700; letter-spacing: -.3px; color: var(--text); }
@@ -38,7 +78,8 @@
     .card-title { font-size: .8rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; font-weight: 600; }
     .card-value { font-size: 1.8rem; font-weight: 800; letter-spacing: -.5px; color: var(--text); }
     .card-sub { font-size: .78rem; color: var(--text-muted); margin-top: 4px; }
-    .grid { display: grid; gap: 1rem; } .grid-3 { grid-template-columns: repeat(3, 1fr); }
+    .grid { display: grid; gap: 1rem; }
+    .grid-3 { grid-template-columns: repeat(3, 1fr); }
     @media (max-width: 1024px) { .grid-3 { grid-template-columns: 1fr; } }
     .table-wrapper { overflow-x: auto; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); }
     table { width: 100%; border-collapse: collapse; font-size: .85rem; }
@@ -48,21 +89,59 @@
     tr:last-child td { border-bottom: none; }
     tbody tr { transition: var(--transition); cursor: default; }
     tbody tr:hover { background: var(--card-hover); }
-    .empty-state { text-align: center; padding: 3rem 1rem; color: var(--text-muted); } .empty-icon { font-size: 3rem; margin-bottom: .75rem; opacity: .4; }
+    .empty-state { text-align: center; padding: 3rem 1rem; color: var(--text-muted); }
+    .empty-icon { font-size: 3rem; margin-bottom: .75rem; opacity: .4; }
     .badge { display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: 20px; font-size: .72rem; font-weight: 600; letter-spacing: .3px; }
-    .badge-green { background: var(--accent-glow); color: var(--accent); } .badge-yellow { background: rgba(217,119,6,.12); color: var(--warning); } .badge-red { background: rgba(220,38,38,.12); color: var(--danger); } .badge-blue { background: var(--primary-glow); color: var(--primary); } .badge-gray { background: rgba(100,116,139,.12); color: var(--text-muted); }
+    .badge-green { background: var(--accent-glow); color: var(--accent); }
+    .badge-yellow { background: rgba(217,119,6,.12); color: var(--warning); }
+    .badge-red { background: rgba(220,38,38,.12); color: var(--danger); }
+    .badge-blue { background: var(--primary-glow); color: var(--primary); }
+    .badge-gray { background: rgba(100,116,139,.12); color: var(--text-muted); }
     .badge-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
-    .price-main { font-weight: 700; font-size: .88rem; color: var(--text); } .price-sub { font-size: .7rem; color: var(--text-muted); margin-left: 4px; }
-    .text-green { color: var(--accent); } .text-yellow { color: var(--warning); } .text-red { color: var(--danger); } .text-blue { color: var(--primary); } .text-muted { color: var(--text-muted); }
-    .fw-700 { font-weight: 700; } .mt-1 { margin-top: .5rem; } .mt-2 { margin-top: 1rem; } .mb-1 { margin-bottom: .5rem; } .mb-2 { margin-bottom: 1rem; } .gap-1 { gap: .5rem; } .flex { display: flex; } .items-center { align-items: center; } .justify-between { justify-content: space-between; } .gap-2 { gap: 1rem; } .wrap { flex-wrap: wrap; }
-    @media (max-width: 1024px) { .header { padding: 0 1rem; height: 80px; } .logo-img { height: 52px; } .nav { gap: 0; flex-wrap: wrap; } .nav-btn { padding: 8px 12px; font-size: .78rem; } .logo-text { font-size: 1.2rem; } .logo-subtitle { display: none; } .main { padding: 1rem; } }
+    .price-main { font-weight: 700; font-size: .88rem; color: var(--text); }
+    .price-sub { font-size: .7rem; color: var(--text-muted); margin-left: 4px; }
+    
+    /* === UTILITY CLASSES === */
+    .text-green { color: var(--accent); }
+    .text-yellow { color: var(--warning); }
+    .text-red { color: var(--danger); }
+    .text-blue { color: var(--primary); }
+    .text-muted { color: var(--text-muted); }
+    .fw-700 { font-weight: 700; }
+    .mt-1 { margin-top: .5rem; }
+    .mt-2 { margin-top: 1rem; }
+    .mb-1 { margin-bottom: .5rem; }
+    .mb-2 { margin-bottom: 1rem; }
+    .gap-1 { gap: .5rem; }
+    .flex { display: flex; }
+    .items-center { align-items: center; }
+    .justify-between { justify-content: space-between; }
+    .gap-2 { gap: 1rem; }
+    .wrap { flex-wrap: wrap; }
+    
+    /* === RESPONSIVE === */
+    @media (max-width: 1024px) {
+      .header { padding: 0 1rem; height: 80px; }
+      .logo-img { height: 52px; }
+      .nav { gap: 0; flex-wrap: wrap; }
+      .nav-btn { padding: 8px 12px; font-size: .78rem; }
+      .logo-text { font-size: 1.2rem; }
+      .logo-subtitle { display: none; }
+      .main { padding: 1rem; }
+    }
   </style>
 </head>
 <body>
 
+<!-- === CONSISTENT HEADER (Matches Finance Page) === -->
 <header class="header">
   <div class="logo" id="logoBtn">
-    <img src="https://i.ibb.co/Y7PJJsNQ/Drafts-Logo.png" alt="Drafts Logo" class="logo-img">
+    <img 
+      src="https://i.ibb.co/p6GCfY1x/Screenshot-2026-05-30-at-17-06-41.png" 
+      alt="Drafts Dashboard Logo" 
+      class="logo-img"
+      loading="lazy"
+    >
   </div>
   <nav class="nav">
     <a href="index.html" class="nav-btn">Dashboard</a>
@@ -71,12 +150,18 @@
     <a href="performance.html" class="nav-btn active">Performance</a>
     <a href="finance.html" class="nav-btn">Finance</a>
   </nav>
-  <div class="header-right"><div class="status-dot"></div><span class="status-text">Online</span></div>
+  <div class="header-right">
+    <div class="status-dot"></div>
+    <span class="status-text">Online</span>
+  </div>
 </header>
 
 <main class="main">
   <div class="page-header">
-    <div><h1 class="page-title">Project Performance</h1><p class="page-desc">Analytics and performance metrics per project</p></div>
+    <div>
+      <h1 class="page-title">Project Performance</h1>
+      <p class="page-desc">Analytics and performance metrics per project</p>
+    </div>
   </div>
 
   <div class="grid grid-3 mb-2">
@@ -101,9 +186,26 @@
     <div class="card-title mb-1">Performance by Project</div>
     <div class="table-wrapper" style="border:none">
       <table>
-        <thead><tr><th>Project</th><th>Client</th><th>Total Paid</th><th>Total Expected</th><th>Collection %</th><th>Payments Made</th><th>Extension</th></tr></thead>
+        <thead>
+          <tr>
+            <th>Project</th>
+            <th>Client</th>
+            <th>Total Paid</th>
+            <th>Total Expected</th>
+            <th>Collection %</th>
+            <th>Payments Made</th>
+            <th>Extension</th>
+          </tr>
+        </thead>
         <tbody id="performanceTable">
-          <tr><td colspan="7"><div class="empty-state"><div class="empty-icon">📊</div><p>Performance data will appear once you have projects and payments.</p></div></td></tr>
+          <tr>
+            <td colspan="7">
+              <div class="empty-state">
+                <div class="empty-icon">📊</div>
+                <p>Performance data will appear once you have projects and payments.</p>
+              </div>
+            </td>
+          </tr>
         </tbody>
       </table>
     </div>
@@ -111,30 +213,43 @@
 </main>
 
 <script>
+  // === SUPABASE CONFIG ===
   const SUPABASE_URL = 'https://hnbzerhoqqsmzqxcbnxv.supabase.co';
   const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhuYnplcmhvcXFzbXpxeGNibnh2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkwNDg1MjksImV4cCI6MjA5NDYyNDUyOX0.a4rM51DQGih9SXMr71PREngZ_pT6dJFgv_fG9j5jAGc';
   const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
   const USD_RATE = 0.00027;
 
+  // === FORMATTING UTILS ===
   function formatUGX(n) { if (!n) return 'UGX 0'; return 'UGX ' + Number(n).toLocaleString(); }
   function formatUSD(n) { if (!n) return '$0.00'; return '$' + (n * USD_RATE).toFixed(2); }
   function priceHTML(ugx) { return `<span class="price-main">${formatUGX(ugx)}</span><span class="price-sub">${formatUSD(ugx)}</span>`; }
 
-  document.getElementById('logoBtn').addEventListener('click', () => window.location.href = 'index.html');
+  // === HEADER NAVIGATION ===
+  document.getElementById('logoBtn').addEventListener('click', () => {
+    window.location.href = 'index.html';
+  });
 
+  // === LOAD PERFORMANCE METRICS ===
   async function loadPerformance() {
     const { data: projects } = await supabase.from('projects').select('*');
     const { data: payments } = await supabase.from('payments').select('*');
+    
     if (!projects || projects.length === 0) return;
 
     let totalExpected = 0, totalPaid = 0, extendedCount = 0, lifespans = [];
+    
     projects.forEach(p => {
       const pPayments = (payments || []).filter(py => py.project_id === p.id && py.status === 'paid');
       const paidAmount = pPayments.reduce((s, py) => s + py.amount, 0);
       const expected = p.monthly_rate * p.plan_months;
-      totalExpected += expected; totalPaid += paidAmount;
+      
+      totalExpected += expected;
+      totalPaid += paidAmount;
+      
       if (p.plan_months > 12) extendedCount++;
-      const start = new Date(p.start_date); const end = new Date(start);
+      
+      const start = new Date(p.start_date);
+      const end = new Date(start);
       end.setMonth(end.getMonth() + p.plan_months);
       lifespans.push(Math.round((end - start) / (1000*60*60*24*30)));
     });
@@ -147,6 +262,7 @@
     document.getElementById('perfAvgLifespan').textContent = avgLifespan + ' mo';
     document.getElementById('perfRetention').textContent = retention + '%';
 
+    // === RENDER PERFORMANCE TABLE ===
     const tbody = document.getElementById('performanceTable');
     tbody.innerHTML = projects.map(p => {
       const pPayments = (payments || []).filter(py => py.project_id === p.id && py.status === 'paid');
@@ -154,16 +270,35 @@
       const expected = p.monthly_rate * p.plan_months;
       const pct = expected > 0 ? Math.round((paid / expected) * 100) : 0;
       const color = pct >= 100 ? 'var(--accent)' : pct >= 50 ? 'var(--warning)' : 'var(--danger)';
+      
       return `<tr>
-        <td><strong>${p.name}</strong></td><td>${p.client}</td>
-        <td><strong>${formatUGX(paid)}</strong></td><td>${formatUGX(expected)}</td>
+        <td><strong>${p.name}</strong></td>
+        <td>${p.client}</td>
+        <td><strong>${formatUGX(paid)}</strong></td>
+        <td>${formatUGX(expected)}</td>
         <td><span style="color:${color}; font-weight:700">${pct}%</span></td>
         <td>${pPayments.length}</td>
-        <td>${p.plan_months > 12 ? `<span class="badge badge-green"><span class="badge-dot"></span>Extended</span>` : '<span class="badge badge-gray">Standard</span>'}</td>
+        <td>${p.plan_months > 12 
+          ? `<span class="badge badge-green"><span class="badge-dot"></span>Extended</span>` 
+          : '<span class="badge badge-gray">Standard</span>'}
+        </td>
       </tr>`;
     }).join('');
   }
 
+  // === AUTO-HIGHLIGHT ACTIVE NAV ===
+  document.addEventListener('DOMContentLoaded', () => {
+    const path = window.location.pathname.split('/').pop() || 'index.html';
+    document.querySelectorAll('.nav-btn').forEach(btn => {
+      if (btn.getAttribute('href') === path) {
+        btn.classList.add('active');
+      } else {
+        btn.classList.remove('active');
+      }
+    });
+  });
+
+  // === INITIALIZE ===
   (async () => { await loadPerformance(); })();
 </script>
 </body>
