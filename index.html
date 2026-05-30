@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard — Drafts</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <style>
+    :root {
+      --bg: #f8fafc; --surface: #ffffff; --card: #ffffff; --card-hover: #f1f5f9;
+      --border: #e2e8f0; --primary: #2563eb; --primary-glow: rgba(37,99,235,.1);
+      --accent: #059669; --accent-glow: rgba(5,150,105,.1); --warning: #d97706;
+      --danger: #dc2626; --text: #1e293b; --text-secondary: #475569;
+      --text-muted: #64748b; --radius: 12px; --radius-sm: 8px;
+      --shadow: 0 4px 24px rgba(0,0,0,.08); --shadow-hover: 0 8px 32px rgba(0,0,0,.12);
+      --transition: .2s cubic-bezier(.4,0,.2,1);
+    }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; line-height: 1.5; }
+    ::-webkit-scrollbar { width:6px; } ::-webkit-scrollbar-track { background:transparent; } ::-webkit-scrollbar-thumb { background:var(--border); border-radius:3px; }
+    .header { position: sticky; top: 0; z-index: 100; display: flex; align-items: center; justify-content: space-between; padding: 0 2rem; height: 88px; background: rgba(255,255,255,.95); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); box-shadow: 0 1px 0 rgba(0,0,0,.02); }
+    .logo { display: flex; align-items: center; gap: 16px; cursor: pointer; user-select: none; pointer-events: auto; }
+    .logo-img { height: 64px; width: auto; object-fit: contain; pointer-events: none; }
+    .logo-text { font-size: 1.6rem; font-weight: 800; letter-spacing: -.3px; color: var(--text); }
+    .logo-subtitle { font-size: .65rem; color: var(--text-muted); letter-spacing: 2px; text-transform: uppercase; margin-top: -4px; }
+    .nav { display: flex; gap: 4px; }
+    .nav-btn { position: relative; padding: 10px 18px; border: none; background: transparent; color: var(--text-secondary); font-size: .88rem; font-weight: 500; border-radius: var(--radius-sm); cursor: pointer; transition: var(--transition); pointer-events: auto; }
+    .nav-btn:hover { background: var(--primary-glow); color: var(--primary); }
+    .nav-btn.active { background: var(--primary-glow); color: var(--primary); font-weight: 600; }
+    .nav-btn.active::after { content: ''; position: absolute; bottom: -1px; left: 50%; transform: translateX(-50%); width: 60%; height: 2px; background: var(--primary); border-radius: 1px; }
+    .header-right { display: flex; align-items: center; gap: 12px; }
+    .status-dot { width: 8px; height: 8px; background: var(--accent); border-radius: 50%; box-shadow: 0 0 8px rgba(5,150,105,.4); }
+    .status-text { font-size: .75rem; color: var(--accent); font-weight: 600; }
+    .main { padding: 2rem; max-width: 1440px; margin: 0 auto; }
+    .page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem; }
+    .page-title { font-size: 1.5rem; font-weight: 700; letter-spacing: -.3px; color: var(--text); }
+    .page-desc { font-size: .85rem; color: var(--text-muted); margin-top: 2px; }
+    .btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; border: none; border-radius: var(--radius-sm); font-size: .85rem; font-weight: 600; cursor: pointer; transition: var(--transition); pointer-events: auto; user-select: none; }
+    .btn-primary { background: var(--primary); color: #fff; box-shadow: 0 2px 8px rgba(37,99,235,.2); }
+    .btn-primary:hover { background: #1d4ed8; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(37,99,235,.3); }
+    .btn-outline { background: transparent; color: var(--text-secondary); border: 1px solid var(--border); }
+    .btn-outline:hover { border-color: var(--primary); color: var(--primary); background: var(--primary-glow); }
+    .card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.5rem; transition: var(--transition); box-shadow: var(--shadow); }
+    .card:hover { border-color: rgba(37,99,235,.3); box-shadow: var(--shadow-hover); }
+    .card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; }
+    .card-title { font-size: .8rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; font-weight: 600; }
+    .card-value { font-size: 1.8rem; font-weight: 800; letter-spacing: -.5px; color: var(--text); }
+    .card-sub { font-size: .78rem; color: var(--text-muted); margin-top: 4px; }
+    .grid { display: grid; gap: 1rem; } .grid-4 { grid-template-columns: repeat(4, 1fr); } .grid-2 { grid-template-columns: repeat(2, 1fr); }
+    @media (max-width: 1024px) { .grid-4 { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 640px) { .grid-4, .grid-2 { grid-template-columns: 1fr; } .header { padding: 0 1rem; height: 80px; } .logo-img { height: 52px; } .nav { gap: 0; flex-wrap: wrap; } .nav-btn { padding: 8px 12px; font-size: .78rem; } .logo-text { font-size: 1.2rem; } .logo-subtitle { display: none; } .main { padding: 1rem; } }
+    .badge { display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: 20px; font-size: .72rem; font-weight: 600; letter-spacing: .3px; }
+    .badge-green { background: var(--accent-glow); color: var(--accent); } .badge-yellow { background: rgba(217,119,6,.12); color: var(--warning); } .badge-red { background: rgba(220,38,38,.12); color: var(--danger); } .badge-blue { background: var(--primary-glow); color: var(--primary); } .badge-gray { background: rgba(100,116,139,.12); color: var(--text-muted); }
+    .badge-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+    .price-main { font-weight: 700; font-size: .88rem; color: var(--text); } .price-sub { font-size: .7rem; color: var(--text-muted); margin-left: 4px; }
+    .chart-area { width: 100%; height: 200px; background: linear-gradient(180deg, var(--primary-glow) 0%, transparent 100%); border-radius: var(--radius-sm); display: flex; align-items: flex-end; padding: 0 12px 12px; gap: 6px; }
+    .chart-bar { flex: 1; background: linear-gradient(180deg, var(--primary), rgba(37,99,235,.3)); border-radius: 4px 4px 0 0; min-height: 8px; transition: height .6s ease; }
+    .timeline { position: relative; padding-left: 24px; }
+    .timeline::before { content: ''; position: absolute; left: 7px; top: 4px; bottom: 4px; width: 2px; background: var(--border); }
+    .timeline-item { position: relative; padding-bottom: 1.25rem; }
+    .timeline-dot { position: absolute; left: -24px; top: 3px; width: 14px; height: 14px; border-radius: 50%; border: 2px solid var(--primary); background: var(--surface); }
+    .timeline-dot.green { border-color: var(--accent); } .timeline-dot.yellow { border-color: var(--warning); } .timeline-dot.red { border-color: var(--danger); }
+    .timeline-title { font-size: .85rem; font-weight: 600; color: var(--text); }
+    .timeline-desc { font-size: .78rem; color: var(--text-muted); margin-top: 2px; }
+    .timeline-date { font-size: .7rem; color: var(--text-muted); margin-top: 4px; }
+    .toast-container { position: fixed; top: 100px; right: 16px; z-index: 300; display: flex; flex-direction: column; gap: 8px; }
+    .toast { background: var(--surface); border: 1px solid var(--border); border-left: 3px solid var(--accent); border-radius: var(--radius-sm); padding: 12px 16px; font-size: .82rem; box-shadow: var(--shadow-hover); animation: slideIn .3s ease; max-width: 320px; color: var(--text); }
+    .toast.success { border-left-color: var(--accent); } .toast.error { border-left-color: var(--danger); }
+    @keyframes slideIn { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+    .empty-state { text-align: center; padding: 3rem 1rem; color: var(--text-muted); } .empty-icon { font-size: 3rem; margin-bottom: .75rem; opacity: .4; }
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.4); backdrop-filter: blur(4px); z-index: 200; place-items: center; pointer-events: none; opacity: 0; transition: opacity .2s ease; }
+    .modal-overlay.open { display: grid; pointer-events: auto; opacity: 1; }
+    .modal { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); width: 90%; max-width: 560px; max-height: 85vh; overflow-y: auto; box-shadow: var(--shadow-hover); animation: fadeUp .2s ease; pointer-events: auto; }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    .modal-header { display: flex; align-items: center; justify-content: space-between; padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--border); position: sticky; top: 0; background: var(--surface); z-index: 1; }
+    .modal-title { font-size: 1.1rem; font-weight: 700; color: var(--text); }
+    .modal-close { width: 32px; height: 32px; display: grid; place-items: center; border: none; background: transparent; color: var(--text-muted); cursor: pointer; border-radius: 6px; font-size: 1.2rem; transition: var(--transition); pointer-events: auto; }
+    .modal-close:hover { background: var(--card-hover); color: var(--text); }
+    .modal-body { padding: 1.5rem; }
+    .modal-footer { padding: 1rem 1.5rem; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 8px; position: sticky; bottom: 0; background: var(--surface); }
+    .form-group { margin-bottom: 1rem; }
+    .form-label { display: block; font-size: .78rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 6px; }
+    .form-input, .form-select, .form-textarea { width: 100%; padding: 10px 14px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--text); font-size: .85rem; font-family: inherit; transition: var(--transition); }
+    .form-input:focus, .form-select:focus, .form-textarea:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-glow); }
+    .form-textarea { resize: vertical; min-height: 80px; } .form-select { cursor: pointer; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    @media (max-width: 500px) { .form-row { grid-template-columns: 1fr; } }
+    .text-green { color: var(--accent); } .text-yellow { color: var(--warning); } .text-red { color: var(--danger); } .text-blue { color: var(--primary); } .text-muted { color: var(--text-muted); }
+    .fw-700 { font-weight: 700; } .mt-1 { margin-top: .5rem; } .mt-2 { margin-top: 1rem; } .mb-1 { margin-bottom: .5rem; } .mb-2 { margin-bottom: 1rem; } .gap-1 { gap: .5rem; } .flex { display: flex; } .items-center { align-items: center; } .justify-between { justify-content: space-between; } .gap-2 { gap: 1rem; } .wrap { flex-wrap: wrap; }
+  </style>
+</head>
+<body>
+
+<header class="header">
+  <div class="logo" id="logoBtn">
+    <img src="https://i.ibb.co/Y7PJJsNQ/Drafts-Logo.png" alt="Drafts Logo" class="logo-img">
+  </div>
+  <nav class="nav">
+    <a href="index.html" class="nav-btn active">Dashboard</a>
+    <a href="projects.html" class="nav-btn">Projects</a>
+    <a href="payments.html" class="nav-btn">Payments</a>
+    <a href="performance.html" class="nav-btn">Performance</a>
+    <a href="finance.html" class="nav-btn">Finance</a>
+  </nav>
+  <div class="header-right"><div class="status-dot"></div><span class="status-text">Online</span></div>
+</header>
+
+<div class="toast-container" id="toastContainer"></div>
+
+<main class="main">
+  <div class="page-header">
+    <div><h1 class="page-title">Dashboard</h1><p class="page-desc">Overview of all projects and financial health</p></div>
+    <a href="projects.html" class="btn btn-primary">＋ New Project</a>
+  </div>
+
+  <div class="grid grid-4 mb-2">
+    <div class="card">
+      <div class="card-header"><span class="card-title">Active Projects</span><span class="badge badge-blue"><span class="badge-dot"></span> Live</span></div>
+      <div class="card-value" id="dashActiveProjects">0</div>
+      <div class="card-sub">Currently being tracked</div>
+    </div>
+    <div class="card">
+      <div class="card-header"><span class="card-title">Total Revenue</span><span class="badge badge-green"><span class="badge-dot"></span> Collected</span></div>
+      <div class="card-value" id="dashRevenue"><span class="price-main">UGX 0</span><span class="price-sub">$0.00</span></div>
+      <div class="card-sub">All-time collected payments</div>
+    </div>
+    <div class="card">
+      <div class="card-header"><span class="card-title">Pending Payments</span><span class="badge badge-yellow"><span class="badge-dot"></span> Due</span></div>
+      <div class="card-value" id="dashPending"><span class="price-main">UGX 0</span><span class="price-sub">$0.00</span></div>
+      <div class="card-sub">Outstanding this month</div>
+    </div>
+    <div class="card">
+      <div class="card-header"><span class="card-title">Overdue</span><span class="badge badge-red"><span class="badge-dot"></span> Late</span></div>
+      <div class="card-value" id="dashOverdue"><span class="price-main">UGX 0</span><span class="price-sub">$0.00</span></div>
+      <div class="card-sub">Past due date</div>
+    </div>
+  </div>
+
+  <div class="grid grid-2">
+    <div class="card">
+      <div class="card-title mb-1">Monthly Revenue</div>
+      <div class="chart-area" id="revenueChart"></div>
+    </div>
+    <div class="card">
+      <div class="card-title mb-1">Recent Activity</div>
+      <div class="timeline" id="dashTimeline">
+        <div class="timeline-item"><div class="timeline-dot green"></div><div class="timeline-title">Welcome to Drafts</div><div class="timeline-desc">Start adding projects to track payments</div></div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- Project Modal (for quick access) -->
+<div class="modal-overlay" id="projectModal">
+  <div class="modal">
+    <div class="modal-header"><h3 class="modal-title">New Project</h3><button class="modal-close" id="closeProjectModal">✕</button></div>
+    <div class="modal-body">
+      <input type="hidden" id="projId" />
+      <div class="form-group"><label class="form-label">Project Name</label><input class="form-input" id="projName" placeholder="e.g. Inventory Management System" /></div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Client Name</label><input class="form-input" id="projClient" placeholder="Client / Company name" /></div>
+        <div class="form-group"><label class="form-label">Monthly Rate (UGX)</label><input class="form-input" id="projRate" type="number" placeholder="500,000" /></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Plan Duration</label>
+          <select class="form-select" id="projPlan">
+            <option value="1">1 Month</option><option value="3">3 Months</option><option value="6">6 Months</option>
+            <option value="8">8 Months</option><option value="12">1 Year (12 Months)</option><option value="24">2 Years (24 Months)</option>
+          </select>
+        </div>
+        <div class="form-group"><label class="form-label">Start Date</label><input class="form-input" id="projStartDate" type="date" /></div>
+      </div>
+      <div class="form-group"><label class="form-label">Status</label>
+        <select class="form-select" id="projStatus">
+          <option value="active">Active</option><option value="completed">Completed</option><option value="on-hold">On Hold</option>
+        </select>
+      </div>
+      <div class="form-group"><label class="form-label">Notes</label><textarea class="form-textarea" id="projNotes" placeholder="Additional project details..."></textarea></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" id="cancelProject">Cancel</button>
+      <button class="btn btn-primary" id="saveProject">Save Project</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const SUPABASE_URL = 'https://hnbzerhoqqsmzqxcbnxv.supabase.co';
+  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhuYnplcmhvcXFzbXpxeGNibnh2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkwNDg1MjksImV4cCI6MjA5NDYyNDUyOX0.a4rM51DQGih9SXMr71PREngZ_pT6dJFgv_fG9j5jAGc';
+  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  const USD_RATE = 0.00027;
+
+  function formatUGX(n) { if (!n) return 'UGX 0'; return 'UGX ' + Number(n).toLocaleString(); }
+  function formatUSD(n) { if (!n) return '$0.00'; return '$' + (n * USD_RATE).toFixed(2); }
+  function priceHTML(ugx) { return `<span class="price-main">${formatUGX(ugx)}</span><span class="price-sub">${formatUSD(ugx)}</span>`; }
+
+  function toast(msg, type = 'success') {
+    const c = document.getElementById('toastContainer');
+    const t = document.createElement('div');
+    t.className = `toast ${type}`; t.textContent = msg; c.appendChild(t);
+    setTimeout(() => t.remove(), 3500);
+  }
+
+  function openModal(id) { document.getElementById(id).classList.add('open'); }
+  function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+  document.getElementById('logoBtn').addEventListener('click', () => window.location.href = 'index.html');
+  document.getElementById('closeProjectModal').addEventListener('click', () => closeModal('projectModal'));
+  document.getElementById('cancelProject').addEventListener('click', () => closeModal('projectModal'));
+  document.querySelectorAll('.modal-overlay').forEach(overlay => {
+    overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.classList.remove('open'); });
+  });
+
+  async function loadDashboard() {
+    const { data: projects } = await supabase.from('projects').select('*');
+    const active = (projects || []).filter(p => p.status === 'active');
+    document.getElementById('dashActiveProjects').textContent = active.length;
+
+    const { data: payments } = await supabase.from('payments').select('*');
+    const paid = (payments || []).filter(p => p.status === 'paid');
+    const pending = (payments || []).filter(p => p.status === 'pending');
+    const overdue = (payments || []).filter(p => p.status === 'overdue');
+
+    const totalRevenue = paid.reduce((s, p) => s + (p.amount || 0), 0);
+    const totalPending = pending.reduce((s, p) => s + (p.amount || 0), 0);
+    const totalOverdue = overdue.reduce((s, p) => s + (p.amount || 0), 0);
+
+    document.getElementById('dashRevenue').innerHTML = priceHTML(totalRevenue);
+    document.getElementById('dashPending').innerHTML = priceHTML(totalPending);
+    document.getElementById('dashOverdue').innerHTML = priceHTML(totalOverdue);
+
+    // Chart
+    const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    const monthlyTotals = new Array(12).fill(0);
+    (payments || []).filter(p => p.status === 'paid').forEach(p => {
+      const d = new Date(p.payment_date); monthlyTotals[d.getMonth()] += p.amount;
+    });
+    const max = Math.max(...monthlyTotals, 1);
+    const chart = document.getElementById('revenueChart');
+    chart.innerHTML = monthlyTotals.map((v, i) => {
+      const h = Math.max(4, (v / max) * 180);
+      return `<div style="flex:1; display:flex; flex-direction:column; align-items:center; gap:4px;">
+        <div class="chart-bar" style="height:${h}px; width:100%;" title="${months[i]}: ${formatUGX(v)}"></div>
+        <span style="font-size:.6rem; color:var(--text-muted)">${months[i]}</span>
+      </div>`;
+    }).join('');
+
+    // Timeline
+    const recent = (payments || []).sort((a, b) => new Date(b.created_at) - new Date(a.created_at)).slice(0, 5);
+    const tl = document.getElementById('dashTimeline');
+    if (recent.length === 0) {
+      tl.innerHTML = `<div class="timeline-item"><div class="timeline-dot green"></div><div class="timeline-title">Welcome to Drafts</div><div class="timeline-desc">Start adding projects to track payments</div></div>`;
+    } else {
+      tl.innerHTML = recent.map(p => {
+        const dot = p.status === 'paid' ? 'green' : p.status === 'pending' ? 'yellow' : 'red';
+        return `<div class="timeline-item">
+          <div class="timeline-dot ${dot}"></div>
+          <div class="timeline-title">${formatUGX(p.amount)} ${p.status}</div>
+          <div class="timeline-desc">${p.projects?.name || 'Project'} — ${p.period || 'N/A'}</div>
+          <div class="timeline-date">${new Date(p.payment_date).toLocaleDateString()}</div>
+        </div>`;
+      }).join('');
+    }
+  }
+
+  // Project Modal Save
+  document.getElementById('saveProject').addEventListener('click', async function() {
+    const id = document.getElementById('projId').value || crypto.randomUUID();
+    const data = {
+      id, name: document.getElementById('projName').value.trim(), client: document.getElementById('projClient').value.trim(),
+      monthly_rate: parseInt(document.getElementById('projRate').value) || 0,
+      plan_months: parseInt(document.getElementById('projPlan').value) || 1,
+      start_date: document.getElementById('projStartDate').value || new Date().toISOString().split('T')[0],
+      status: document.getElementById('projStatus').value, notes: document.getElementById('projNotes').value.trim(),
+      created_at: new Date().toISOString()
+    };
+    if (!data.name || !data.client) { toast('Please fill in project name and client', 'error'); return; }
+    const { error } = await supabase.from('projects').upsert(data);
+    if (error) { toast('Error: ' + error.message, 'error'); return; }
+    toast('Project saved!'); closeModal('projectModal');
+    document.querySelectorAll('.form-input, .form-textarea').forEach(el => el.value = '');
+    loadDashboard();
+  });
+
+  (async () => {
+    document.getElementById('projStartDate').value = new Date().toISOString().split('T')[0];
+    await loadDashboard();
+  })();
+</script>
+</body>
+</html>
