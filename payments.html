@@ -25,139 +25,79 @@
       --transition: .2s cubic-bezier(.4,0,.2,1);
     }
     * { margin:0; padding:0; box-sizing:border-box; }
-    body {
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
-      background: var(--bg); color: var(--text); min-height: 100vh; line-height: 1.5;
-    }
-    ::-webkit-scrollbar { width:6px; }
-    ::-webkit-scrollbar-track { background:transparent; }
-    ::-webkit-scrollbar-thumb { background:var(--border); border-radius:3px; }
-    
-    /* === HEADER STYLES === */
-    .header {
-      position: sticky; top: 0; z-index: 100;
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 0 2rem; height: 88px;
-      background: rgba(255,255,255,.95); backdrop-filter: blur(12px);
-      border-bottom: 1px solid var(--border);
-      box-shadow: 0 1px 0 rgba(0,0,0,.02);
-    }
-    .logo { display: flex; align-items: center; gap: 16px; cursor: pointer; user-select: none; }
-    .logo-img { height: 64px; width: auto; object-fit: contain; }
-    .logo-text { font-size: 1.6rem; font-weight: 800; letter-spacing: -.3px; color: var(--text); }
+    body { font-family: 'Inter', system-ui, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; line-height: 1.5; }
+    ::-webkit-scrollbar { width:6px; } ::-webkit-scrollbar-track { background:transparent; } ::-webkit-scrollbar-thumb { background:var(--border); border-radius:3px; }
+    .header { position: sticky; top: 0; z-index: 100; display: flex; align-items: center; justify-content: space-between; padding: 0 2rem; height: 88px; background: rgba(255,255,255,.95); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); }
+    .logo { display: flex; align-items: center; gap: 16px; cursor: pointer; }
+    .logo-img { height: 64px; width: auto; }
+    .logo-text { font-size: 1.6rem; font-weight: 800; color: var(--text); }
     .logo-subtitle { font-size: .65rem; color: var(--text-muted); letter-spacing: 2px; text-transform: uppercase; margin-top: -4px; }
     .nav { display: flex; gap: 4px; }
-    .nav-btn {
-      position: relative; padding: 10px 18px; border: none; background: transparent;
-      color: var(--text-secondary); font-size: .88rem; font-weight: 500;
-      border-radius: var(--radius-sm); cursor: pointer; transition: var(--transition);
-    }
+    .nav-btn { position: relative; padding: 10px 18px; border: none; background: transparent; color: var(--text-secondary); font-size: .88rem; font-weight: 500; border-radius: 8px; cursor: pointer; transition: .2s; }
     .nav-btn:hover { background: var(--primary-glow); color: var(--primary); }
     .nav-btn.active { background: var(--primary-glow); color: var(--primary); font-weight: 600; }
-    .nav-btn.active::after {
-      content: ''; position: absolute; bottom: -1px; left: 50%;
-      transform: translateX(-50%); width: 60%; height: 2px;
-      background: var(--primary); border-radius: 1px;
-    }
+    .nav-btn.active::after { content: ''; position: absolute; bottom: -1px; left: 50%; transform: translateX(-50%); width: 60%; height: 2px; background: var(--primary); }
     .header-right { display: flex; align-items: center; gap: 12px; }
-    .status-dot { width: 8px; height: 8px; background: var(--accent); border-radius: 50%; box-shadow: 0 0 8px rgba(5,150,105,.4); }
+    .status-dot { width: 8px; height: 8px; background: var(--accent); border-radius: 50%; }
     .status-text { font-size: .75rem; color: var(--accent); font-weight: 600; }
-    
-    /* === PAGE STYLES === */
     .main { padding: 2rem; max-width: 1440px; margin: 0 auto; }
     .page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem; }
-    .page-title { font-size: 1.5rem; font-weight: 700; letter-spacing: -.3px; color: var(--text); }
+    .page-title { font-size: 1.5rem; font-weight: 700; color: var(--text); }
     .page-desc { font-size: .85rem; color: var(--text-muted); margin-top: 2px; }
-    
-    .btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; border: none; border-radius: var(--radius-sm); font-size: .85rem; font-weight: 600; cursor: pointer; transition: var(--transition); pointer-events: auto; }
+    .btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; border: none; border-radius: 8px; font-size: .85rem; font-weight: 600; cursor: pointer; transition: .2s; }
     .btn-primary { background: var(--primary); color: #fff; box-shadow: 0 2px 8px rgba(37,99,235,.2); }
-    .btn-primary:hover { background: #1d4ed8; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(37,99,235,.3); }
+    .btn-primary:hover { background: #1d4ed8; transform: translateY(-1px); }
     .btn-outline { background: transparent; color: var(--text-secondary); border: 1px solid var(--border); }
     .btn-outline:hover { border-color: var(--primary); color: var(--primary); background: var(--primary-glow); }
     .btn-sm { padding: 6px 14px; font-size: .78rem; }
     .btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none !important; }
-    
-    .badge { display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: 20px; font-size: .72rem; font-weight: 600; letter-spacing: .3px; }
+    .badge { display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: 20px; font-size: .72rem; font-weight: 600; }
     .badge-green { background: var(--accent-glow); color: var(--accent); }
     .badge-yellow { background: rgba(217,119,6,.12); color: var(--warning); }
     .badge-red { background: rgba(220,38,38,.12); color: var(--danger); }
-    .badge-blue { background: var(--primary-glow); color: var(--primary); }
-    .badge-gray { background: rgba(100,116,139,.12); color: var(--text-muted); }
     .badge-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
-    
-    .price-main { font-weight: 700; font-size: .88rem; color: var(--text); }
+    .price-main { font-weight: 700; font-size: .88rem; }
     .price-sub { font-size: .7rem; color: var(--text-muted); margin-left: 4px; }
-    
-    .table-wrapper { overflow-x: auto; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); }
+    .table-wrapper { overflow-x: auto; border: 1px solid var(--border); border-radius: 12px; background: var(--surface); }
     table { width: 100%; border-collapse: collapse; font-size: .85rem; }
     thead { background: var(--card-hover); }
-    th { text-align: left; padding: 12px 16px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; font-size: .72rem; letter-spacing: .8px; border-bottom: 1px solid var(--border); }
-    td { padding: 12px 16px; border-bottom: 1px solid var(--border); vertical-align: middle; color: var(--text); }
+    th { text-align: left; padding: 12px 16px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; font-size: .72rem; border-bottom: 1px solid var(--border); }
+    td { padding: 12px 16px; border-bottom: 1px solid var(--border); vertical-align: middle; }
     tr:last-child td { border-bottom: none; }
-    tbody tr { transition: var(--transition); cursor: default; }
     tbody tr:hover { background: var(--card-hover); }
-    
     .empty-state { text-align: center; padding: 3rem 1rem; color: var(--text-muted); }
     .empty-icon { font-size: 3rem; margin-bottom: .75rem; opacity: .4; }
-    
-    .tabs { display: flex; gap: 2px; background: var(--card); padding: 4px; border-radius: var(--radius-sm); margin-bottom: 1.25rem; width: fit-content; border: 1px solid var(--border); }
-    .tab-btn { padding: 8px 16px; border: none; background: transparent; color: var(--text-muted); font-size: .8rem; font-weight: 500; border-radius: 6px; cursor: pointer; transition: var(--transition); }
+    .tabs { display: flex; gap: 2px; background: var(--card); padding: 4px; border-radius: 8px; margin-bottom: 1.25rem; width: fit-content; border: 1px solid var(--border); }
+    .tab-btn { padding: 8px 16px; border: none; background: transparent; color: var(--text-muted); font-size: .8rem; font-weight: 500; border-radius: 6px; cursor: pointer; }
     .tab-btn:hover { color: var(--text); background: var(--card-hover); }
     .tab-btn.active { background: var(--primary); color: #fff; }
-    
     .toast-container { position: fixed; top: 100px; right: 16px; z-index: 300; display: flex; flex-direction: column; gap: 8px; }
-    .toast { background: var(--surface); border: 1px solid var(--border); border-left: 3px solid var(--accent); border-radius: var(--radius-sm); padding: 12px 16px; font-size: .82rem; box-shadow: var(--shadow-hover); animation: slideIn .3s ease; max-width: 320px; color: var(--text); }
-    .toast.success { border-left-color: var(--accent); }
-    .toast.error { border-left-color: var(--danger); }
+    .toast { background: var(--surface); border: 1px solid var(--border); border-left: 3px solid var(--accent); border-radius: 8px; padding: 12px 16px; font-size: .82rem; box-shadow: 0 8px 32px rgba(0,0,0,.12); animation: slideIn .3s ease; max-width: 320px; }
     @keyframes slideIn { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
-    
-    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.4); backdrop-filter: blur(4px); z-index: 200; place-items: center; pointer-events: none; opacity: 0; transition: opacity .2s ease; }
-    .modal-overlay.open { display: grid; pointer-events: auto; opacity: 1; }
-    .modal { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); width: 90%; max-width: 560px; max-height: 85vh; overflow-y: auto; box-shadow: var(--shadow-hover); animation: fadeUp .2s ease; pointer-events: auto; }
-    @keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-    .modal-header { display: flex; align-items: center; justify-content: space-between; padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--border); position: sticky; top: 0; background: var(--surface); z-index: 1; }
-    .modal-title { font-size: 1.1rem; font-weight: 700; color: var(--text); }
-    .modal-close { width: 32px; height: 32px; display: grid; place-items: center; border: none; background: transparent; color: var(--text-muted); cursor: pointer; border-radius: 6px; font-size: 1.2rem; transition: var(--transition); }
-    .modal-close:hover { background: var(--card-hover); color: var(--text); }
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.4); backdrop-filter: blur(4px); z-index: 200; place-items: center; }
+    .modal-overlay.open { display: grid; }
+    .modal { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; width: 90%; max-width: 560px; max-height: 85vh; overflow-y: auto; box-shadow: 0 8px 32px rgba(0,0,0,.12); }
+    .modal-header { display: flex; align-items: center; justify-content: space-between; padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--border); position: sticky; top: 0; background: var(--surface); }
+    .modal-title { font-size: 1.1rem; font-weight: 700; }
+    .modal-close { width: 32px; height: 32px; display: grid; place-items: center; border: none; background: transparent; color: var(--text-muted); cursor: pointer; border-radius: 6px; }
     .modal-body { padding: 1.5rem; }
     .modal-footer { padding: 1rem 1.5rem; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 8px; position: sticky; bottom: 0; background: var(--surface); }
-    
     .form-group { margin-bottom: 1rem; }
     .form-label { display: block; font-size: .78rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 6px; }
-    .form-input, .form-select, .form-textarea { width: 100%; padding: 10px 14px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--text); font-size: .85rem; font-family: inherit; transition: var(--transition); }
-    .form-input:focus, .form-select:focus, .form-textarea:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-glow); }
-    .form-textarea { resize: vertical; min-height: 80px; }
-    .form-select { cursor: pointer; }
+    .form-input, .form-select, .form-textarea { width: 100%; padding: 10px 14px; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-size: .85rem; font-family: inherit; }
+    .form-input:focus, .form-select:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-glow); }
     .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
     @media (max-width: 500px) { .form-row { grid-template-columns: 1fr; } }
-    
-    .text-green { color: var(--accent); }
-    .text-yellow { color: var(--warning); }
+    .flex { display: flex; } .items-center { align-items: center; } .justify-between { justify-content: space-between; } .gap-1 { gap: .5rem; } .wrap { flex-wrap: wrap; }
     .text-red { color: var(--danger); }
-    .text-blue { color: var(--primary); }
-    .text-muted { color: var(--text-muted); }
-    .flex { display: flex; }
-    .items-center { align-items: center; }
-    .justify-between { justify-content: space-between; }
-    .gap-1 { gap: .5rem; }
-    .wrap { flex-wrap: wrap; }
-    
-    @media (max-width: 1024px) {
-      .header { padding: 0 1rem; height: 80px; }
-      .logo-img { height: 52px; }
-      .nav { gap: 0; flex-wrap: wrap; }
-      .nav-btn { padding: 8px 12px; font-size: .78rem; }
-      .logo-text { font-size: 1.2rem; }
-      .logo-subtitle { display: none; }
-      .main { padding: 1rem; }
-    }
+    @media (max-width: 1024px) { .header { padding: 0 1rem; height: 80px; } .logo-img { height: 52px; } .nav { gap: 0; flex-wrap: wrap; } .nav-btn { padding: 8px 12px; } .main { padding: 1rem; } }
   </style>
 </head>
 <body>
 
 <header class="header">
   <div class="logo" id="logoBtn">
-    <img src="https://i.ibb.co/p6GCfY1x/Screenshot-2026-05-30-at-17-06-41.png" alt="Drafts Dashboard Logo" class="logo-img" loading="lazy">
+    <img src="https://i.ibb.co/p6GCfY1x/Screenshot-2026-05-30-at-17-06-41.png" alt="Logo" class="logo-img">
   </div>
   <nav class="nav">
     <a href="index.html" class="nav-btn">Dashboard</a>
@@ -168,24 +108,16 @@
     <a href="performance.html" class="nav-btn">Performance</a>
     <a href="finance.html" class="nav-btn">Finance</a>
   </nav>
-  <div class="header-right">
-    <div class="status-dot"></div>
-    <span class="status-text">Online</span>
-  </div>
+  <div class="header-right"><div class="status-dot"></div><span class="status-text">Online</span></div>
 </header>
 
 <div class="toast-container" id="toastContainer"></div>
 
 <main class="main">
   <div class="page-header">
-    <div>
-      <h1 class="page-title">Payment Records</h1>
-      <p class="page-desc">Complete payment history and transaction log</p>
-    </div>
+    <div><h1 class="page-title">Payment Records</h1><p class="page-desc">Complete payment history and transaction log</p></div>
     <div class="flex gap-1 wrap">
-      <select class="form-select" style="width:auto" id="paymentFilter">
-        <option value="all">All Projects</option>
-      </select>
+      <select class="form-select" style="width:auto" id="paymentFilter"><option value="all">All Projects</option></select>
       <button class="btn btn-primary" id="newPaymentBtn">＋ Record Payment</button>
     </div>
   </div>
@@ -200,20 +132,9 @@
   <div class="table-wrapper">
     <table>
       <thead>
-        <tr>
-          <th>Date</th>
-          <th>Project</th>
-          <th>Client</th>
-          <th>Period</th>
-          <th>Amount (UGX)</th>
-          <th>Amount (USD)</th>
-          <th>Status</th>
-          <th>Actions</th>
-        </tr>
+        <tr><th>Date</th><th>Project</th><th>Client</th><th>Period</th><th>Amount (UGX)</th><th>Amount (USD)</th><th>Status</th><th>Actions</th></tr>
       </thead>
-      <tbody id="paymentsTable">
-        <tr><td colspan="8"><div class="empty-state"><div class="empty-icon">💳</div><p>Loading payments...</p></div></td></tr>
-      </tbody>
+      <tbody id="paymentsTable"><tr><td colspan="8"><div class="empty-state"><div class="empty-icon">💳</div><p>Loading payments...</p></div></td></tr></tbody>
     </table>
   </div>
 </main>
@@ -221,43 +142,18 @@
 <!-- Payment Modal -->
 <div class="modal-overlay" id="paymentModal">
   <div class="modal">
-    <div class="modal-header">
-      <h3 class="modal-title">Record Payment</h3>
-      <button class="modal-close" id="closePaymentModal">✕</button>
-    </div>
+    <div class="modal-header"><h3 class="modal-title">Record Payment</h3><button class="modal-close" id="closePaymentModal">✕</button></div>
     <div class="modal-body">
-      <div class="form-group">
-        <label class="form-label">Project *</label>
-        <select class="form-select" id="payProject"></select>
+      <div class="form-group"><label class="form-label">Project *</label><select class="form-select" id="payProject"></select></div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Date</label><input class="form-input" id="payDate" type="date" /></div>
+        <div class="form-group"><label class="form-label">Amount (UGX) *</label><input class="form-input" id="payAmount" type="number" placeholder="500,000" /></div>
       </div>
       <div class="form-row">
-        <div class="form-group">
-          <label class="form-label">Payment Date</label>
-          <input class="form-input" id="payDate" type="date" />
-        </div>
-        <div class="form-group">
-          <label class="form-label">Amount (UGX) *</label>
-          <input class="form-input" id="payAmount" type="number" placeholder="500,000" />
-        </div>
+        <div class="form-group"><label class="form-label">Period</label><input class="form-input" id="payPeriod" placeholder="Jan 2026" /></div>
+        <div class="form-group"><label class="form-label">Status</label><select class="form-select" id="payStatus"><option value="paid">Paid</option><option value="pending">Pending</option><option value="overdue">Overdue</option></select></div>
       </div>
-      <div class="form-row">
-        <div class="form-group">
-          <label class="form-label">Payment Period</label>
-          <input class="form-input" id="payPeriod" placeholder="e.g. Jan 2026" />
-        </div>
-        <div class="form-group">
-          <label class="form-label">Status</label>
-          <select class="form-select" id="payStatus">
-            <option value="paid">Paid</option>
-            <option value="pending">Pending</option>
-            <option value="overdue">Overdue</option>
-          </select>
-        </div>
-      </div>
-      <div class="form-group">
-        <label class="form-label">Notes</label>
-        <textarea class="form-textarea" id="payNotes" placeholder="Payment reference, method, etc..."></textarea>
-      </div>
+      <div class="form-group"><label class="form-label">Notes</label><textarea class="form-textarea" id="payNotes"></textarea></div>
     </div>
     <div class="modal-footer">
       <button class="btn btn-outline" id="cancelPayment">Cancel</button>
@@ -268,215 +164,127 @@
 
 <script>
   (function() {
-    'use strict';
-    
-    // === CONFIG ===
     const SUPABASE_URL = 'https://hnbzerhoqqsmzqxcbnxv.supabase.co';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhuYnplcmhvcXFzbXpxeGNibnh2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkwNDg1MjksImV4cCI6MjA5NDYyNDUyOX0.a4rM51DQGih9SXMr71PREngZ_pT6dJFgv_fG9j5jAGc';
     const USD_RATE = 0.00027;
 
     document.addEventListener('DOMContentLoaded', async function() {
-      if (!window.supabase) {
-        showToast('Database SDK failed to load', 'error');
-        return;
-      }
-
+      if (!window.supabase) { alert('DB SDK Error'); return; }
       const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
       let isSaving = false;
 
-      // === UTILS ===
-      function generateId() {
-        if (crypto?.randomUUID) return crypto.randomUUID();
-        return 'id-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
-      }
-      function formatUGX(n) { if (!n) return 'UGX 0'; return 'UGX ' + Number(n).toLocaleString(); }
-      function formatUSD(n) { if (!n) return '$0.00'; return '$' + (n * USD_RATE).toFixed(2); }
-      function priceHTML(ugx) { return `<span class="price-main">${formatUGX(ugx)}</span><span class="price-sub">${formatUSD(ugx)}</span>`; }
-      
-      function showToast(msg, type = 'success') {
-        const c = document.getElementById('toastContainer');
-        const t = document.createElement('div');
-        t.className = `toast ${type}`;
-        t.textContent = msg;
-        c.appendChild(t);
-        setTimeout(() => t.remove(), 3500);
-      }
-      function openModal(id) { document.getElementById(id).classList.add('open'); }
-      function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+      // Utils
+      function genId() { if (crypto?.randomUUID) return crypto.randomUUID(); return 'id-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9); }
+      function fmtUGX(n) { return 'UGX ' + Number(n || 0).toLocaleString(); }
+      function fmtUSD(n) { return '$' + (n * USD_RATE).toFixed(2); }
+      function toast(m, t='success') { const c = document.getElementById('toastContainer'); const d = document.createElement('div'); d.className = 'toast'; d.textContent = m; d.style.borderLeftColor = t === 'error' ? 'var(--danger)' : 'var(--accent)'; c.appendChild(d); setTimeout(() => d.remove(), 3000); }
+      function open(id) { document.getElementById(id).classList.add('open'); }
+      function close(id) { document.getElementById(id).classList.remove('open'); }
 
-      // === TAB FILTERING ===
-      function filterPaymentTab(tab) {
+      // Filter Tab
+      function filterTab(tab) {
         const rows = document.querySelectorAll('#paymentsTable tr[data-status]');
-        rows.forEach(row => {
-          const status = row.dataset.status;
-          if (tab === 'all-payments') { row.style.display = ''; return; }
-          const statusMap = { 'paid-payments': 'paid', 'pending-payments': 'pending', 'overdue-payments': 'overdue' };
-          const target = statusMap[tab];
-          row.style.display = status === target ? '' : 'none';
-        });
+        const map = { 'paid-payments': 'paid', 'pending-payments': 'pending', 'overdue-payments': 'overdue' };
+        rows.forEach(r => r.style.display = (tab === 'all-payments' || r.dataset.status === map[tab]) ? '' : 'none');
       }
 
-      // === LOAD PROJECT DROPDOWN ===
-      async function loadProjectDropdown() {
+      // Load Projects Dropdown
+      async function loadDropdown() {
         try {
-          const { data, error } = await supabase.from('projects').select('id, name, client').eq('status', 'active');
+          const { data } = await supabase.from('projects').select('id, name, client').eq('status', 'active');
           const sel = document.getElementById('payProject');
-          if (error) throw error;
-          sel.innerHTML = data && data.length 
-            ? data.map(p => `<option value="${p.id}">${p.name} — ${p.client}</option>`).join('')
-            : '<option value="">No active projects</option>';
-        } catch (err) {
-          console.error('Failed to load projects:', err);
-          document.getElementById('payProject').innerHTML = '<option value="">Error loading projects</option>';
-        }
+          sel.innerHTML = data && data.length ? data.map(p => `<option value="${p.id}">${p.name}</option>`).join('') : '<option>No active projects</option>';
+        } catch (e) { console.error(e); }
       }
 
-      // === LOAD PAYMENTS TABLE ===
+      // Load Payments Table
       async function loadPayments() {
         try {
           const filter = document.getElementById('paymentFilter').value;
-          let query = supabase.from('payments').select('*, projects(name, client)').order('payment_date', { ascending: false });
-          if (filter !== 'all') query = query.eq('project_id', filter);
-          
-          const { data, error } = await query;
-          const tbody = document.getElementById('paymentsTable');
-          
-          if (error) {
-            console.error('Load error:', error);
-            tbody.innerHTML = `<tr><td colspan="8"><div class="empty-state"><div class="empty-icon">⚠️</div><p>Failed to load: ${error.message}</p></div></td></tr>`;
-            return;
-          }
-          
-          // Refresh project filter dropdown
-          try {
-            const { data: projects } = await supabase.from('projects').select('id, name');
-            const sel = document.getElementById('paymentFilter');
-            const currentVal = sel.value;
-            sel.innerHTML = '<option value="all">All Projects</option>' + 
-              (projects || []).map(p => `<option value="${p.id}" ${currentVal === p.id ? 'selected' : ''}>${p.name}</option>`).join('');
-          } catch (e) { /* ignore filter dropdown errors */ }
+          const { data: payments, error } = await supabase.from('payments').select('*').order('payment_date', { ascending: false });
+          if (error) throw error;
 
-          if (!data || data.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="8"><div class="empty-state"><div class="empty-icon">💳</div><p>No payment records found.</p></div></td></tr>`;
-            return;
-          }
-          
-          tbody.innerHTML = data.map(p => {
-            const statusBadge = p.status === 'paid' ? 'badge-green' : p.status === 'pending' ? 'badge-yellow' : 'badge-red';
+          // Update Filter Dropdown
+          try {
+            const { data: projs } = await supabase.from('projects').select('id, name');
+            const sel = document.getElementById('paymentFilter');
+            const cur = sel.value;
+            sel.innerHTML = '<option value="all">All Projects</option>' + (projs||[]).map(p => `<option value="${p.id}" ${cur===p.id?'selected':''}>${p.name}</option>`).join('');
+          } catch(e) {}
+
+          // Fetch Projects to Map Names (No Join)
+          const { data: projects } = await supabase.from('projects').select('id, name, client');
+          const pMap = {}; (projects||[]).forEach(p => pMap[p.id] = p);
+
+          const tbody = document.getElementById('paymentsTable');
+          if (!payments || !payments.length) { tbody.innerHTML = `<tr><td colspan="8"><div class="empty-state"><div class="empty-icon">💳</div><p>No payments found.</p></div></td></tr>`; return; }
+
+          tbody.innerHTML = (filter === 'all' ? payments : payments.filter(p => p.project_id === filter)).map(p => {
+            const proj = pMap[p.project_id] || {};
+            const badge = p.status === 'paid' ? 'badge-green' : p.status === 'pending' ? 'badge-yellow' : 'badge-red';
             return `<tr data-status="${p.status}">
               <td>${new Date(p.payment_date).toLocaleDateString()}</td>
-              <td><strong>${p.projects?.name || 'Unknown'}</strong></td>
-              <td>${p.projects?.client || '—'}</td>
+              <td><strong>${proj.name || 'Unknown'}</strong></td>
+              <td>${proj.client || '—'}</td>
               <td style="font-size:.82rem">${p.period || '—'}</td>
-              <td><strong>${formatUGX(p.amount)}</strong></td>
-              <td><strong style="font-size:.82rem">${formatUSD(p.amount)}</strong></td>
-              <td><span class="badge ${statusBadge}"><span class="badge-dot"></span>${p.status}</span></td>
-              <td><button class="btn btn-sm btn-outline text-red delete-btn" data-id="${p.id}">Delete</button></td>
+              <td><strong>${fmtUGX(p.amount)}</strong></td>
+              <td><strong style="font-size:.82rem">${fmtUSD(p.amount)}</strong></td>
+              <td><span class="badge ${badge}"><span class="badge-dot"></span>${p.status}</span></td>
+              <td><button class="btn btn-sm btn-outline text-red del-btn" data-id="${p.id}">Delete</button></td>
             </tr>`;
           }).join('');
         } catch (err) {
-          console.error('Payments load error:', err);
-          showToast('Failed to load payments', 'error');
+          console.error(err); toast('Failed to load payments', 'error');
         }
       }
 
-      // === DELETE PAYMENT ===
-      async function deletePayment(id) {
-        if (!confirm('Delete this payment record? This cannot be undone.')) return;
-        try {
-          const { error } = await supabase.from('payments').delete().eq('id', id);
-          if (error) throw error;
-          showToast('Payment deleted');
-          await loadPayments();
-        } catch (err) {
-          showToast('Failed to delete: ' + err.message, 'error');
-        }
+      // Delete
+      async function deletePay(id) {
+        if (!confirm('Delete this payment?')) return;
+        const { error } = await supabase.from('payments').delete().eq('id', id);
+        if (error) { toast('Failed to delete', 'error'); return; }
+        toast('Deleted'); loadPayments();
       }
 
-      // === EVENT LISTENERS ===
-      document.getElementById('logoBtn').addEventListener('click', () => window.location.href = 'index.html');
-      document.getElementById('newPaymentBtn').addEventListener('click', () => openModal('paymentModal'));
-      document.getElementById('closePaymentModal').addEventListener('click', () => closeModal('paymentModal'));
-      document.getElementById('cancelPayment').addEventListener('click', () => closeModal('paymentModal'));
-      document.getElementById('paymentFilter').addEventListener('change', loadPayments);
-      
-      document.querySelectorAll('.modal-overlay').forEach(overlay => {
-        overlay.addEventListener('click', (e) => {
-          if (e.target === overlay) overlay.classList.remove('open');
-        });
-      });
+      // Events
+      document.getElementById('logoBtn').onclick = () => location.href = 'index.html';
+      document.getElementById('newPaymentBtn').onclick = () => open('paymentModal');
+      document.getElementById('closePaymentModal').onclick = document.getElementById('cancelPayment').onclick = () => close('paymentModal');
+      document.getElementById('paymentFilter').onchange = loadPayments;
+      document.querySelectorAll('.modal-overlay').forEach(o => o.onclick = e => { if(e.target === o) o.classList.remove('open'); });
+      document.querySelectorAll('.tab-btn').forEach(b => b.onclick = function() { document.querySelectorAll('.tab-btn').forEach(x=>x.classList.remove('active')); this.classList.add('active'); filterTab(this.dataset.tab); });
+      document.getElementById('paymentsTable').onclick = e => { const btn = e.target.closest('.del-btn'); if(btn) deletePay(btn.dataset.id); };
 
-      // Tab buttons
-      document.querySelectorAll('.tab-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
-          document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-          this.classList.add('active');
-          filterPaymentTab(this.dataset.tab);
-        });
-      });
-
-      // Event delegation for dynamic delete buttons
-      document.getElementById('paymentsTable').addEventListener('click', (e) => {
-        const deleteBtn = e.target.closest('.delete-btn');
-        if (deleteBtn) deletePayment(deleteBtn.dataset.id);
-      });
-
-      // === SAVE PAYMENT ===
-      document.getElementById('savePayment').addEventListener('click', async function() {
-        if (isSaving) return;
-        isSaving = true;
-        const btn = this;
-        const originalText = btn.textContent;
-        btn.textContent = 'Recording...';
-        btn.disabled = true;
-
+      // Save
+      document.getElementById('savePayment').onclick = async function() {
+        if (isSaving) return; isSaving = true;
+        const btn = this; btn.textContent = 'Recording...'; btn.disabled = true;
         try {
-          const data = {
-            id: generateId(),
-            project_id: document.getElementById('payProject').value,
+          const proj = document.getElementById('payProject').value;
+          const amt = parseInt(document.getElementById('payAmount').value);
+          if (!proj) { toast('Select project', 'error'); return; }
+          if (!amt) { toast('Enter amount', 'error'); return; }
+          
+          const { error } = await supabase.from('payments').upsert({
+            id: genId(), project_id: proj,
             payment_date: document.getElementById('payDate').value || new Date().toISOString().split('T')[0],
-            amount: parseInt(document.getElementById('payAmount').value) || 0,
-            period: document.getElementById('payPeriod').value.trim(),
+            amount: amt, period: document.getElementById('payPeriod').value,
             status: document.getElementById('payStatus').value,
-            notes: document.getElementById('payNotes').value.trim(),
+            notes: document.getElementById('payNotes').value,
             created_at: new Date().toISOString()
-          };
+          }, { onConflict: 'id' });
+          if (error) throw error;
           
-          if (!data.project_id) {
-            showToast('Please select a project', 'error');
-            return;
-          }
-          if (!data.amount || data.amount <= 0) {
-            showToast('Please enter a valid amount', 'error');
-            return;
-          }
-          
-          const { error } = await supabase.from('payments').upsert(data, { onConflict: 'id' });
-          if (error) throw new Error(error.message);
-          
-          showToast('Payment recorded successfully!');
-          closeModal('paymentModal');
-          
-          // Reset form
-          ['payDate','payAmount','payPeriod','payNotes'].forEach(id => 
-            document.getElementById(id).value = ''
-          );
+          toast('Recorded!'); close('paymentModal');
+          ['payDate','payAmount','payPeriod','payNotes'].forEach(i => document.getElementById(i).value = '');
           document.getElementById('payStatus').value = 'paid';
-          
           await loadPayments();
-        } catch (err) {
-          showToast('Error: ' + err.message, 'error');
-        } finally {
-          btn.textContent = originalText;
-          btn.disabled = false;
-          isSaving = false;
-        }
-      });
+        } catch (e) { toast('Error: ' + e.message, 'error'); }
+        finally { btn.textContent = 'Record Payment'; btn.disabled = false; isSaving = false; }
+      };
 
-      // === INIT ===
       document.getElementById('payDate').value = new Date().toISOString().split('T')[0];
-      await loadProjectDropdown();
-      await loadPayments();
+      await loadDropdown(); await loadPayments();
     });
   })();
 </script>
