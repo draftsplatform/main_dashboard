@@ -163,6 +163,8 @@
     <a href="index.html" class="nav-btn">Dashboard</a>
     <a href="projects.html" class="nav-btn">Projects</a>
     <a href="payments.html" class="nav-btn active">Payments</a>
+    <a href="clients.html" class="nav-btn">Clients</a>
+    <a href="reports.html" class="nav-btn">Reports</a>
     <a href="performance.html" class="nav-btn">Performance</a>
     <a href="finance.html" class="nav-btn">Finance</a>
   </nav>
@@ -225,7 +227,7 @@
     </div>
     <div class="modal-body">
       <div class="form-group">
-        <label class="form-label">Project</label>
+        <label class="form-label">Project *</label>
         <select class="form-select" id="payProject"></select>
       </div>
       <div class="form-row">
@@ -234,7 +236,7 @@
           <input class="form-input" id="payDate" type="date" />
         </div>
         <div class="form-group">
-          <label class="form-label">Amount (UGX)</label>
+          <label class="form-label">Amount (UGX) *</label>
           <input class="form-input" id="payAmount" type="number" placeholder="500,000" />
         </div>
       </div>
@@ -331,46 +333,51 @@
 
       // === LOAD PAYMENTS TABLE ===
       async function loadPayments() {
-        const filter = document.getElementById('paymentFilter').value;
-        let query = supabase.from('payments').select('*, projects(name, client)').order('payment_date', { ascending: false });
-        if (filter !== 'all') query = query.eq('project_id', filter);
-        
-        const { data, error } = await query;
-        const tbody = document.getElementById('paymentsTable');
-        
-        if (error) {
-          console.error('Load error:', error);
-          tbody.innerHTML = `<tr><td colspan="8"><div class="empty-state"><div class="empty-icon">⚠️</div><p>Failed to load: ${error.message}</p></div></td></tr>`;
-          return;
-        }
-        
-        // Refresh project filter dropdown
         try {
-          const { data: projects } = await supabase.from('projects').select('id, name');
-          const sel = document.getElementById('paymentFilter');
-          const currentVal = sel.value;
-          sel.innerHTML = '<option value="all">All Projects</option>' + 
-            (projects || []).map(p => `<option value="${p.id}" ${currentVal === p.id ? 'selected' : ''}>${p.name}</option>`).join('');
-        } catch (e) { /* ignore filter dropdown errors */ }
+          const filter = document.getElementById('paymentFilter').value;
+          let query = supabase.from('payments').select('*, projects(name, client)').order('payment_date', { ascending: false });
+          if (filter !== 'all') query = query.eq('project_id', filter);
+          
+          const { data, error } = await query;
+          const tbody = document.getElementById('paymentsTable');
+          
+          if (error) {
+            console.error('Load error:', error);
+            tbody.innerHTML = `<tr><td colspan="8"><div class="empty-state"><div class="empty-icon">⚠️</div><p>Failed to load: ${error.message}</p></div></td></tr>`;
+            return;
+          }
+          
+          // Refresh project filter dropdown
+          try {
+            const { data: projects } = await supabase.from('projects').select('id, name');
+            const sel = document.getElementById('paymentFilter');
+            const currentVal = sel.value;
+            sel.innerHTML = '<option value="all">All Projects</option>' + 
+              (projects || []).map(p => `<option value="${p.id}" ${currentVal === p.id ? 'selected' : ''}>${p.name}</option>`).join('');
+          } catch (e) { /* ignore filter dropdown errors */ }
 
-        if (!data || data.length === 0) {
-          tbody.innerHTML = `<tr><td colspan="8"><div class="empty-state"><div class="empty-icon">💳</div><p>No payment records found.</p></div></td></tr>`;
-          return;
+          if (!data || data.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="8"><div class="empty-state"><div class="empty-icon">💳</div><p>No payment records found.</p></div></td></tr>`;
+            return;
+          }
+          
+          tbody.innerHTML = data.map(p => {
+            const statusBadge = p.status === 'paid' ? 'badge-green' : p.status === 'pending' ? 'badge-yellow' : 'badge-red';
+            return `<tr data-status="${p.status}">
+              <td>${new Date(p.payment_date).toLocaleDateString()}</td>
+              <td><strong>${p.projects?.name || 'Unknown'}</strong></td>
+              <td>${p.projects?.client || '—'}</td>
+              <td style="font-size:.82rem">${p.period || '—'}</td>
+              <td><strong>${formatUGX(p.amount)}</strong></td>
+              <td><strong style="font-size:.82rem">${formatUSD(p.amount)}</strong></td>
+              <td><span class="badge ${statusBadge}"><span class="badge-dot"></span>${p.status}</span></td>
+              <td><button class="btn btn-sm btn-outline text-red delete-btn" data-id="${p.id}">Delete</button></td>
+            </tr>`;
+          }).join('');
+        } catch (err) {
+          console.error('Payments load error:', err);
+          showToast('Failed to load payments', 'error');
         }
-        
-        tbody.innerHTML = data.map(p => {
-          const statusBadge = p.status === 'paid' ? 'badge-green' : p.status === 'pending' ? 'badge-yellow' : 'badge-red';
-          return `<tr data-status="${p.status}">
-            <td>${new Date(p.payment_date).toLocaleDateString()}</td>
-            <td><strong>${p.projects?.name || 'Unknown'}</strong></td>
-            <td>${p.projects?.client || '—'}</td>
-            <td style="font-size:.82rem">${p.period || '—'}</td>
-            <td><strong>${formatUGX(p.amount)}</strong></td>
-            <td><strong style="font-size:.82rem">${formatUSD(p.amount)}</strong></td>
-            <td><span class="badge ${statusBadge}"><span class="badge-dot"></span>${p.status}</span></td>
-            <td><button class="btn btn-sm btn-outline text-red delete-btn" data-id="${p.id}">Delete</button></td>
-          </tr>`;
-        }).join('');
       }
 
       // === DELETE PAYMENT ===
@@ -380,7 +387,7 @@
           const { error } = await supabase.from('payments').delete().eq('id', id);
           if (error) throw error;
           showToast('Payment deleted');
-          loadPayments();
+          await loadPayments();
         } catch (err) {
           showToast('Failed to delete: ' + err.message, 'error');
         }
