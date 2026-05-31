@@ -29,41 +29,23 @@
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
       background: var(--bg); color: var(--text); min-height: 100vh; line-height: 1.5;
     }
-    ::-webkit-scrollbar { width:6px; }
-    ::-webkit-scrollbar-track { background:transparent; }
+    ::-webkit-scrollbar { width:6px; } ::-webkit-scrollbar-track { background:transparent; }
     ::-webkit-scrollbar-thumb { background:var(--border); border-radius:3px; }
     
-    /* === HEADER STYLES === */
-    .header {
-      position: sticky; top: 0; z-index: 100;
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 0 2rem; height: 88px;
-      background: rgba(255,255,255,.95); backdrop-filter: blur(12px);
-      border-bottom: 1px solid var(--border);
-      box-shadow: 0 1px 0 rgba(0,0,0,.02);
-    }
+    .header { position: sticky; top: 0; z-index: 100; display: flex; align-items: center; justify-content: space-between; padding: 0 2rem; height: 88px; background: rgba(255,255,255,.95); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); box-shadow: 0 1px 0 rgba(0,0,0,.02); }
     .logo { display: flex; align-items: center; gap: 16px; cursor: pointer; user-select: none; }
     .logo-img { height: 64px; width: auto; object-fit: contain; }
     .logo-text { font-size: 1.6rem; font-weight: 800; letter-spacing: -.3px; color: var(--text); }
     .logo-subtitle { font-size: .65rem; color: var(--text-muted); letter-spacing: 2px; text-transform: uppercase; margin-top: -4px; }
     .nav { display: flex; gap: 4px; }
-    .nav-btn {
-      position: relative; padding: 10px 18px; border: none; background: transparent;
-      color: var(--text-secondary); font-size: .88rem; font-weight: 500;
-      border-radius: var(--radius-sm); cursor: pointer; transition: var(--transition);
-    }
+    .nav-btn { position: relative; padding: 10px 18px; border: none; background: transparent; color: var(--text-secondary); font-size: .88rem; font-weight: 500; border-radius: var(--radius-sm); cursor: pointer; transition: var(--transition); }
     .nav-btn:hover { background: var(--primary-glow); color: var(--primary); }
     .nav-btn.active { background: var(--primary-glow); color: var(--primary); font-weight: 600; }
-    .nav-btn.active::after {
-      content: ''; position: absolute; bottom: -1px; left: 50%;
-      transform: translateX(-50%); width: 60%; height: 2px;
-      background: var(--primary); border-radius: 1px;
-    }
+    .nav-btn.active::after { content: ''; position: absolute; bottom: -1px; left: 50%; transform: translateX(-50%); width: 60%; height: 2px; background: var(--primary); border-radius: 1px; }
     .header-right { display: flex; align-items: center; gap: 12px; }
     .status-dot { width: 8px; height: 8px; background: var(--accent); border-radius: 50%; box-shadow: 0 0 8px rgba(5,150,105,.4); }
     .status-text { font-size: .75rem; color: var(--accent); font-weight: 600; }
     
-    /* === PAGE STYLES === */
     .main { padding: 2rem; max-width: 1440px; margin: 0 auto; }
     .page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem; }
     .page-title { font-size: 1.5rem; font-weight: 700; letter-spacing: -.3px; color: var(--text); }
@@ -77,6 +59,7 @@
     .btn-sm { padding: 6px 14px; font-size: .78rem; }
     .btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none !important; }
     
+    .card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.5rem; transition: var(--transition); box-shadow: var(--shadow); }
     .badge { display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: 20px; font-size: .72rem; font-weight: 600; letter-spacing: .3px; }
     .badge-green { background: var(--accent-glow); color: var(--accent); }
     .badge-yellow { background: rgba(217,119,6,.12); color: var(--warning); }
@@ -127,10 +110,6 @@
     @media (max-width: 500px) { .form-row { grid-template-columns: 1fr; } }
     
     .text-green { color: var(--accent); }
-    .text-yellow { color: var(--warning); }
-    .text-red { color: var(--danger); }
-    .text-blue { color: var(--primary); }
-    .text-muted { color: var(--text-muted); }
     .flex { display: flex; }
     .items-center { align-items: center; }
     .justify-between { justify-content: space-between; }
@@ -282,6 +261,7 @@
       }
       function formatUGX(n) { if (!n) return 'UGX 0'; return 'UGX ' + Number(n).toLocaleString(); }
       function formatUSD(n) { if (!n) return '$0.00'; return '$' + (n * USD_RATE).toFixed(2); }
+      function priceHTML(ugx) { return `<span class="price-main">${formatUGX(ugx)}</span><span class="price-sub">${formatUSD(ugx)}</span>`; }
       
       function showToast(msg, type = 'success') {
         const c = document.getElementById('toastContainer');
@@ -294,83 +274,101 @@
       function openModal(id) { document.getElementById(id).classList.add('open'); }
       function closeModal(id) { document.getElementById(id).classList.remove('open'); }
 
-      // === LOAD CLIENTS TABLE ===
+      // === LOAD CLIENTS TABLE (JavaScript-side Merging) ===
       async function loadClients() {
-        const filter = document.getElementById('clientFilter').value;
-        let query = supabase.from('clients').select(`
-          *,
-          projects:projects(count).filter(status, eq, active)
-        `).order('created_at', { ascending: false });
-        
-        if (filter !== 'all') query = query.eq('status', filter);
-        
-        const { data, error } = await query;
-        const tbody = document.getElementById('clientsTable');
-        
-        if (error) {
-          console.error('Load error:', error);
-          tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state"><div class="empty-icon">⚠️</div><p>Failed to load: ${error.message}</p></div></td></tr>`;
-          return;
-        }
-        
-        if (!data || data.length === 0) {
-          tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state"><div class="empty-icon">👥</div><p>No clients found.</p></div></td></tr>`;
-          return;
-        }
-        
-        // Fetch payment totals for each client (in parallel)
-        const clientsWithRevenue = await Promise.all(data.map(async (c) => {
-          const { data: payments } = await supabase.from('payments')
-            .select('amount')
-            .eq('project_id', c.id)
-            .eq('status', 'paid');
-          const total = payments?.reduce((sum, p) => sum + (p.amount || 0), 0) || 0;
-          return { ...c, total_revenue: total };
-        }));
-        
-        tbody.innerHTML = clientsWithRevenue.map(c => {
-          const statusBadge = c.status === 'active' ? 'badge-green' : c.status === 'inactive' ? 'badge-gray' : 'badge-yellow';
-          const projectCount = c.projects?.[0]?.count || 0;
+        try {
+          // 1. Fetch all clients
+          const { data: clients, error: clientErr } = await supabase.from('clients').select('*');
+          if (clientErr) throw clientErr;
           
-          return `<tr>
-            <td><strong>${c.name || 'Untitled'}</strong></td>
-            <td>${c.contact_person || '—'}</td>
-            <td>${c.email ? `<a href="mailto:${c.email}" class="text-blue">${c.email}</a>` : '—'}</td>
-            <td><span class="badge badge-blue">${projectCount} project${projectCount !== 1 ? 's' : ''}</span></td>
-            <td><strong>${formatUGX(c.total_revenue)}</strong><br><span class="text-muted" style="font-size:.75rem">${formatUSD(c.total_revenue)}</span></td>
-            <td><span class="badge ${statusBadge}"><span class="badge-dot"></span>${c.status}</span></td>
-            <td>
-              <div class="flex gap-1">
-                <button class="btn btn-sm btn-outline edit-btn" data-id="${c.id}">Edit</button>
-                <button class="btn btn-sm btn-outline text-red delete-btn" data-id="${c.id}">Delete</button>
-              </div>
-            </td>
-          </tr>`;
-        }).join('');
+          // 2. Fetch all projects (to calculate counts/revenue)
+          const { data: projects, error: projErr } = await supabase.from('projects').select('id, client, status, monthly_rate, plan_months');
+          if (projErr) throw projErr;
+
+          // 3. Fetch all payments (to calculate revenue)
+          const { data: payments, error: payErr } = await supabase.from('payments').select('project_id, amount, status');
+          if (payErr) throw payErr;
+
+          // 4. Map project IDs to payment amounts
+          const projectRevenue = {};
+          (payments || []).filter(p => p.status === 'paid').forEach(p => {
+            projectRevenue[p.project_id] = (projectRevenue[p.project_id] || 0) + (p.amount || 0);
+          });
+
+          // 5. Calculate stats for each client
+          const clientsWithStats = (clients || []).map(c => {
+            // Find projects that match this client name (text match)
+            const clientProjects = (projects || []).filter(p => p.client === c.name);
+            const activeProjects = clientProjects.filter(p => p.status === 'active');
+            
+            let totalRevenue = 0;
+            clientProjects.forEach(p => {
+              totalRevenue += (projectRevenue[p.id] || 0);
+            });
+
+            return {
+              ...c,
+              activeCount: activeProjects.length,
+              totalRevenue: totalRevenue
+            };
+          });
+          
+          const tbody = document.getElementById('clientsTable');
+          if (!clientsWithStats || clientsWithStats.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state"><div class="empty-icon">👥</div><p>No clients found. Add your first client.</p></div></td></tr>`;
+            return;
+          }
+
+          tbody.innerHTML = clientsWithStats.map(c => {
+            const statusBadge = c.status === 'active' ? 'badge-green' : c.status === 'inactive' ? 'badge-gray' : 'badge-yellow';
+            return `<tr>
+              <td><strong>${c.name || 'Untitled'}</strong></td>
+              <td>${c.contact_person || '—'}</td>
+              <td>${c.email ? `<a href="mailto:${c.email}" class="text-blue">${c.email}</a>` : '—'}</td>
+              <td><span class="badge badge-blue">${c.activeCount} active</span></td>
+              <td><strong>${formatUGX(c.totalRevenue)}</strong><br><span class="text-muted" style="font-size:.75rem">${formatUSD(c.totalRevenue)}</span></td>
+              <td><span class="badge ${statusBadge}"><span class="badge-dot"></span>${c.status}</span></td>
+              <td>
+                <div class="flex gap-1">
+                  <button class="btn btn-sm btn-outline edit-btn" data-id="${c.id}">Edit</button>
+                  <button class="btn btn-sm btn-outline text-red delete-btn" data-id="${c.id}">Delete</button>
+                </div>
+              </td>
+            </tr>`;
+          }).join('');
+          
+        } catch (err) {
+          console.error('Clients load error:', err);
+          showToast('Failed to load clients', 'error');
+        }
       }
 
       // === EDIT CLIENT ===
       async function editClient(id) {
-        const { data, error } = await supabase.from('clients').select('*').eq('id', id).single();
-        if (error) { showToast('Failed to load client', 'error'); return; }
-        
-        document.getElementById('clientId').value = data.id;
-        document.getElementById('clientName').value = data.name || '';
-        document.getElementById('clientContact').value = data.contact_person || '';
-        document.getElementById('clientEmail').value = data.email || '';
-        document.getElementById('clientPhone').value = data.phone || '';
-        document.getElementById('clientStatus').value = data.status || 'active';
-        document.getElementById('clientNotes').value = data.notes || '';
-        document.getElementById('clientModalTitle').textContent = 'Edit Client';
-        openModal('clientModal');
+        try {
+          const { data, error } = await supabase.from('clients').select('*').eq('id', id).single();
+          if (error) { showToast('Failed to load client', 'error'); return; }
+          
+          document.getElementById('clientId').value = data.id;
+          document.getElementById('clientName').value = data.name || '';
+          document.getElementById('clientContact').value = data.contact_person || '';
+          document.getElementById('clientEmail').value = data.email || '';
+          document.getElementById('clientPhone').value = data.phone || '';
+          document.getElementById('clientStatus').value = data.status || 'active';
+          document.getElementById('clientNotes').value = data.notes || '';
+          document.getElementById('clientModalTitle').textContent = 'Edit Client';
+          openModal('clientModal');
+        } catch (err) {
+          showToast('Error loading client: ' + err.message, 'error');
+        }
       }
 
       // === DELETE CLIENT ===
       async function deleteClient(id) {
-        // Check for active projects first
-        const { data: projects } = await supabase.from('projects').select('id').eq('client_id', id).limit(1);
+        // Check for projects linked by name
+        const { data: projects } = await supabase.from('projects').select('id').eq('client', document.querySelector(`.edit-btn[data-id="${id}"]`).closest('tr').querySelector('td:first-child').textContent);
         if (projects && projects.length > 0) {
-          if (!confirm('This client has active projects. Delete anyway? Projects will remain but lose client reference.')) return;
+          if (!confirm(`This client has ${projects.length} project(s). Delete anyway? Projects will remain but may lose client link.`)) return;
         } else if (!confirm('Delete this client? This cannot be undone.')) {
           return;
         }
@@ -388,10 +386,7 @@
       // === EVENT LISTENERS ===
       document.getElementById('logoBtn').addEventListener('click', () => window.location.href = 'index.html');
       document.getElementById('newClientBtn').addEventListener('click', () => {
-        // Reset form for new client
-        ['clientId','clientName','clientContact','clientEmail','clientPhone','clientNotes'].forEach(id => 
-          document.getElementById(id).value = ''
-        );
+        ['clientId','clientName','clientContact','clientEmail','clientPhone','clientNotes'].forEach(id => document.getElementById(id).value = '');
         document.getElementById('clientStatus').value = 'active';
         document.getElementById('clientModalTitle').textContent = 'Add Client';
         openModal('clientModal');
@@ -402,12 +397,9 @@
       document.getElementById('clientFilter').addEventListener('change', loadClients);
       
       document.querySelectorAll('.modal-overlay').forEach(overlay => {
-        overlay.addEventListener('click', (e) => {
-          if (e.target === overlay) overlay.classList.remove('open');
-        });
+        overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.classList.remove('open'); });
       });
 
-      // Event delegation for dynamic buttons
       document.getElementById('clientsTable').addEventListener('click', (e) => {
         const editBtn = e.target.closest('.edit-btn');
         const deleteBtn = e.target.closest('.delete-btn');
@@ -420,28 +412,22 @@
         if (isSaving) return;
         isSaving = true;
         const btn = this;
-        const originalText = btn.textContent;
         btn.textContent = 'Saving...';
         btn.disabled = true;
 
         try {
           const id = document.getElementById('clientId').value || generateId();
           const data = {
-            id,
-            name: document.getElementById('clientName').value.trim(),
+            id, name: document.getElementById('clientName').value.trim(),
             contact_person: document.getElementById('clientContact').value.trim(),
             email: document.getElementById('clientEmail').value.trim(),
             phone: document.getElementById('clientPhone').value.trim(),
             status: document.getElementById('clientStatus').value,
             notes: document.getElementById('clientNotes').value.trim(),
-            created_at: new Date().toISOString(),
             updated_at: new Date().toISOString()
           };
           
-          if (!data.name) {
-            showToast('Please enter a client name', 'error');
-            return;
-          }
+          if (!data.name) { showToast('Please enter a client name', 'error'); return; }
           
           const { error } = await supabase.from('clients').upsert(data, { onConflict: 'id' });
           if (error) throw new Error(error.message);
@@ -452,7 +438,7 @@
         } catch (err) {
           showToast('Error: ' + err.message, 'error');
         } finally {
-          btn.textContent = originalText;
+          btn.textContent = 'Save Client';
           btn.disabled = false;
           isSaving = false;
         }
