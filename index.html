@@ -188,6 +188,7 @@
     <a href="reports.html" class="nav-btn">Reports</a>
     <a href="performance.html" class="nav-btn">Performance</a>
     <a href="finance.html" class="nav-btn">Finance</a>
+    <a href="employees.html" class="nav-btn">Employees</a>
   </nav>
   <div class="header-right">
     <div class="status-dot"></div>
@@ -225,19 +226,19 @@
     </div>
     <div class="card">
       <div class="card-header">
-        <span class="card-title">Pending Payments</span>
-        <span class="badge badge-yellow"><span class="badge-dot"></span> Due</span>
+        <span class="card-title">Commission Payouts</span>
+        <span class="badge badge-blue"><span class="badge-dot"></span> To Employees</span>
       </div>
-      <div class="card-value" id="dashPending"><span class="price-main">UGX 0</span><span class="price-sub">$0.00</span></div>
-      <div class="card-sub">Outstanding this month</div>
+      <div class="card-value" id="dashCommission"><span class="price-main">UGX 0</span><span class="price-sub">$0.00</span></div>
+      <div class="card-sub">Paid to employee referrals</div>
     </div>
     <div class="card">
       <div class="card-header">
-        <span class="card-title">Overdue</span>
-        <span class="badge badge-red"><span class="badge-dot"></span> Late</span>
+        <span class="card-title">Top Referrer</span>
+        <span class="badge badge-green"><span class="badge-dot"></span> Star Performer</span>
       </div>
-      <div class="card-value" id="dashOverdue"><span class="price-main">UGX 0</span><span class="price-sub">$0.00</span></div>
-      <div class="card-sub">Past due date</div>
+      <div class="card-value" id="dashTopReferrer" style="font-size:1.4rem">—</div>
+      <div class="card-sub" id="dashTopReferrerStats">0 projects • UGX 0 earned</div>
     </div>
   </div>
 
@@ -302,6 +303,12 @@
         </div>
       </div>
       <div class="form-group">
+        <label class="form-label">Referred By (Optional)</label>
+        <select class="form-select" id="projEmployee">
+          <option value="">None</option>
+        </select>
+      </div>
+      <div class="form-group">
         <label class="form-label">Status</label>
         <select class="form-select" id="projStatus">
           <option value="active">Active</option>
@@ -338,6 +345,7 @@
 
       const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
       let isSaving = false;
+      let employeesCache = [];
 
       // === UTILS ===
       function generateId() {
@@ -358,6 +366,21 @@
       }
       function openModal(id) { document.getElementById(id).classList.add('open'); }
       function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+      // === LOAD EMPLOYEES FOR PROJECT MODAL ===
+      async function loadEmployeesForDropdown() {
+        try {
+          const { data, error } = await supabase.from('employees').select('id, name').eq('status', 'active').order('name');
+          if (error) throw error;
+          employeesCache = data || [];
+          
+          const sel = document.getElementById('projEmployee');
+          sel.innerHTML = '<option value="">None</option>' + 
+            employeesCache.map(e => `<option value="${e.id}">${e.name}</option>`).join('');
+        } catch (err) {
+          console.warn('Failed to load employees for dropdown:', err);
+        }
+      }
 
       // === LOAD DASHBOARD ===
       async function loadDashboard() {
@@ -383,6 +406,35 @@
           document.getElementById('dashRevenue').innerHTML = priceHTML(totalRevenue);
           document.getElementById('dashPending').innerHTML = priceHTML(totalPending);
           document.getElementById('dashOverdue').innerHTML = priceHTML(totalOverdue);
+
+          // Commission payouts to employees
+          const { data: commissions, error: commErr } = await supabase
+            .from('employee_earnings')
+            .select('amount')
+            .eq('type', 'commission')
+            .eq('status', 'paid');
+          
+          const totalCommission = commissions?.reduce((s, c) => s + (c.amount || 0), 0) || 0;
+          document.getElementById('dashCommission').innerHTML = priceHTML(totalCommission);
+
+          // Top referrer
+          if (commissions?.length) {
+            const empMap = {};
+            commissions.forEach(c => {
+              empMap[c.employee_id] = (empMap[c.employee_id] || 0) + (c.amount || 0);
+            });
+            const topEmpId = Object.keys(empMap).sort((a, b) => empMap[b] - empMap[a])[0];
+            
+            if (topEmpId) {
+              const { data: emp } = await supabase.from('employees').select('name').eq('id', topEmpId).single();
+              const topAmount = empMap[topEmpId];
+              const projCount = commissions.filter(c => c.employee_id === topEmpId).length;
+              
+              document.getElementById('dashTopReferrer').textContent = emp?.name || 'Unknown';
+              document.getElementById('dashTopReferrerStats').textContent = 
+                `${projCount} project${projCount !== 1 ? 's' : ''} • ${formatUGX(topAmount)} earned`;
+            }
+          }
 
           // Chart: Monthly Revenue
           const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
@@ -458,6 +510,7 @@
             start_date: document.getElementById('projStartDate').value || new Date().toISOString().split('T')[0],
             status: document.getElementById('projStatus').value,
             notes: document.getElementById('projNotes').value.trim(),
+            referred_by_id: document.getElementById('projEmployee').value || null,
             created_at: new Date().toISOString()
           };
           
@@ -478,6 +531,7 @@
           );
           document.getElementById('projPlan').value = '1';
           document.getElementById('projStatus').value = 'active';
+          document.getElementById('projEmployee').value = '';
           
           await loadDashboard();
         } catch (err) {
@@ -491,6 +545,7 @@
 
       // === INIT ===
       document.getElementById('projStartDate').value = new Date().toISOString().split('T')[0];
+      await loadEmployeesForDropdown();
       await loadDashboard();
     });
   })();
