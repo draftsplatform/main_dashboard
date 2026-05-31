@@ -131,6 +131,31 @@
     .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
     @media (max-width: 500px) { .form-row { grid-template-columns: 1fr; } }
     
+    /* === CLIENT SELECT WITH SEARCH === */
+    .client-select-wrapper { position: relative; }
+    .client-search { width: 100%; padding: 10px 14px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--text); font-size: .85rem; font-family: inherit; }
+    .client-search:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-glow); }
+    .client-dropdown {
+      position: absolute; top: 100%; left: 0; right: 0; z-index: 10;
+      max-height: 200px; overflow-y: auto; background: var(--surface);
+      border: 1px solid var(--border); border-radius: var(--radius-sm);
+      box-shadow: var(--shadow-hover); margin-top: 4px; display: none;
+    }
+    .client-dropdown.show { display: block; }
+    .client-option {
+      padding: 10px 14px; cursor: pointer; font-size: .85rem;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .client-option:hover { background: var(--card-hover); }
+    .client-option.selected { background: var(--primary-glow); color: var(--primary); font-weight: 600; }
+    .client-option .client-meta { font-size: .75rem; color: var(--text-muted); }
+    .client-new {
+      padding: 10px 14px; border-top: 1px solid var(--border);
+      font-size: .8rem; color: var(--primary); cursor: pointer;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .client-new:hover { background: var(--primary-glow); }
+    
     .text-green { color: var(--accent); }
     .flex { display: flex; }
     .items-center { align-items: center; }
@@ -225,8 +250,12 @@
       </div>
       <div class="form-row">
         <div class="form-group">
-          <label class="form-label">Client Name *</label>
-          <input class="form-input" id="projClient" placeholder="Client / Company name" />
+          <label class="form-label">Client *</label>
+          <div class="client-select-wrapper">
+            <input class="client-search" id="projClientSearch" placeholder="Search or type client name" autocomplete="off" />
+            <div class="client-dropdown" id="clientDropdown"></div>
+            <input type="hidden" id="projClient" />
+          </div>
         </div>
         <div class="form-group">
           <label class="form-label">Monthly Rate (UGX)</label>
@@ -322,6 +351,7 @@
 
       const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
       let isSaving = false;
+      let clientsCache = []; // Cache for client dropdown
 
       // === UTILS ===
       function generateId() {
@@ -343,14 +373,122 @@
       function openModal(id) { document.getElementById(id).classList.add('open'); }
       function closeModal(id) { document.getElementById(id).classList.remove('open'); }
 
+      // === CLIENT SELECT WITH SEARCH ===
+      async function loadClientsCache() {
+        try {
+          const { data, error } = await supabase.from('clients').select('id, name, email, phone, status').order('name');
+          if (error) throw error;
+          clientsCache = data || [];
+        } catch (err) {
+          console.warn('Failed to load clients for dropdown:', err);
+          clientsCache = [];
+        }
+      }
+
+      function renderClientDropdown(searchTerm = '') {
+        const dropdown = document.getElementById('clientDropdown');
+        const search = searchTerm.toLowerCase().trim();
+        
+        // Filter clients
+        const matches = clientsCache.filter(c => 
+          c.name.toLowerCase().includes(search) || 
+          (c.email && c.email.toLowerCase().includes(search))
+        ).slice(0, 10); // Limit to 10 results
+        
+        // Build HTML
+        let html = matches.map(c => {
+          const meta = [c.email, c.phone, c.status].filter(Boolean).join(' • ');
+          return `<div class="client-option" data-value="${c.name}">
+            <span>${c.name}</span>
+            ${meta ? `<span class="client-meta">${meta}</span>` : ''}
+          </div>`;
+        }).join('');
+        
+        // Add "Add new client" option if no exact match
+        if (search && !matches.some(c => c.name.toLowerCase() === search)) {
+          html += `<div class="client-new" data-value="${search}">
+            ➕ Add new client: "${search}"
+          </div>`;
+        }
+        
+        dropdown.innerHTML = html || '<div class="client-option" style="color:var(--text-muted)">No clients found</div>';
+        dropdown.classList.toggle('show', searchTerm.length > 0 || matches.length > 0);
+      }
+
+      function setupClientSelect() {
+        const searchInput = document.getElementById('projClientSearch');
+        const hiddenInput = document.getElementById('projClient');
+        const dropdown = document.getElementById('clientDropdown');
+        
+        // Search input events
+        searchInput.addEventListener('input', (e) => {
+          renderClientDropdown(e.target.value);
+          hiddenInput.value = ''; // Clear until selection
+        });
+        
+        searchInput.addEventListener('focus', () => {
+          if (searchInput.value) renderClientDropdown(searchInput.value);
+        });
+        
+        // Close dropdown on outside click
+        document.addEventListener('click', (e) => {
+          if (!e.target.closest('.client-select-wrapper')) {
+            dropdown.classList.remove('show');
+          }
+        });
+        
+        // Option click handler (delegation)
+        dropdown.addEventListener('click', (e) => {
+          const option = e.target.closest('.client-option, .client-new');
+          if (!option) return;
+          
+          const value = option.dataset.value;
+          searchInput.value = value;
+          hiddenInput.value = value;
+          dropdown.classList.remove('show');
+          
+          // Highlight selected
+          dropdown.querySelectorAll('.client-option').forEach(o => o.classList.remove('selected'));
+          if (option.classList.contains('client-option')) {
+            option.classList.add('selected');
+          }
+        });
+        
+        // Keyboard navigation
+        searchInput.addEventListener('keydown', (e) => {
+          if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+            e.preventDefault();
+            const options = dropdown.querySelectorAll('.client-option, .client-new');
+            if (!options.length) return;
+            
+            const current = dropdown.querySelector('.client-option.selected, .client-new.selected');
+            const idx = Array.from(options).indexOf(current);
+            const nextIdx = e.key === 'ArrowDown' 
+              ? Math.min(idx + 1, options.length - 1) 
+              : Math.max(idx - 1, 0);
+            
+            options.forEach(o => o.classList.remove('selected'));
+            options[nextIdx].classList.add('selected');
+            options[nextIdx].scrollIntoView({ block: 'nearest' });
+          } else if (e.key === 'Enter' && dropdown.classList.contains('show')) {
+            e.preventDefault();
+            const selected = dropdown.querySelector('.client-option.selected, .client-new.selected');
+            if (selected) selected.click();
+          } else if (e.key === 'Escape') {
+            dropdown.classList.remove('show');
+          }
+        });
+      }
+
       // === FORM ===
       function resetProjectForm() {
-        ['projId','projName','projClient','projRate','projStartDate','projNotes'].forEach(id => 
+        ['projId','projName','projClient','projRate','projStartDate','projNotes','projClientSearch'].forEach(id => 
           document.getElementById(id).value = ''
         );
         document.getElementById('projPlan').value = '1';
         document.getElementById('projStatus').value = 'active';
         document.getElementById('projectModalTitle').textContent = 'New Project';
+        document.getElementById('clientDropdown').classList.remove('show');
       }
 
       // === LOAD PROJECTS ===
@@ -417,7 +555,12 @@
           
           document.getElementById('projId').value = data.id;
           document.getElementById('projName').value = data.name || '';
-          document.getElementById('projClient').value = data.client || '';
+          
+          // Set client in both search and hidden field
+          const clientVal = data.client || '';
+          document.getElementById('projClientSearch').value = clientVal;
+          document.getElementById('projClient').value = clientVal;
+          
           document.getElementById('projRate').value = data.monthly_rate || '';
           document.getElementById('projPlan').value = data.plan_months || '1';
           document.getElementById('projStartDate').value = data.start_date || '';
@@ -439,9 +582,11 @@
       }
 
       // === EVENT LISTENERS ===
-      document.getElementById('newProjectBtn').addEventListener('click', () => {
+      document.getElementById('newProjectBtn').addEventListener('click', async () => {
+        await loadClientsCache(); // Refresh client list when opening modal
         resetProjectForm();
         openModal('projectModal');
+        document.getElementById('projClientSearch').focus();
       });
 
       document.getElementById('logoBtn').addEventListener('click', () => window.location.href = 'index.html');
@@ -465,6 +610,9 @@
         if (extendBtn) openExtend(extendBtn.dataset.id, extendBtn.dataset.end, extendBtn.dataset.rate);
       });
 
+      // Setup client select
+      setupClientSelect();
+
       // === SAVE PROJECT ===
       document.getElementById('saveProject').addEventListener('click', async function() {
         if (isSaving) return;
@@ -476,10 +624,12 @@
 
         try {
           const id = document.getElementById('projId').value || generateId();
+          const clientVal = document.getElementById('projClient').value.trim() || document.getElementById('projClientSearch').value.trim();
+          
           const data = {
             id,
             name: document.getElementById('projName').value.trim(),
-            client: document.getElementById('projClient').value.trim(),
+            client: clientVal, // Use selected or typed client name
             monthly_rate: parseInt(document.getElementById('projRate').value) || 0,
             plan_months: parseInt(document.getElementById('projPlan').value) || 1,
             start_date: document.getElementById('projStartDate').value || new Date().toISOString().split('T')[0],
@@ -546,6 +696,7 @@
 
       // === INIT ===
       document.getElementById('projStartDate').value = new Date().toISOString().split('T')[0];
+      await loadClientsCache(); // Initial load for dropdown
       await loadProjects();
     });
   })();
