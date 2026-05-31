@@ -3,624 +3,152 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>My Dashboard — Drafts</title>
-  
-  <!-- Google Fonts + QR Code Library -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <title>Employee Dashboard — Drafts</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
-  
-  <!-- Supabase JS (v2) -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-  
   <style>
-    :root {
-      --bg: #f8fafc; --surface: #ffffff; --card: #ffffff; --card-hover: #f1f5f9;
-      --border: #e2e8f0; --primary: #2563eb; --primary-glow: rgba(37,99,235,.1);
-      --accent: #059669; --accent-glow: rgba(5,150,105,.1);
-      --warning: #d97706; --danger: #dc2626;
-      --text: #1e293b; --text-secondary: #475569; --text-muted: #64748b;
-      --radius: 12px; --radius-sm: 8px;
-      --shadow: 0 4px 24px rgba(0,0,0,.08); --shadow-hover: 0 8px 32px rgba(0,0,0,.12);
-      --transition: .2s cubic-bezier(.4,0,.2,1);
-    }
-    * { margin:0; padding:0; box-sizing:border-box; }
-    body {
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
-      background: var(--bg); color: var(--text); min-height: 100vh; line-height: 1.5;
-    }
-    ::-webkit-scrollbar { width:6px; }
-    ::-webkit-scrollbar-track { background:transparent; }
-    ::-webkit-scrollbar-thumb { background:var(--border); border-radius:3px; }
-    
-    /* === HEADER === */
-    .header {
-      position: sticky; top: 0; z-index: 100;
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 0 2rem; height: 72px;
-      background: rgba(255,255,255,.95); backdrop-filter: blur(12px);
-      border-bottom: 1px solid var(--border);
-      box-shadow: 0 1px 0 rgba(0,0,0,.02);
-    }
-    .logo { display: flex; align-items: center; gap: 12px; }
-    .logo-img { height: 40px; }
-    .logo-text { font-size: 1.2rem; font-weight: 700; color: var(--text); }
-    .header-right { display: flex; align-items: center; gap: 1rem; }
-    .employee-info { text-align: right; }
-    .employee-name { font-weight: 600; font-size: .9rem; }
-    .employee-code { font-size: .7rem; color: var(--text-muted); font-family: monospace; }
-    .btn-logout { padding: 6px 12px; font-size: .75rem; }
-    
-    /* === MAIN === */
-    .main { padding: 1.5rem; max-width: 1200px; margin: 0 auto; }
-    .page-title { font-size: 1.3rem; font-weight: 700; margin-bottom: 1.5rem; }
-    
-    /* === STATS CARDS === */
-    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
-    .stat-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem; text-align: center; }
-    .stat-value { font-size: 1.5rem; font-weight: 800; margin: 0.25rem 0; }
-    .stat-label { font-size: .75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: .5px; }
-    .stat-balance { color: var(--accent); }
-    
-    /* === PROFILE CARD === */
-    .profile-card { display: flex; gap: 1.5rem; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.5rem; margin-bottom: 1.5rem; }
-    .profile-avatar { width: 80px; height: 80px; border-radius: 50%; background: var(--primary-glow); display: grid; place-items: center; font-weight: 700; color: var(--primary); flex-shrink: 0; }
-    .profile-avatar img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
-    .profile-details h3 { font-size: 1.1rem; margin-bottom: 4px; }
-    .profile-details p { font-size: .85rem; color: var(--text-muted); margin-bottom: 2px; }
-    .profile-qr { margin-left: auto; text-align: center; }
-    .profile-qr .qr-code { width: 80px; height: 80px; margin: 0 auto 4px; }
-    .profile-qr .qr-label { font-size: .7rem; color: var(--text-muted); }
-    
-    /* === TABS === */
-    .tabs { display: flex; gap: 2px; background: var(--card); padding: 4px; border-radius: var(--radius-sm); margin-bottom: 1.25rem; width: fit-content; border: 1px solid var(--border); }
-    .tab-btn { padding: 8px 16px; border: none; background: transparent; color: var(--text-muted); font-size: .8rem; font-weight: 500; border-radius: 6px; cursor: pointer; transition: var(--transition); }
-    .tab-btn:hover { color: var(--text); background: var(--card-hover); }
-    .tab-btn.active { background: var(--primary); color: #fff; }
-    
-    /* === TABLES === */
-    .table-wrapper { overflow-x: auto; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); }
-    table { width: 100%; border-collapse: collapse; font-size: .85rem; }
-    thead { background: var(--card-hover); }
-    th { text-align: left; padding: 12px 16px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; font-size: .72rem; border-bottom: 1px solid var(--border); }
-    td { padding: 12px 16px; border-bottom: 1px solid var(--border); vertical-align: middle; }
-    tr:last-child td { border-bottom: none; }
-    tbody tr:hover { background: var(--card-hover); }
-    
-    /* === BADGES === */
-    .badge { display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: 20px; font-size: .72rem; font-weight: 600; }
-    .badge-green { background: var(--accent-glow); color: var(--accent); }
-    .badge-yellow { background: rgba(217,119,6,.12); color: var(--warning); }
-    .badge-red { background: rgba(220,38,38,.12); color: var(--danger); }
-    .badge-blue { background: var(--primary-glow); color: var(--primary); }
-    .badge-gray { background: rgba(100,116,139,.12); color: var(--text-muted); }
-    .badge-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
-    
-    /* === FORMS === */
-    .btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; border: none; border-radius: var(--radius-sm); font-size: .85rem; font-weight: 600; cursor: pointer; transition: var(--transition); }
-    .btn-primary { background: var(--primary); color: #fff; box-shadow: 0 2px 8px rgba(37,99,235,.2); }
-    .btn-primary:hover { background: #1d4ed8; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(37,99,235,.3); }
-    .btn-outline { background: transparent; color: var(--text-secondary); border: 1px solid var(--border); }
-    .btn-outline:hover { border-color: var(--primary); color: var(--primary); background: var(--primary-glow); }
-    .btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none !important; }
-    
-    .form-group { margin-bottom: 1rem; }
-    .form-label { display: block; font-size: .78rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 6px; }
-    .form-input { width: 100%; padding: 10px 14px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--text); font-size: .85rem; }
-    .form-input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-glow); }
-    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
-    @media (max-width: 500px) { .form-row { grid-template-columns: 1fr; } }
-    
-    /* === MODAL === */
-    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.4); backdrop-filter: blur(4px); z-index: 200; place-items: center; pointer-events: none; opacity: 0; transition: opacity .2s ease; }
-    .modal-overlay.open { display: grid; pointer-events: auto; opacity: 1; }
-    .modal { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); width: 90%; max-width: 480px; max-height: 85vh; overflow-y: auto; box-shadow: var(--shadow-hover); animation: fadeUp .2s ease; pointer-events: auto; }
-    @keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-    .modal-header { display: flex; align-items: center; justify-content: space-between; padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--border); position: sticky; top: 0; background: var(--surface); z-index: 1; }
-    .modal-title { font-size: 1.1rem; font-weight: 700; }
-    .modal-close { width: 32px; height: 32px; display: grid; place-items: center; border: none; background: transparent; color: var(--text-muted); cursor: pointer; border-radius: 6px; }
-    .modal-body { padding: 1.5rem; }
-    .modal-footer { padding: 1rem 1.5rem; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 8px; position: sticky; bottom: 0; background: var(--surface); }
-    
-    /* === TOAST === */
-    .toast-container { position: fixed; top: 100px; right: 16px; z-index: 300; display: flex; flex-direction: column; gap: 8px; }
-    .toast { background: var(--surface); border: 1px solid var(--border); border-left: 3px solid var(--accent); border-radius: var(--radius-sm); padding: 12px 16px; font-size: .82rem; box-shadow: var(--shadow-hover); animation: slideIn .3s ease; max-width: 320px; }
-    @keyframes slideIn { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
-    
-    .empty-state { text-align: center; padding: 3rem 1rem; color: var(--text-muted); }
-    .empty-icon { font-size: 3rem; margin-bottom: .75rem; opacity: .4; }
-    
-    .price-main { font-weight: 700; font-size: .88rem; }
-    .price-sub { font-size: .7rem; color: var(--text-muted); margin-left: 4px; }
-    
-    .flex { display: flex; }
-    .items-center { align-items: center; }
-    .justify-between { justify-content: space-between; }
-    .gap-1 { gap: .5rem; }
-    .text-green { color: var(--accent); }
-    .text-red { color: var(--danger); }
-    .text-muted { color: var(--text-muted); }
-    
-    @media (max-width: 768px) {
-      .header { padding: 0 1rem; height: 64px; }
-      .logo-img { height: 32px; }
-      .profile-card { flex-direction: column; text-align: center; }
-      .profile-qr { margin-left: 0; margin-top: 1rem; }
-      .main { padding: 1rem; }
-    }
+    :root { --bg:#f8fafc; --surface:#fff; --card:#fff; --border:#e2e8f0; --primary:#2563eb; --accent:#059669; --warning:#d97706; --danger:#dc2626; --text:#1e293b; --text-muted:#64748b; --radius:12px; --radius-sm:8px; }
+    * { margin:0; padding:0; box-sizing:border-box; } body { font-family:'Inter',system-ui,sans-serif; background:var(--bg); color:var(--text); min-height:100vh; line-height:1.5; }
+    .header { position:sticky; top:0; z-index:100; display:flex; align-items:center; justify-content:space-between; padding:0 2rem; height:72px; background:rgba(255,255,255,.95); backdrop-filter:blur(12px); border-bottom:1px solid var(--border); }
+    .logo { display:flex; align-items:center; gap:12px; } .logo-img { height:40px; } .logo-text { font-size:1.2rem; font-weight:700; }
+    .header-right { display:flex; align-items:center; gap:1rem; } .emp-info { text-align:right; } .emp-name { font-weight:600; } .emp-code { font-size:.7rem; color:var(--text-muted); font-family:monospace; }
+    .btn { padding:8px 16px; border:none; border-radius:var(--radius-sm); font-weight:600; cursor:pointer; font-size:.85rem; } .btn-primary { background:var(--primary); color:#fff; } .btn-outline { background:transparent; color:var(--text); border:1px solid var(--border); }
+    .main { padding:1.5rem; max-width:1200px; margin:0 auto; } .page-title { font-size:1.3rem; font-weight:700; margin-bottom:1.5rem; }
+    .stats { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:1rem; margin-bottom:1.5rem; } .stat { background:var(--card); border:1px solid var(--border); border-radius:var(--radius); padding:1.25rem; text-align:center; } .stat-val { font-size:1.5rem; font-weight:800; margin:.25rem 0; } .stat-lbl { font-size:.75rem; color:var(--text-muted); text-transform:uppercase; }
+    .tabs { display:flex; gap:2px; background:var(--card); padding:4px; border-radius:var(--radius-sm); margin-bottom:1.25rem; width:fit-content; border:1px solid var(--border); } .tab { padding:8px 16px; border:none; background:transparent; color:var(--text-muted); font-size:.8rem; font-weight:500; border-radius:6px; cursor:pointer; } .tab:hover { background:var(--card-hover); } .tab.active { background:var(--primary); color:#fff; }
+    .table-wrap { overflow-x:auto; border:1px solid var(--border); border-radius:var(--radius); background:var(--surface); } table { width:100%; border-collapse:collapse; font-size:.85rem; } th { text-align:left; padding:12px 16px; font-weight:600; color:var(--text-muted); text-transform:uppercase; font-size:.72rem; background:var(--card-hover); border-bottom:1px solid var(--border); } td { padding:12px 16px; border-bottom:1px solid var(--border); } tr:hover { background:var(--card-hover); } .badge { display:inline-flex; padding:4px 8px; border-radius:20px; font-size:.72rem; font-weight:600; } .badge-green { background:rgba(5,150,105,.12); color:var(--accent); } .badge-yellow { background:rgba(217,119,6,.12); color:var(--warning); } .badge-blue { background:rgba(37,99,235,.1); color:var(--primary); }
+    .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.4); backdrop-filter:blur(4px); z-index:200; place-items:center; } .modal-overlay.open { display:grid; } .modal { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); width:90%; max-width:480px; max-height:85vh; overflow-y:auto; } .modal-head { display:flex; align-items:center; justify-content:space-between; padding:1.25rem 1.5rem; border-bottom:1px solid var(--border); position:sticky; top:0; background:var(--surface); } .modal-close { width:32px; height:32px; display:grid; place-items:center; border:none; background:transparent; cursor:pointer; } .modal-body { padding:1.5rem; } .modal-foot { padding:1rem 1.5rem; border-top:1px solid var(--border); display:flex; justify-content:flex-end; gap:8px; position:sticky; bottom:0; background:var(--surface); }
+    .form-group { margin-bottom:1rem; } .form-lbl { display:block; font-size:.78rem; font-weight:600; color:var(--text); margin-bottom:6px; } .form-inp { width:100%; padding:10px 14px; border:1px solid var(--border); border-radius:8px; } .form-inp:focus { outline:none; border-color:var(--primary); box-shadow:0 0 0 3px rgba(37,99,235,.1); }
+    .toast-container { position:fixed; top:100px; right:16px; z-index:300; display:flex; flex-direction:column; gap:8px; } .toast { background:var(--surface); border:1px solid var(--border); border-left:3px solid var(--accent); border-radius:8px; padding:12px 16px; font-size:.82rem; box-shadow:0 8px 32px rgba(0,0,0,.12); animation:slide .3s ease; } @keyframes slide { from{transform:translateX(20px);opacity:0} to{transform:translateX(0);opacity:1} }
+    .empty { text-align:center; padding:2rem 1rem; color:var(--text-muted); }
   </style>
 </head>
 <body>
-
 <header class="header">
-  <div class="logo">
-    <img src="https://i.ibb.co/p6GCfY1x/Screenshot-2026-05-30-at-17-06-41.png" alt="Drafts Logo" class="logo-img">
-    <div class="logo-text">Drafts</div>
-  </div>
-  <div class="header-right">
-    <div class="employee-info">
-      <div class="employee-name" id="empNameDisplay">Loading...</div>
-      <div class="employee-code" id="empCodeDisplay">EMP-XXX</div>
-    </div>
-    <button class="btn btn-outline btn-logout" id="logoutBtn">Log Out</button>
-  </div>
+  <div class="logo"><img src="https://i.ibb.co/p6GCfY1x/Screenshot-2026-05-30-at-17-06-41.png" alt="Logo" class="logo-img"><div class="logo-text">Drafts</div></div>
+  <div class="header-right"><div class="emp-info"><div class="emp-name" id="empName">Loading...</div><div class="emp-code" id="empCode">EMP-XXX</div></div><button class="btn btn-outline" id="logoutBtn">Log Out</button></div>
 </header>
-
 <div class="toast-container" id="toastContainer"></div>
-
 <main class="main">
   <h1 class="page-title">My Dashboard</h1>
-  
-  <!-- Profile Card -->
-  <div class="profile-card">
-    <div class="profile-avatar" id="profileAvatar">
-      <span>JD</span>
-    </div>
-    <div class="profile-details">
-      <h3 id="profileName">John Doe</h3>
-      <p><strong>Title:</strong> <span id="profileTitle">Sales Agent</span></p>
-      <p><strong>Email:</strong> <span id="profileEmail">john@example.com</span></p>
-      <p><strong>Commission Rate:</strong> <span id="profileCommission">10%</span></p>
-    </div>
-    <div class="profile-qr">
-      <div id="profileQr" class="qr-code"></div>
-      <div class="qr-label">My Profile QR</div>
-    </div>
+  <div class="stats">
+    <div class="stat"><div class="stat-lbl">Account Balance</div><div class="stat-val" style="color:var(--accent)" id="bal">UGX 0</div></div>
+    <div class="stat"><div class="stat-lbl">Total Earned</div><div class="stat-val" id="totalEarned">UGX 0</div></div>
+    <div class="stat"><div class="stat-lbl">My Projects</div><div class="stat-val" id="projCount">0</div></div>
+    <div class="stat"><div class="stat-lbl">Pending Requests</div><div class="stat-val" id="pendReq">0</div></div>
   </div>
-  
-  <!-- Stats -->
-  <div class="stats-grid">
-    <div class="stat-card">
-      <div class="stat-label">Account Balance</div>
-      <div class="stat-value stat-balance" id="statBalance">UGX 0</div>
-      <div class="stat-label" style="font-size:.7rem" id="statBalanceUsd">$0.00</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-label">Total Earned</div>
-      <div class="stat-value" id="statTotal">UGX 0</div>
-      <div class="stat-label" style="font-size:.7rem" id="statTotalUsd">$0.00</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-label">Pending Withdrawals</div>
-      <div class="stat-value" id="statPending">0</div>
-      <div class="stat-label" style="font-size:.7rem">Requests</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-label">Projects Referred</div>
-      <div class="stat-value" id="statProjects">0</div>
-      <div class="stat-label" style="font-size:.7rem">Active</div>
-    </div>
-  </div>
-  
-  <!-- Tabs -->
   <div class="tabs">
-    <button class="tab-btn active" data-tab="earnings">Earnings</button>
-    <button class="tab-btn" data-tab="withdrawals">Withdrawals</button>
-    <button class="tab-btn" data-tab="projects">My Projects</button>
+    <button class="tab active" data-tab="earnings">Earnings</button>
+    <button class="tab" data-tab="projects">My Projects</button>
+    <button class="tab" data-tab="withdrawals">Withdrawals</button>
   </div>
-  
-  <!-- Earnings Tab -->
   <div id="earningsTab">
-    <div class="flex justify-between items-center mb-1">
-      <h3 style="font-size:1rem; font-weight:600">Earnings History</h3>
-      <button class="btn btn-primary" id="requestWithdrawBtn">💰 Request Withdrawal</button>
-    </div>
-    <div class="table-wrapper">
-      <table>
-        <thead>
-          <tr>
-            <th>Date</th>
-            <th>Type</th>
-            <th>Project</th>
-            <th>Amount (UGX)</th>
-            <th>Status</th>
-          </tr>
-        </thead>
-        <tbody id="earningsTable">
-          <tr><td colspan="5"><div class="empty-state"><div class="empty-icon">💰</div><p>Loading earnings...</p></div></td></tr>
-        </tbody>
-      </table>
-    </div>
+    <div class="table-wrap"><table><thead><tr><th>Date</th><th>Type</th><th>Project</th><th>Amount</th><th>Status</th></tr></thead><tbody id="earningsTb"><tr><td colspan="5"><div class="empty">Loading...</div></td></tr></tbody></table></div>
   </div>
-  
-  <!-- Withdrawals Tab (hidden by default) -->
-  <div id="withdrawalsTab" style="display:none">
-    <h3 style="font-size:1rem; font-weight:600; margin-bottom:1rem">Withdrawal Requests</h3>
-    <div class="table-wrapper">
-      <table>
-        <thead>
-          <tr>
-            <th>Requested</th>
-            <th>Amount</th>
-            <th>Status</th>
-            <th>Processed</th>
-            <th>Notes</th>
-          </tr>
-        </thead>
-        <tbody id="withdrawalsTable">
-          <tr><td colspan="5"><div class="empty-state"><div class="empty-icon">🔄</div><p>No withdrawal requests yet.</p></div></td></tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
-  
-  <!-- Projects Tab (hidden by default) -->
   <div id="projectsTab" style="display:none">
-    <h3 style="font-size:1rem; font-weight:600; margin-bottom:1rem">Projects I Referred</h3>
-    <div class="table-wrapper">
-      <table>
-        <thead>
-          <tr>
-            <th>Project</th>
-            <th>Client</th>
-            <th>Commission Rate</th>
-            <th>Earned So Far</th>
-            <th>Status</th>
-          </tr>
-        </thead>
-        <tbody id="projectsTable">
-          <tr><td colspan="5"><div class="empty-state"><div class="empty-icon">📁</div><p>Loading projects...</p></div></td></tr>
-        </tbody>
-      </table>
-    </div>
+    <div class="table-wrap"><table><thead><tr><th>Project</th><th>Client</th><th>Rate</th><th>Commission</th><th>Earned</th><th>Status</th></tr></thead><tbody id="projTb"><tr><td colspan="6"><div class="empty">Loading...</div></td></tr></tbody></table></div>
+  </div>
+  <div id="withdrawalsTab" style="display:none">
+    <div class="flex justify-between items-center mb-2" style="margin-bottom:1rem; display:flex; justify-content:space-between; align-items:center;"><h3 style="font-size:1rem; font-weight:600">Withdrawal Requests</h3><button class="btn btn-primary" id="withdrawBtn">💰 Request Withdraw</button></div>
+    <div class="table-wrap"><table><thead><tr><th>Date</th><th>Amount</th><th>Status</th><th>Processed</th><th>Notes</th></tr></thead><tbody id="wdTb"><tr><td colspan="5"><div class="empty">No requests</div></td></tr></tbody></table></div>
   </div>
 </main>
 
-<!-- Withdrawal Modal -->
-<div class="modal-overlay" id="withdrawModal">
+<div class="modal-overlay" id="wdModal">
   <div class="modal">
-    <div class="modal-header">
-      <h3 class="modal-title">Request Withdrawal</h3>
-      <button class="modal-close" id="closeWithdrawModal">✕</button>
-    </div>
+    <div class="modal-head"><h3>Request Withdrawal</h3><button class="modal-close" id="closeWd">✕</button></div>
     <div class="modal-body">
-      <p style="margin-bottom:1rem; color:var(--text-muted)">
-        Current balance: <strong id="withdrawBalance" style="color:var(--accent)">UGX 0</strong>
-      </p>
-      <div class="form-group">
-        <label class="form-label">Withdrawal Amount (UGX) *</label>
-        <input class="form-input" id="withdrawAmount" type="number" placeholder="Enter amount" min="1" />
-        <div style="font-size:.75rem; color:var(--text-muted); margin-top:4px" id="withdrawHint">Minimum: UGX 10,000</div>
-      </div>
-      <div class="form-group">
-        <label class="form-label">Notes (optional)</label>
-        <textarea class="form-input" id="withdrawNotes" placeholder="e.g. Mobile money number, bank details..." style="min-height:60px"></textarea>
-      </div>
+      <p style="margin-bottom:1rem; color:var(--text-muted)">Available: <strong id="wdBal" style="color:var(--accent)">UGX 0</strong></p>
+      <div class="form-group"><label class="form-lbl">Amount (UGX) *</label><input class="form-inp" id="wdAmt" type="number" min="10000" placeholder="10,000 min" /></div>
+      <div class="form-group"><label class="form-lbl">Notes</label><input class="form-inp" id="wdNote" placeholder="Mobile number / Bank details" /></div>
     </div>
-    <div class="modal-footer">
-      <button class="btn btn-outline" id="cancelWithdraw">Cancel</button>
-      <button class="btn btn-primary" id="submitWithdraw">Submit Request</button>
-    </div>
+    <div class="modal-foot"><button class="btn btn-outline" id="cancelWd">Cancel</button><button class="btn btn-primary" id="submitWd">Submit</button></div>
   </div>
 </div>
 
 <script>
-  (function() {
-    'use strict';
-    
-    const SUPABASE_URL = 'https://hnbzerhoqqsmzqxcbnxv.supabase.co';
-    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhuYnplcmhvcXFzbXpxeGNibnh2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkwNDg1MjksImV4cCI6MjA5NDYyNDUyOX0.a4rM51DQGih9SXMr71PREngZ_pT6dJFgv_fG9j5jAGc';
-    const USD_RATE = 0.00027;
-    
-    // Check authentication
-    const employeeId = localStorage.getItem('employee_id');
-    if (!employeeId) {
-      window.location.href = 'employee-login.html';
-      return;
-    }
-    
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-    let employeeData = null;
+(function(){
+  const SUPABASE_URL = 'https://hnbzerhoqqsmzqxcbnxv.supabase.co';
+  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhuYnplcmhvcXFzbXpxeGNibnh2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkwNDg1MjksImV4cCI6MjA5NDYyNDUyOX0.a4rM51DQGih9SXMr71PREngZ_pT6dJFgv_fG9j5jAGc';
+  const empId = localStorage.getItem('employee_id');
+  if(!empId) location.href = 'employee-login.html';
+  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  let empData = null;
 
-    // === UTILS ===
-    function formatUGX(n) { if (!n) return 'UGX 0'; return 'UGX ' + Number(n).toLocaleString(); }
-    function formatUSD(n) { if (!n) return '$0.00'; return '$' + (n * USD_RATE).toFixed(2); }
-    
-    function showToast(msg) {
-      const c = document.getElementById('toastContainer');
-      const t = document.createElement('div');
-      t.className = 'toast';
-      t.textContent = msg;
-      c.appendChild(t);
-      setTimeout(() => t.remove(), 3000);
-    }
-    
-    function openModal(id) { document.getElementById(id).classList.add('open'); }
-    function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+  function fmt(n){ return 'UGX ' + Number(n||0).toLocaleString(); }
+  function toast(m){ const c=document.getElementById('toastContainer'); const d=document.createElement('div'); d.className='toast'; d.textContent=m; c.appendChild(d); setTimeout(()=>d.remove(),3000); }
+  function open(id){ document.getElementById(id).classList.add('open'); } function close(id){ document.getElementById(id).classList.remove('open'); }
 
-    // === LOAD EMPLOYEE DATA ===
-    async function loadEmployeeData() {
-      try {
-        // Fetch from the summary view for performance
-        const { data, error } = await supabase
-          .from('employee_earnings_summary')
-          .select('*')
-          .eq('id', employeeId)
-          .single();
-        
-        if (error || !data) throw new Error('Failed to load employee data');
-        
-        employeeData = data;
-        
-        // Update profile
-        document.getElementById('empNameDisplay').textContent = data.name;
-        document.getElementById('empCodeDisplay').textContent = data.employee_code;
-        document.getElementById('profileName').textContent = data.name;
-        document.getElementById('profileTitle').textContent = data.title || '—';
-        document.getElementById('profileEmail').textContent = data.email || '—';
-        document.getElementById('profileCommission').textContent = `${(data.commission_rate * 100).toFixed(1)}%`;
-        
-        // Avatar initials
-        const initials = data.name?.split(' ').map(n => n[0]).join('').toUpperCase() || 'E';
-        document.getElementById('profileAvatar').innerHTML = `<span>${initials}</span>`;
-        
-        // Stats
-        document.getElementById('statBalance').textContent = formatUGX(data.account_balance);
-        document.getElementById('statBalanceUsd').textContent = formatUSD(data.account_balance);
-        document.getElementById('statTotal').textContent = formatUGX(data.total_commissions + data.total_salary);
-        document.getElementById('statTotalUsd').textContent = formatUSD(data.total_commissions + data.total_salary);
-        document.getElementById('statPending').textContent = data.pending_withdrawals || 0;
-        document.getElementById('statProjects').textContent = '—'; // Will load separately
-        
-        // QR code for profile
-        const profileUrl = `${window.location.origin}/employee-dashboard.html?user=${data.employee_code}`;
-        document.getElementById('profileQr').innerHTML = '';
-        new QRCode(document.getElementById('profileQr'), {
-          text: profileUrl,
-          width: 80,
-          height: 80,
-          correctLevel: QRCode.CorrectLevel.M
-        });
-        
-        // Load tabs
-        await Promise.all([
-          loadEarnings(),
-          loadWithdrawals(),
-          loadReferredProjects()
-        ]);
-        
-      } catch (err) {
-        console.error('Load error:', err);
-        showToast('Failed to load dashboard');
-        // Redirect to login on auth error
-        if (err.message?.includes('401') || err.message?.includes('JWT')) {
-          localStorage.removeItem('employee_id');
-          window.location.href = 'employee-login.html';
-        }
-      }
-    }
+  document.addEventListener('DOMContentLoaded', async () => {
+    try {
+      const { data } = await supabase.from('employee_earnings_summary').select('*').eq('id', empId).single();
+      if(!data) throw new Error('Profile not found');
+      empData = data;
+      document.getElementById('empName').textContent = data.name;
+      document.getElementById('empCode').textContent = data.employee_code;
+      document.getElementById('bal').textContent = fmt(data.account_balance);
+      document.getElementById('totalEarned').textContent = fmt(data.total_commissions + data.total_salary);
+      document.getElementById('pendReq').textContent = data.pending_withdrawals || 0;
 
-    // === LOAD EARNINGS ===
-    async function loadEarnings() {
-      try {
-        const { data, error } = await supabase
-          .from('employee_earnings')
-          .select('*, projects(name, client)')
-          .eq('employee_id', employeeId)
-          .order('payment_date', { ascending: false });
-        
-        const tbody = document.getElementById('earningsTable');
-        if (error) throw error;
-        
-        if (!data || data.length === 0) {
-          tbody.innerHTML = `<tr><td colspan="5"><div class="empty-state"><div class="empty-icon">💰</div><p>No earnings yet.</p></div></td></tr>`;
-          return;
-        }
-        
-        tbody.innerHTML = data.map(e => {
-          const statusBadge = e.status === 'paid' ? 'badge-green' : e.status === 'pending' ? 'badge-yellow' : 'badge-gray';
-          const typeLabel = e.type === 'commission' ? 'Commission' : e.type === 'salary' ? 'Salary' : e.type;
-          return `<tr>
-            <td>${new Date(e.payment_date).toLocaleDateString()}</td>
-            <td><span class="badge badge-blue">${typeLabel}</span></td>
-            <td>${e.projects?.name || 'Salary Payment'}</td>
-            <td><strong>${formatUGX(e.amount)}</strong></td>
-            <td><span class="badge ${statusBadge}"><span class="badge-dot"></span>${e.status}</span></td>
-          </tr>`;
-        }).join('');
-        
-      } catch (err) {
-        console.error('Earnings load error:', err);
-      }
-    }
+      await loadEarnings(); await loadProjects(); await loadWithdrawals();
+    } catch(e) { toast('Session expired'); localStorage.clear(); location.href='employee-login.html'; }
+  });
 
-    // === LOAD WITHDRAWALS ===
-    async function loadWithdrawals() {
-      try {
-        const { data, error } = await supabase
-          .from('withdrawal_requests')
-          .select('*')
-          .eq('employee_id', employeeId)
-          .order('requested_at', { ascending: false });
-        
-        const tbody = document.getElementById('withdrawalsTable');
-        if (error) throw error;
-        
-        if (!data || data.length === 0) {
-          tbody.innerHTML = `<tr><td colspan="5"><div class="empty-state"><div class="empty-icon">🔄</div><p>No withdrawal requests yet.</p></div></td></tr>`;
-          return;
-        }
-        
-        tbody.innerHTML = data.map(w => {
-          const statusBadge = w.status === 'completed' ? 'badge-green' : w.status === 'pending' ? 'badge-yellow' : w.status === 'rejected' ? 'badge-red' : 'badge-gray';
-          return `<tr>
-            <td>${new Date(w.requested_at).toLocaleDateString()}</td>
-            <td><strong>${formatUGX(w.amount)}</strong></td>
-            <td><span class="badge ${statusBadge}"><span class="badge-dot"></span>${w.status}</span></td>
-            <td>${w.processed_at ? new Date(w.processed_at).toLocaleDateString() : '—'}</td>
-            <td style="font-size:.75rem">${w.admin_notes || w.employee_notes || '—'}</td>
-          </tr>`;
-        }).join('');
-        
-      } catch (err) {
-        console.error('Withdrawals load error:', err);
-      }
-    }
+  async function loadEarnings() {
+    const { data } = await supabase.from('employee_earnings').select('*, projects(name)').eq('employee_id', empId).order('payment_date',{ascending:false});
+    const tb = document.getElementById('earningsTb');
+    if(!data?.length) { tb.innerHTML = `<tr><td colspan="5"><div class="empty">No earnings yet</div></td></tr>`; return; }
+    tb.innerHTML = data.map(e => `<tr><td>${new Date(e.payment_date).toLocaleDateString()}</td><td><span class="badge badge-blue">${e.type}</span></td><td>${e.projects?.name||'—'}</td><td><strong>${fmt(e.amount)}</strong></td><td><span class="badge ${e.status==='paid'?'badge-green':'badge-yellow'}">${e.status}</span></td></tr>`).join('');
+  }
 
-    // === LOAD REFERRED PROJECTS ===
-    async function loadReferredProjects() {
-      try {
-        const { data, error } = await supabase
-          .from('project_referrals')
-          .select('*, projects(name, client, monthly_rate, plan_months), employee_earnings(amount)')
-          .eq('employee_id', employeeId)
-          .eq('status', 'active');
-        
-        const tbody = document.getElementById('projectsTable');
-        if (error) throw error;
-        
-        if (!data || data.length === 0) {
-          tbody.innerHTML = `<tr><td colspan="5"><div class="empty-state"><div class="empty-icon">📁</div><p>No referred projects yet.</p></div></td></tr>`;
-          return;
-        }
-        
-        // Calculate earned per project
-        const projectsWithEarnings = await Promise.all(data.map(async ref => {
-          const { data: earnings } = await supabase
-            .from('employee_earnings')
-            .select('amount')
-            .eq('employee_id', employeeId)
-            .eq('project_id', ref.project_id)
-            .eq('type', 'commission');
-          const earned = earnings?.reduce((s, e) => s + (e.amount || 0), 0) || 0;
-          return { ...ref, earned };
-        }));
-        
-        document.getElementById('statProjects').textContent = projectsWithEarnings.length;
-        
-        tbody.innerHTML = projectsWithEarnings.map(ref => {
-          const project = ref.projects;
-          const totalValue = (project?.monthly_rate || 0) * (project?.plan_months || 1);
-          return `<tr>
-            <td><strong>${project?.name || 'Unknown'}</strong></td>
-            <td>${project?.client || '—'}</td>
-            <td><span class="badge badge-blue">${(ref.commission_rate * 100).toFixed(1)}%</span></td>
-            <td><strong>${formatUGX(ref.earned)}</strong><br><span class="text-muted" style="font-size:.7rem">of ${formatUGX(totalValue * ref.commission_rate)} potential</span></td>
-            <td><span class="badge badge-green"><span class="badge-dot"></span>Active</span></td>
-          </tr>`;
-        }).join('');
-        
-      } catch (err) {
-        console.error('Projects load error:', err);
-      }
-    }
+  async function loadProjects() {
+    const { data: refs } = await supabase.from('project_referrals').select('*, projects(name, client, monthly_rate)').eq('employee_id', empId);
+    const { data: earns } = await supabase.from('employee_earnings').select('project_id, amount').eq('employee_id', empId).eq('type','commission');
+    const tb = document.getElementById('projTb');
+    document.getElementById('projCount').textContent = refs?.length || 0;
+    if(!refs?.length) { tb.innerHTML = `<tr><td colspan="6"><div class="empty">No referred projects</div></td></tr>`; return; }
+    const earnedMap = {}; (earns||[]).forEach(e => earnedMap[e.project_id] = (earnedMap[e.project_id]||0) + e.amount);
+    tb.innerHTML = refs.map(r => {
+      const p = r.projects, com = (p?.monthly_rate||0) * r.commission_rate, ear = earnedMap[r.project_id]||0;
+      return `<tr><td><strong>${p?.name}</strong></td><td>${p?.client}</td><td>${fmt(p?.monthly_rate)}/mo</td><td>${(r.commission_rate*100).toFixed(1)}%</td><td>${fmt(ear)}</td><td><span class="badge badge-green">${r.status}</span></td></tr>`;
+    }).join('');
+  }
 
-    // === REQUEST WITHDRAWAL ===
-    async function requestWithdrawal() {
-      const amount = parseInt(document.getElementById('withdrawAmount').value);
-      const notes = document.getElementById('withdrawNotes').value.trim();
-      
-      if (!amount || amount < 10000) { // Minimum UGX 10,000
-        showToast('Minimum withdrawal: UGX 10,000');
-        return;
-      }
-      if (amount > (employeeData?.account_balance || 0)) {
-        showToast('Insufficient balance');
-        return;
-      }
-      
-      const btn = document.getElementById('submitWithdraw');
-      btn.disabled = true;
-      btn.textContent = 'Submitting...';
-      
-      try {
-        const { error } = await supabase.from('withdrawal_requests').insert({
-          id: crypto.randomUUID?.() || 'id-' + Date.now(),
-          employee_id: employeeId,
-          amount: amount,
-          employee_notes: notes,
-          status: 'pending',
-          requested_at: new Date().toISOString()
-        });
-        
-        if (error) throw error;
-        
-        showToast('Withdrawal request submitted!');
-        closeModal('withdrawModal');
-        document.getElementById('withdrawAmount').value = '';
-        document.getElementById('withdrawNotes').value = '';
-        
-        // Refresh data
-        await loadEmployeeData();
-        await loadWithdrawals();
-        
-      } catch (err) {
-        showToast('Error: ' + err.message);
-      } finally {
-        btn.disabled = false;
-        btn.textContent = 'Submit Request';
-      }
-    }
+  async function loadWithdrawals() {
+    const { data } = await supabase.from('withdrawal_requests').select('*').eq('employee_id', empId).order('requested_at',{ascending:false});
+    const tb = document.getElementById('wdTb');
+    if(!data?.length) { tb.innerHTML = `<tr><td colspan="5"><div class="empty">No requests</div></td></tr>`; return; }
+    tb.innerHTML = data.map(w => `<tr><td>${new Date(w.requested_at).toLocaleDateString()}</td><td><strong>${fmt(w.amount)}</strong></td><td><span class="badge ${w.status==='completed'?'badge-green':w.status==='pending'?'badge-yellow':'badge-red'}">${w.status}</span></td><td>${w.processed_at?new Date(w.processed_at).toLocaleDateString():'—'}</td><td>${w.employee_notes||'—'}</td></tr>`).join('');
+  }
 
-    // === TAB SWITCHING ===
-    function setupTabs() {
-      document.querySelectorAll('.tab-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
-          // Update tab buttons
-          document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-          this.classList.add('active');
-          
-          // Show/hide tab content
-          const tab = this.dataset.tab;
-          document.getElementById('earningsTab').style.display = tab === 'earnings' ? '' : 'none';
-          document.getElementById('withdrawalsTab').style.display = tab === 'withdrawals' ? '' : 'none';
-          document.getElementById('projectsTab').style.display = tab === 'projects' ? '' : 'none';
-        });
-      });
-    }
+  // Tabs
+  document.querySelectorAll('.tab').forEach(b => b.onclick = function() {
+    document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active')); this.classList.add('active');
+    const t = this.dataset.tab;
+    document.getElementById('earningsTab').style.display = t==='earnings'?'':'none';
+    document.getElementById('projectsTab').style.display = t==='projects'?'':'none';
+    document.getElementById('withdrawalsTab').style.display = t==='withdrawals'?'':'none';
+  });
 
-    // === EVENT LISTENERS ===
-    document.getElementById('logoutBtn').addEventListener('click', () => {
-      localStorage.removeItem('employee_id');
-      localStorage.removeItem('employee_session');
-      window.location.href = 'employee-login.html';
-    });
-    
-    document.getElementById('closeWithdrawModal').addEventListener('click', () => closeModal('withdrawModal'));
-    document.getElementById('cancelWithdraw').addEventListener('click', () => closeModal('withdrawModal'));
-    document.getElementById('requestWithdrawBtn').addEventListener('click', () => {
-      document.getElementById('withdrawBalance').textContent = formatUGX(employeeData?.account_balance || 0);
-      document.getElementById('withdrawAmount').max = employeeData?.account_balance || 0;
-      openModal('withdrawModal');
-    });
-    document.getElementById('submitWithdraw').addEventListener('click', requestWithdrawal);
-    
-    document.querySelectorAll('.modal-overlay').forEach(overlay => {
-      overlay.addEventListener('click', (e) => {
-        if (e.target === overlay) overlay.classList.remove('open');
-      });
-    });
-    
-    setupTabs();
-
-    // === INIT ===
-    loadEmployeeData();
-    
-    // Auto-refresh every 5 minutes
-    setInterval(loadEmployeeData, 5 * 60 * 1000);
-    
-  })();
+  // Withdraw
+  document.getElementById('logoutBtn').onclick = () => { localStorage.clear(); location.href='employee-login.html'; };
+  document.getElementById('closeWd').onclick = document.getElementById('cancelWd').onclick = () => close('wdModal');
+  document.getElementById('wdModal').onclick = e => { if(e.target.classList.contains('modal-overlay')) close('wdModal'); };
+  document.getElementById('withdrawBtn').onclick = () => { document.getElementById('wdBal').textContent = fmt(empData?.account_balance||0); document.getElementById('wdAmt').max = empData?.account_balance||0; open('wdModal'); };
+  document.getElementById('submitWd').onclick = async () => {
+    const amt = parseInt(document.getElementById('wdAmt').value);
+    if(amt < 10000) return toast('Minimum: UGX 10,000');
+    if(amt > empData.account_balance) return toast('Insufficient balance');
+    const btn = document.getElementById('submitWd'); btn.disabled=true; btn.textContent='Submitting...';
+    try {
+      const { error } = await supabase.from('withdrawal_requests').insert({ id: 'w'+Date.now(), employee_id: empId, amount: amt, status:'pending', requested_at: new Date().toISOString(), employee_notes: document.getElementById('wdNote').value });
+      if(error) throw error;
+      toast('Requested!'); close('wdModal'); document.getElementById('wdAmt').value=''; document.getElementById('wdNote').value='';
+      await loadWithdrawals();
+    } catch(e) { toast('Error: '+e.message); } finally { btn.disabled=false; btn.textContent='Submit'; }
+  };
+})();
 </script>
 </body>
 </html>
