@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Employee Login — Drafts</title>
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- Supabase JS (v2) -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  
+  <style>
+    :root {
+      --bg: #f8fafc; --surface: #ffffff; --card: #ffffff; --card-hover: #f1f5f9;
+      --border: #e2e8f0; --primary: #2563eb; --primary-glow: rgba(37,99,235,.1);
+      --accent: #059669; --accent-glow: rgba(5,150,105,.1);
+      --warning: #d97706; --danger: #dc2626;
+      --text: #1e293b; --text-secondary: #475569; --text-muted: #64748b;
+      --radius: 12px; --radius-sm: 8px;
+      --shadow: 0 4px 24px rgba(0,0,0,.08); --shadow-hover: 0 8px 32px rgba(0,0,0,.12);
+      --transition: .2s cubic-bezier(.4,0,.2,1);
+    }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+      background: var(--bg); color: var(--text); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 1rem;
+    }
+    .login-card {
+      background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+      padding: 2rem; width: 100%; max-width: 400px; box-shadow: var(--shadow);
+    }
+    .logo { text-align: center; margin-bottom: 1.5rem; }
+    .logo-img { height: 48px; margin-bottom: 0.5rem; }
+    .logo-text { font-size: 1.2rem; font-weight: 700; color: var(--text); }
+    .logo-subtitle { font-size: .7rem; color: var(--text-muted); letter-spacing: 1px; text-transform: uppercase; }
+    .form-group { margin-bottom: 1rem; }
+    .form-label { display: block; font-size: .78rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 6px; }
+    .form-input { width: 100%; padding: 10px 14px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--text); font-size: .85rem; font-family: inherit; }
+    .form-input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-glow); }
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 10px 20px; border: none; border-radius: var(--radius-sm); font-size: .85rem; font-weight: 600; cursor: pointer; transition: var(--transition); width: 100%; }
+    .btn-primary { background: var(--primary); color: #fff; box-shadow: 0 2px 8px rgba(37,99,235,.2); }
+    .btn-primary:hover { background: #1d4ed8; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(37,99,235,.3); }
+    .btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none !important; }
+    .error-msg { color: var(--danger); font-size: .75rem; margin-top: 4px; display: none; }
+    .error-msg.show { display: block; }
+    .toast { position: fixed; top: 16px; right: 16px; background: var(--surface); border: 1px solid var(--border); border-left: 3px solid var(--accent); border-radius: var(--radius-sm); padding: 12px 16px; font-size: .82rem; box-shadow: var(--shadow-hover); animation: slideIn .3s ease; max-width: 320px; }
+    @keyframes slideIn { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+  </style>
+</head>
+<body>
+
+<div class="login-card">
+  <div class="logo">
+    <img src="https://i.ibb.co/p6GCfY1x/Screenshot-2026-05-30-at-17-06-41.png" alt="Drafts Logo" class="logo-img">
+    <div class="logo-text">Drafts</div>
+    <div class="logo-subtitle">Employee Portal</div>
+  </div>
+  
+  <form id="loginForm">
+    <div class="form-group">
+      <label class="form-label" for="username">Username</label>
+      <input class="form-input" id="username" type="text" placeholder="e.g. emp001" autocomplete="username" required />
+    </div>
+    <div class="form-group">
+      <label class="form-label" for="password">Password</label>
+      <input class="form-input" id="password" type="password" placeholder="••••••••" autocomplete="current-password" required />
+      <div class="error-msg" id="errorMsg">Invalid credentials</div>
+    </div>
+    <button type="submit" class="btn btn-primary" id="loginBtn">Log In</button>
+  </form>
+  
+  <p style="text-align:center; margin-top:1rem; font-size:.75rem; color:var(--text-muted)">
+    Contact your administrator for login credentials
+  </p>
+</div>
+
+<div id="toastContainer"></div>
+
+<script>
+  const SUPABASE_URL = 'https://hnbzerhoqqsmzqxcbnxv.supabase.co';
+  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhuYnplcmhvcXFzbXpxeGNibnh2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkwNDg1MjksImV4cCI6MjA5NDYyNDUyOX0.a4rM51DQGih9SXMr71PREngZ_pT6dJFgv_fG9j5jAGc';
+
+  function showToast(msg) {
+    const c = document.getElementById('toastContainer');
+    const t = document.createElement('div');
+    t.className = 'toast';
+    t.textContent = msg;
+    c.appendChild(t);
+    setTimeout(() => t.remove(), 3000);
+  }
+
+  document.getElementById('loginForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const btn = document.getElementById('loginBtn');
+    const errorMsg = document.getElementById('errorMsg');
+    
+    btn.disabled = true;
+    btn.textContent = 'Logging in...';
+    errorMsg.classList.remove('show');
+    
+    try {
+      const username = document.getElementById('username').value.trim().toLowerCase();
+      const password = document.getElementById('password').value;
+      
+      // In production: use Supabase Auth with bcrypt password verification
+      // For now: simple check against employee_credentials table
+      const { data: creds, error: credErr } = await window.supabase
+        .createClient(SUPABASE_URL, SUPABASE_KEY)
+        .from('employee_credentials')
+        .select('employee_id')
+        .eq('username', username)
+        .eq('password_hash', password) // ⚠️ In production, hash password before comparing
+        .single();
+      
+      if (credErr || !creds) {
+        errorMsg.classList.add('show');
+        return;
+      }
+      
+      // Store employee session
+      localStorage.setItem('employee_id', creds.employee_id);
+      localStorage.setItem('employee_session', Date.now().toString());
+      
+      showToast('Login successful!');
+      window.location.href = 'employee-dashboard.html';
+      
+    } catch (err) {
+      console.error('Login error:', err);
+      errorMsg.textContent = 'Login failed: ' + err.message;
+      errorMsg.classList.add('show');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Log In';
+    }
+  });
+
+  // Check for existing session
+  if (localStorage.getItem('employee_id')) {
+    const sessionTime = localStorage.getItem('employee_session');
+    if (sessionTime && Date.now() - parseInt(sessionTime) < 24 * 60 * 60 * 1000) {
+      window.location.href = 'employee-dashboard.html';
+    } else {
+      localStorage.removeItem('employee_id');
+      localStorage.removeItem('employee_session');
+    }
+  }
+</script>
+</body>
+</html>
