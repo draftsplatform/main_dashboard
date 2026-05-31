@@ -5,587 +5,161 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Reports — Drafts</title>
   
-  <!-- Google Fonts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  
-  <!-- Supabase JS (v2) + Chart.js -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <!-- Google Fonts & Chart.js -->
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <!-- Supabase -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   
   <style>
-    :root {
-      --bg: #f8fafc; --surface: #ffffff; --card: #ffffff; --card-hover: #f1f5f9;
-      --border: #e2e8f0; --primary: #2563eb; --primary-glow: rgba(37,99,235,.1);
-      --accent: #059669; --accent-glow: rgba(5,150,105,.1);
-      --warning: #d97706; --danger: #dc2626;
-      --text: #1e293b; --text-secondary: #475569; --text-muted: #64748b;
-      --radius: 12px; --radius-sm: 8px;
-      --shadow: 0 4px 24px rgba(0,0,0,.08); --shadow-hover: 0 8px 32px rgba(0,0,0,.12);
-      --transition: .2s cubic-bezier(.4,0,.2,1);
-    }
+    /* [Keep the same CSS as payments.html for consistency] */
+    :root { --bg: #f8fafc; --surface: #ffffff; --card: #ffffff; --card-hover: #f1f5f9; --border: #e2e8f0; --primary: #2563eb; --primary-glow: rgba(37,99,235,.1); --accent: #059669; --accent-glow: rgba(5,150,105,.1); --warning: #d97706; --danger: #dc2626; --text: #1e293b; --text-secondary: #475569; --text-muted: #64748b; --radius: 12px; --radius-sm: 8px; --shadow: 0 4px 24px rgba(0,0,0,.08); --shadow-hover: 0 8px 32px rgba(0,0,0,.12); --transition: .2s cubic-bezier(.4,0,.2,1); }
     * { margin:0; padding:0; box-sizing:border-box; }
-    body {
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
-      background: var(--bg); color: var(--text); min-height: 100vh; line-height: 1.5;
-    }
-    ::-webkit-scrollbar { width:6px; }
-    ::-webkit-scrollbar-track { background:transparent; }
-    ::-webkit-scrollbar-thumb { background:var(--border); border-radius:3px; }
-    
-    /* === HEADER STYLES === */
-    .header {
-      position: sticky; top: 0; z-index: 100;
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 0 2rem; height: 88px;
-      background: rgba(255,255,255,.95); backdrop-filter: blur(12px);
-      border-bottom: 1px solid var(--border);
-      box-shadow: 0 1px 0 rgba(0,0,0,.02);
-    }
-    .logo { display: flex; align-items: center; gap: 16px; cursor: pointer; user-select: none; }
-    .logo-img { height: 64px; width: auto; object-fit: contain; }
-    .logo-text { font-size: 1.6rem; font-weight: 800; letter-spacing: -.3px; color: var(--text); }
-    .logo-subtitle { font-size: .65rem; color: var(--text-muted); letter-spacing: 2px; text-transform: uppercase; margin-top: -4px; }
-    .nav { display: flex; gap: 4px; }
-    .nav-btn {
-      position: relative; padding: 10px 18px; border: none; background: transparent;
-      color: var(--text-secondary); font-size: .88rem; font-weight: 500;
-      border-radius: var(--radius-sm); cursor: pointer; transition: var(--transition);
-    }
-    .nav-btn:hover { background: var(--primary-glow); color: var(--primary); }
-    .nav-btn.active { background: var(--primary-glow); color: var(--primary); font-weight: 600; }
-    .nav-btn.active::after {
-      content: ''; position: absolute; bottom: -1px; left: 50%;
-      transform: translateX(-50%); width: 60%; height: 2px;
-      background: var(--primary); border-radius: 1px;
-    }
-    .header-right { display: flex; align-items: center; gap: 12px; }
-    .status-dot { width: 8px; height: 8px; background: var(--accent); border-radius: 50%; box-shadow: 0 0 8px rgba(5,150,105,.4); }
-    .status-text { font-size: .75rem; color: var(--accent); font-weight: 600; }
-    
-    /* === PAGE STYLES === */
-    .main { padding: 2rem; max-width: 1440px; margin: 0 auto; }
-    .page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem; }
-    .page-title { font-size: 1.5rem; font-weight: 700; letter-spacing: -.3px; color: var(--text); }
-    .page-desc { font-size: .85rem; color: var(--text-muted); margin-top: 2px; }
-    
-    .btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; border: none; border-radius: var(--radius-sm); font-size: .85rem; font-weight: 600; cursor: pointer; transition: var(--transition); pointer-events: auto; }
-    .btn-primary { background: var(--primary); color: #fff; box-shadow: 0 2px 8px rgba(37,99,235,.2); }
-    .btn-primary:hover { background: #1d4ed8; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(37,99,235,.3); }
-    .btn-outline { background: transparent; color: var(--text-secondary); border: 1px solid var(--border); }
-    .btn-outline:hover { border-color: var(--primary); color: var(--primary); background: var(--primary-glow); }
-    .btn-sm { padding: 6px 14px; font-size: .78rem; }
-    .btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none !important; }
-    
-    .badge { display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: 20px; font-size: .72rem; font-weight: 600; letter-spacing: .3px; }
-    .badge-green { background: var(--accent-glow); color: var(--accent); }
-    .badge-yellow { background: rgba(217,119,6,.12); color: var(--warning); }
-    .badge-red { background: rgba(220,38,38,.12); color: var(--danger); }
-    .badge-blue { background: var(--primary-glow); color: var(--primary); }
-    .badge-gray { background: rgba(100,116,139,.12); color: var(--text-muted); }
-    .badge-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
-    
-    .card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.5rem; transition: var(--transition); box-shadow: var(--shadow); margin-bottom: 1.5rem; }
-    .card:hover { border-color: rgba(37,99,235,.3); box-shadow: var(--shadow-hover); }
-    
-    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
-    .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 1rem; text-align: center; }
-    .stat-value { font-size: 1.5rem; font-weight: 700; color: var(--text); margin: 0.25rem 0; }
-    .stat-label { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
-    .stat-change { font-size: 0.7rem; margin-top: 0.25rem; }
-    .stat-change.positive { color: var(--accent); }
-    .stat-change.negative { color: var(--danger); }
-    
+    body { font-family: 'Inter', system-ui, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; line-height: 1.5; }
+    .header { position: sticky; top: 0; z-index: 100; display: flex; align-items: center; justify-content: space-between; padding: 0 2rem; height: 88px; background: rgba(255,255,255,.95); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); }
+    .logo { display: flex; align-items: center; gap: 16px; cursor: pointer; } .logo-img { height: 64px; } .logo-text { font-size: 1.6rem; font-weight: 800; color: var(--text); } .logo-subtitle { font-size: .65rem; color: var(--text-muted); letter-spacing: 2px; text-transform: uppercase; margin-top: -4px; }
+    .nav { display: flex; gap: 4px; } .nav-btn { position: relative; padding: 10px 18px; border: none; background: transparent; color: var(--text-secondary); font-size: .88rem; font-weight: 500; border-radius: 8px; cursor: pointer; } .nav-btn:hover { background: var(--primary-glow); color: var(--primary); } .nav-btn.active { background: var(--primary-glow); color: var(--primary); font-weight: 600; } .nav-btn.active::after { content: ''; position: absolute; bottom: -1px; left: 50%; transform: translateX(-50%); width: 60%; height: 2px; background: var(--primary); }
+    .header-right { display: flex; align-items: center; gap: 12px; } .status-dot { width: 8px; height: 8px; background: var(--accent); border-radius: 50%; } .status-text { font-size: .75rem; color: var(--accent); font-weight: 600; }
+    .main { padding: 2rem; max-width: 1440px; margin: 0 auto; } .page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem; } .page-title { font-size: 1.5rem; font-weight: 700; color: var(--text); } .page-desc { font-size: .85rem; color: var(--text-muted); margin-top: 2px; }
+    .btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; border: none; border-radius: 8px; font-size: .85rem; font-weight: 600; cursor: pointer; } .btn-primary { background: var(--primary); color: #fff; box-shadow: 0 2px 8px rgba(37,99,235,.2); } .btn-primary:hover { background: #1d4ed8; transform: translateY(-1px); } .btn-outline { background: transparent; color: var(--text-secondary); border: 1px solid var(--border); } .btn-outline:hover { border-color: var(--primary); color: var(--primary); background: var(--primary-glow); } .btn:disabled { opacity: 0.6; cursor: not-allowed; }
+    .card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.5rem; box-shadow: var(--shadow); margin-bottom: 1.5rem; }
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; } .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 1rem; text-align: center; } .stat-value { font-size: 1.5rem; font-weight: 700; margin: 0.25rem 0; } .stat-label { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; }
     .chart-container { position: relative; height: 300px; margin: 1rem 0; }
-    
-    .table-wrapper { overflow-x: auto; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); }
-    table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
-    thead { background: var(--card-hover); }
-    th { text-align: left; padding: 12px 16px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; font-size: 0.72rem; letter-spacing: 0.8px; border-bottom: 1px solid var(--border); }
-    td { padding: 12px 16px; border-bottom: 1px solid var(--border); vertical-align: middle; color: var(--text); }
-    tr:last-child td { border-bottom: none; }
-    tbody tr { transition: var(--transition); cursor: default; }
-    tbody tr:hover { background: var(--card-hover); }
-    
-    .empty-state { text-align: center; padding: 3rem 1rem; color: var(--text-muted); }
-    .empty-icon { font-size: 3rem; margin-bottom: 0.75rem; opacity: 0.4; }
-    
-    .toast-container { position: fixed; top: 100px; right: 16px; z-index: 300; display: flex; flex-direction: column; gap: 8px; }
-    .toast { background: var(--surface); border: 1px solid var(--border); border-left: 3px solid var(--accent); border-radius: var(--radius-sm); padding: 12px 16px; font-size: 0.82rem; box-shadow: var(--shadow-hover); animation: slideIn 0.3s ease; max-width: 320px; color: var(--text); }
-    .toast.success { border-left-color: var(--accent); }
-    .toast.error { border-left-color: var(--danger); }
-    @keyframes slideIn { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
-    
-    .form-group { margin-bottom: 1rem; }
-    .form-label { display: block; font-size: 0.78rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 6px; }
-    .form-input, .form-select { width: 100%; padding: 10px 14px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--text); font-size: 0.85rem; font-family: inherit; transition: var(--transition); }
-    .form-input:focus, .form-select:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-glow); }
-    .form-select { cursor: pointer; }
-    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
-    @media (max-width: 500px) { .form-row { grid-template-columns: 1fr; } }
-    
-    .text-green { color: var(--accent); }
-    .text-yellow { color: var(--warning); }
-    .text-red { color: var(--danger); }
-    .text-blue { color: var(--primary); }
-    .text-muted { color: var(--text-muted); }
-    .flex { display: flex; }
-    .items-center { align-items: center; }
-    .justify-between { justify-content: space-between; }
-    .gap-1 { gap: 0.5rem; }
-    .wrap { flex-wrap: wrap; }
-    
-    @media (max-width: 1024px) {
-      .header { padding: 0 1rem; height: 80px; }
-      .logo-img { height: 52px; }
-      .nav { gap: 0; flex-wrap: wrap; }
-      .nav-btn { padding: 8px 12px; font-size: 0.78rem; }
-      .logo-text { font-size: 1.2rem; }
-      .logo-subtitle { display: none; }
-      .main { padding: 1rem; }
-      .stats-grid { grid-template-columns: repeat(2, 1fr); }
-    }
+    .table-wrapper { overflow-x: auto; border: 1px solid var(--border); border-radius: 12px; background: var(--surface); } table { width: 100%; border-collapse: collapse; font-size: 0.85rem; } thead { background: var(--card-hover); } th { text-align: left; padding: 12px 16px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; font-size: 0.72rem; border-bottom: 1px solid var(--border); } td { padding: 12px 16px; border-bottom: 1px solid var(--border); } tr:last-child td { border-bottom: none; } tbody tr:hover { background: var(--card-hover); }
+    .empty-state { text-align: center; padding: 3rem 1rem; color: var(--text-muted); } .empty-icon { font-size: 3rem; opacity: 0.4; }
+    .toast-container { position: fixed; top: 100px; right: 16px; z-index: 300; display: flex; flex-direction: column; gap: 8px; } .toast { background: var(--surface); border: 1px solid var(--border); border-left: 3px solid var(--accent); border-radius: 8px; padding: 12px 16px; font-size: .82rem; box-shadow: 0 8px 32px rgba(0,0,0,.12); }
+    .form-group { margin-bottom: 1rem; } .form-label { display: block; font-size: .78rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 6px; } .form-input, .form-select { width: 100%; padding: 10px 14px; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; } .form-input:focus, .form-select:focus { outline: none; border-color: var(--primary); } .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; } @media (max-width: 500px) { .form-row { grid-template-columns: 1fr; } }
+    .text-red { color: var(--danger); } .text-blue { color: var(--primary); } .text-muted { color: var(--text-muted); } .flex { display: flex; } .items-center { align-items: center; } .justify-between { justify-content: space-between; } .gap-1 { gap: 0.5rem; } .wrap { flex-wrap: wrap; }
+    @media (max-width: 1024px) { .header { padding: 0 1rem; height: 80px; } .logo-img { height: 52px; } .nav { gap: 0; flex-wrap: wrap; } .nav-btn { padding: 8px 12px; } .main { padding: 1rem; } }
   </style>
 </head>
 <body>
 
 <header class="header">
-  <div class="logo" id="logoBtn">
-    <img src="https://i.ibb.co/p6GCfY1x/Screenshot-2026-05-30-at-17-06-41.png" alt="Drafts Dashboard Logo" class="logo-img" loading="lazy">
-  </div>
+  <div class="logo" id="logoBtn"><img src="https://i.ibb.co/p6GCfY1x/Screenshot-2026-05-30-at-17-06-41.png" alt="Logo" class="logo-img"></div>
   <nav class="nav">
-    <a href="index.html" class="nav-btn">Dashboard</a>
-    <a href="projects.html" class="nav-btn">Projects</a>
-    <a href="payments.html" class="nav-btn">Payments</a>
-    <a href="clients.html" class="nav-btn">Clients</a>
-    <a href="reports.html" class="nav-btn active">Reports</a>
-    <a href="performance.html" class="nav-btn">Performance</a>
-    <a href="finance.html" class="nav-btn">Finance</a>
+    <a href="index.html" class="nav-btn">Dashboard</a> <a href="projects.html" class="nav-btn">Projects</a> <a href="payments.html" class="nav-btn">Payments</a> <a href="clients.html" class="nav-btn">Clients</a> <a href="reports.html" class="nav-btn active">Reports</a> <a href="performance.html" class="nav-btn">Performance</a> <a href="finance.html" class="nav-btn">Finance</a>
   </nav>
-  <div class="header-right">
-    <div class="status-dot"></div>
-    <span class="status-text">Online</span>
-  </div>
+  <div class="header-right"><div class="status-dot"></div><span class="status-text">Online</span></div>
 </header>
 
 <div class="toast-container" id="toastContainer"></div>
 
 <main class="main">
   <div class="page-header">
-    <div>
-      <h1 class="page-title">Reports & Analytics</h1>
-      <p class="page-desc">Generate insights, exports, and financial summaries</p>
-    </div>
-    <div class="flex gap-1 wrap">
-      <button class="btn btn-outline" id="exportCsvBtn">📥 Export CSV</button>
-      <button class="btn btn-primary" id="generateReportBtn">📊 Generate Report</button>
-    </div>
+    <div><h1 class="page-title">Reports & Analytics</h1><p class="page-desc">Generate insights, exports, and financial summaries</p></div>
+    <div class="flex gap-1 wrap"><button class="btn btn-outline" id="exportCsvBtn">📥 Export CSV</button><button class="btn btn-primary" id="generateReportBtn">📊 Generate Report</button></div>
   </div>
 
-  <!-- Report Filters -->
   <div class="card">
     <div class="form-row">
-      <div class="form-group">
-        <label class="form-label">Date Range</label>
-        <select class="form-select" id="reportRange">
-          <option value="30">Last 30 Days</option>
-          <option value="90">Last 90 Days</option>
-          <option value="180">Last 6 Months</option>
-          <option value="365">Last Year</option>
-          <option value="custom">Custom Range</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label class="form-label">Report Type</label>
-        <select class="form-select" id="reportType">
-          <option value="revenue">💰 Revenue Summary</option>
-          <option value="projects">📁 Project Performance</option>
-          <option value="clients">👥 Client Activity</option>
-          <option value="payments">💳 Payment History</option>
-        </select>
-      </div>
+      <div class="form-group"><label class="form-label">Date Range</label><select class="form-select" id="reportRange"><option value="30">Last 30 Days</option><option value="90">Last 90 Days</option><option value="180">Last 6 Months</option><option value="365">Last Year</option><option value="custom">Custom Range</option></select></div>
+      <div class="form-group"><label class="form-label">Report Type</label><select class="form-select" id="reportType"><option value="revenue">💰 Revenue Summary</option><option value="projects">📁 Project Performance</option><option value="clients">👥 Client Activity</option><option value="payments">💳 Payment History</option></select></div>
     </div>
-    <div id="customRange" style="display:none" class="form-row">
-      <div class="form-group">
-        <label class="form-label">Start Date</label>
-        <input class="form-input" type="date" id="startDate" />
-      </div>
-      <div class="form-group">
-        <label class="form-label">End Date</label>
-        <input class="form-input" type="date" id="endDate" />
-      </div>
-    </div>
+    <div id="customRange" style="display:none" class="form-row"><div class="form-group"><label class="form-label">Start</label><input class="form-input" type="date" id="startDate" /></div><div class="form-group"><label class="form-label">End</label><input class="form-input" type="date" id="endDate" /></div></div>
   </div>
 
-  <!-- Summary Stats -->
   <div class="stats-grid" id="statsGrid" style="display:none">
-    <div class="stat-card">
-      <div class="stat-label">Total Revenue</div>
-      <div class="stat-value" id="statRevenue">UGX 0</div>
-      <div class="stat-change positive" id="statRevenueChange">+0%</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-label">Active Projects</div>
-      <div class="stat-value" id="statProjects">0</div>
-      <div class="stat-change" id="statProjectsChange">—</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-label">Payments Received</div>
-      <div class="stat-value" id="statPayments">0</div>
-      <div class="stat-change positive" id="statPaymentsChange">+0%</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-label">Avg. Project Value</div>
-      <div class="stat-value" id="statAvgValue">UGX 0</div>
-      <div class="stat-change" id="statAvgValueChange">—</div>
-    </div>
+    <div class="stat-card"><div class="stat-label">Total Revenue</div><div class="stat-value" id="statRevenue">UGX 0</div></div>
+    <div class="stat-card"><div class="stat-label">Active Projects</div><div class="stat-value" id="statProjects">0</div></div>
+    <div class="stat-card"><div class="stat-label">Payments</div><div class="stat-value" id="statPayments">0</div></div>
+    <div class="stat-card"><div class="stat-label">Avg. Value</div><div class="stat-value" id="statAvgValue">UGX 0</div></div>
   </div>
 
-  <!-- Chart Area -->
-  <div class="card" id="chartCard" style="display:none">
-    <h3 style="font-size:1rem; font-weight:600; margin-bottom:1rem">📈 Revenue Trend</h3>
-    <div class="chart-container">
-      <canvas id="revenueChart"></canvas>
-    </div>
-  </div>
+  <div class="card" id="chartCard" style="display:none"><h3>📈 Trend</h3><div class="chart-container"><canvas id="revenueChart"></canvas></div></div>
 
-  <!-- Results Table -->
-  <div class="card">
-    <h3 style="font-size:1rem; font-weight:600; margin-bottom:1rem" id="tableTitle">Report Results</h3>
-    <div class="table-wrapper">
-      <table>
-        <thead id="tableHead">
-          <!-- Dynamic headers -->
-        </thead>
-        <tbody id="tableBody">
-          <tr><td colspan="6"><div class="empty-state"><div class="empty-icon">📊</div><p>Select filters and click "Generate Report" to view data.</p></div></td></tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
+  <div class="card"><h3 id="tableTitle">Results</h3><div class="table-wrapper"><table><thead id="tableHead"></thead><tbody id="tableBody"><tr><td colspan="6"><div class="empty-state"><div class="empty-icon">📊</div><p>Click "Generate Report"</p></div></td></tr></tbody></table></div></div>
 </main>
 
 <script>
   (function() {
-    'use strict';
-    
-    // === CONFIG ===
     const SUPABASE_URL = 'https://hnbzerhoqqsmzqxcbnxv.supabase.co';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhuYnplcmhvcXFzbXpxeGNibnh2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkwNDg1MjksImV4cCI6MjA5NDYyNDUyOX0.a4rM51DQGih9SXMr71PREngZ_pT6dJFgv_fG9j5jAGc';
-    const USD_RATE = 0.00027;
-    
-    let revenueChart = null;
+    let chart = null, isGen = false;
 
     document.addEventListener('DOMContentLoaded', async function() {
-      if (!window.supabase) {
-        showToast('Database SDK failed to load', 'error');
-        return;
-      }
-
+      if (!window.supabase) return;
       const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-      let isGenerating = false;
 
-      // === UTILS ===
-      function formatUGX(n) { if (!n) return 'UGX 0'; return 'UGX ' + Number(n).toLocaleString(); }
-      function formatUSD(n) { if (!n) return '$0.00'; return '$' + (n * USD_RATE).toFixed(2); }
-      function formatDate(dateStr) { return new Date(dateStr).toLocaleDateString(); }
-      
-      function showToast(msg, type = 'success') {
-        const c = document.getElementById('toastContainer');
-        const t = document.createElement('div');
-        t.className = `toast ${type}`;
-        t.textContent = msg;
-        c.appendChild(t);
-        setTimeout(() => t.remove(), 3500);
-      }
-
-      // === DATE RANGE HELPERS ===
-      function getDateRange(days) {
-        const end = new Date();
-        const start = new Date();
-        start.setDate(start.getDate() - days);
-        return { start: start.toISOString().split('T')[0], end: end.toISOString().split('T')[0] };
-      }
-
-      // === GENERATE REPORT ===
-      async function generateReport() {
-        if (isGenerating) return;
-        isGenerating = true;
-        const btn = document.getElementById('generateReportBtn');
-        const originalText = btn.textContent;
-        btn.textContent = 'Generating...';
-        btn.disabled = true;
-
-        try {
-          const type = document.getElementById('reportType').value;
-          const range = document.getElementById('reportRange').value;
-          let startDate, endDate;
-          
-          if (range === 'custom') {
-            startDate = document.getElementById('startDate').value;
-            endDate = document.getElementById('endDate').value;
-            if (!startDate || !endDate) throw new Error('Please select both start and end dates');
-          } else {
-            const dates = getDateRange(parseInt(range));
-            startDate = dates.start;
-            endDate = dates.end;
-          }
-
-          // Show loading state
-          document.getElementById('statsGrid').style.display = 'grid';
-          document.getElementById('chartCard').style.display = 'block';
-          document.getElementById('tableBody').innerHTML = `<tr><td colspan="6"><div class="empty-state"><div class="empty-icon">⏳</div><p>Loading data...</p></div></td></tr>`;
-
-          // Fetch data based on report type
-          let results = [];
-          let chartData = { labels: [], values: [] };
-          let stats = { revenue: 0, projects: 0, payments: 0, avgValue: 0 };
-
-          if (type === 'revenue') {
-            // Revenue by month
-            const { data: payments, error } = await supabase
-              .from('payments')
-              .select('amount, payment_date, status')
-              .gte('payment_date', startDate)
-              .lte('payment_date', endDate)
-              .eq('status', 'paid')
-              .order('payment_date', { ascending: true });
-            
-            if (error) throw error;
-            
-            // Aggregate by month
-            const monthly = {};
-            payments.forEach(p => {
-              const month = p.payment_date.substring(0, 7); // YYYY-MM
-              monthly[month] = (monthly[month] || 0) + p.amount;
-            });
-            
-            chartData.labels = Object.keys(monthly).map(m => new Date(m + '-01').toLocaleDateString('en-US', { month: 'short', year: 'numeric' }));
-            chartData.values = Object.values(monthly);
-            
-            stats.revenue = Object.values(monthly).reduce((a, b) => a + b, 0);
-            stats.payments = payments.length;
-            
-            // Get active projects count
-            const { count } = await supabase.from('projects').select('*', { count: 'exact', head: true }).eq('status', 'active');
-            stats.projects = count || 0;
-            stats.avgValue = stats.projects > 0 ? stats.revenue / stats.projects : 0;
-            
-            // Table: monthly breakdown
-            results = Object.entries(monthly).map(([month, amount]) => ({
-              period: new Date(month + '-01').toLocaleDateString('en-US', { month: 'long', year: 'numeric' }),
-              amount: formatUGX(amount),
-              usd: formatUSD(amount)
-            }));
-            
-            renderTable(['Period', 'Amount (UGX)', 'Amount (USD)'], results);
-            
-          } else if (type === 'projects') {
-            const { data: projects, error } = await supabase
-              .from('projects')
-              .select('*, clients(name)')
-              .gte('start_date', startDate)
-              .order('created_at', { ascending: false });
-            
-            if (error) throw error;
-            
-            stats.projects = projects?.length || 0;
-            stats.revenue = projects?.reduce((sum, p) => sum + ((p.monthly_rate || 0) * (p.plan_months || 1)), 0) || 0;
-            stats.avgValue = stats.projects > 0 ? stats.revenue / stats.projects : 0;
-            
-            // Chart: projects by status
-            const byStatus = {};
-            projects?.forEach(p => { byStatus[p.status] = (byStatus[p.status] || 0) + 1; });
-            chartData.labels = Object.keys(byStatus);
-            chartData.values = Object.values(byStatus);
-            
-            results = (projects || []).map(p => ({
-              name: p.name,
-              client: p.clients?.name || '—',
-              rate: formatUGX(p.monthly_rate),
-              duration: `${p.plan_months} mo`,
-              status: p.status
-            }));
-            
-            renderTable(['Project', 'Client', 'Monthly Rate', 'Duration', 'Status'], results);
-            
-          } else if (type === 'clients') {
-            const { data: clients, error } = await supabase.from('clients').select('*').order('created_at', { ascending: false });
-            if (error) throw error;
-            
-            // Fetch revenue per client
-            const clientsWithRevenue = await Promise.all((clients || []).map(async c => {
-              const { data: payments } = await supabase
-                .from('payments')
-                .select('amount')
-                .eq('project_id', c.id)
-                .eq('status', 'paid');
-              const total = payments?.reduce((sum, p) => sum + (p.amount || 0), 0) || 0;
-              return { ...c, total_revenue: total };
-            }));
-            
-            stats.revenue = clientsWithRevenue.reduce((sum, c) => sum + c.total_revenue, 0);
-            stats.projects = clientsWithRevenue.filter(c => c.total_revenue > 0).length;
-            
-            chartData.labels = clientsWithRevenue.slice(0, 10).map(c => c.name);
-            chartData.values = clientsWithRevenue.slice(0, 10).map(c => c.total_revenue);
-            
-            results = clientsWithRevenue.map(c => ({
-              name: c.name,
-              contact: c.contact_person || '—',
-              email: c.email || '—',
-              revenue: formatUGX(c.total_revenue),
-              status: c.status
-            }));
-            
-            renderTable(['Client', 'Contact', 'Email', 'Total Revenue', 'Status'], results);
-            
-          } else if (type === 'payments') {
-            const { data: payments, error } = await supabase
-              .from('payments')
-              .select('*, projects(name), clients(name)')
-              .gte('payment_date', startDate)
-              .lte('payment_date', endDate)
-              .order('payment_date', { ascending: false });
-            
-            if (error) throw error;
-            
-            stats.revenue = payments?.filter(p => p.status === 'paid').reduce((sum, p) => sum + (p.amount || 0), 0) || 0;
-            stats.payments = payments?.length || 0;
-            
-            // Chart: payments by status
-            const byStatus = {};
-            payments?.forEach(p => { byStatus[p.status] = (byStatus[p.status] || 0) + 1; });
-            chartData.labels = Object.keys(byStatus);
-            chartData.values = Object.values(byStatus);
-            
-            results = (payments || []).map(p => ({
-              date: formatDate(p.payment_date),
-              project: p.projects?.name || '—',
-              client: p.clients?.name || '—',
-              amount: formatUGX(p.amount),
-              status: p.status
-            }));
-            
-            renderTable(['Date', 'Project', 'Client', 'Amount', 'Status'], results);
-          }
-
-          // Update stats cards
-          document.getElementById('statRevenue').textContent = formatUGX(stats.revenue);
-          document.getElementById('statProjects').textContent = stats.projects;
-          document.getElementById('statPayments').textContent = stats.payments;
-          document.getElementById('statAvgValue').textContent = formatUGX(stats.avgValue);
-          
-          // Render chart
-          renderChart(chartData.labels, chartData.values, type);
-          
-          showToast('Report generated successfully!');
-          
-        } catch (err) {
-          console.error('Report error:', err);
-          showToast('Failed to generate report: ' + err.message, 'error');
-          document.getElementById('statsGrid').style.display = 'none';
-          document.getElementById('chartCard').style.display = 'none';
-        } finally {
-          btn.textContent = originalText;
-          btn.disabled = false;
-          isGenerating = false;
-        }
-      }
-
-      // === RENDER TABLE ===
-      function renderTable(headers, rows) {
-        const thead = document.getElementById('tableHead');
-        const tbody = document.getElementById('tableBody');
-        
-        thead.innerHTML = '<tr>' + headers.map(h => `<th>${h}</th>`).join('') + '</tr>';
-        
-        if (rows.length === 0) {
-          tbody.innerHTML = `<tr><td colspan="${headers.length}"><div class="empty-state"><div class="empty-icon">📭</div><p>No data found for selected filters.</p></div></td></tr>`;
-          return;
-        }
-        
-        tbody.innerHTML = rows.map(row => 
-          '<tr>' + Object.values(row).map(v => `<td>${v}</td>`).join('') + '</tr>'
-        ).join('');
-      }
-
-      // === RENDER CHART ===
-      function renderChart(labels, values, type) {
+      function fmt(n) { return 'UGX ' + Number(n||0).toLocaleString(); }
+      function toast(m, t='success') { const c = document.getElementById('toastContainer'); const d = document.createElement('div'); d.className = 'toast'; d.textContent = m; d.style.borderLeftColor = t==='error'?'var(--danger)':'var(--accent)'; c.appendChild(d); setTimeout(()=>d.remove(),3000); }
+      function renderTable(h, r) { document.getElementById('tableHead').innerHTML = '<tr>'+h.map(x=>`<th>${x}</th>`).join('')+'</tr>'; document.getElementById('tableBody').innerHTML = r.length ? r.map(r=>'<tr>'+r.map(v=>`<td>${v}</td>`).join('')+'</tr>').join('') : `<tr><td colspan="${h.length}"><div class="empty-state">No data</div></td></tr>`; }
+      function drawChart(l, v, type) {
         const ctx = document.getElementById('revenueChart').getContext('2d');
-        
-        if (revenueChart) revenueChart.destroy();
-        
-        const colors = {
-          revenue: 'rgba(37, 99, 235, 0.8)',
-          projects: 'rgba(5, 150, 105, 0.8)',
-          clients: 'rgba(217, 119, 6, 0.8)',
-          payments: 'rgba(100, 116, 139, 0.8)'
-        };
-        
-        revenueChart = new Chart(ctx, {
-          type: type === 'projects' ? 'doughnut' : 'bar',
-          data: {
-            labels: labels,
-            datasets: [{
-              label: type === 'projects' ? 'Projects' : 'Amount (UGX)',
-              data: values,
-              backgroundColor: colors[type] || colors.revenue,
-              borderColor: colors[type]?.replace('0.8', '1') || colors.revenue.replace('0.8', '1'),
-              borderWidth: 1
-            }]
-          },
-          options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: { legend: { display: type !== 'projects' } },
-            scales: type === 'projects' ? {} : {
-              y: { beginAtZero: true, ticks: { callback: v => 'UGX ' + (v/1000000).toFixed(1) + 'M' } }
-            }
+        if (chart) chart.destroy();
+        chart = new Chart(ctx, { type: type==='projects'?'doughnut':'bar', data: { labels: l, datasets: [{ label: 'Amount', data: v, backgroundColor: type==='projects'?'rgba(5,150,105,0.8)':'rgba(37,99,235,0.8)', borderWidth: 1 }] }, options: { responsive: true, maintainAspectRatio: false, scales: type==='projects'?{}:{y:{beginAtZero:true,ticks:{callback:v=>'UGX '+ (v/1000000).toFixed(1)+'M'}}} } });
+      }
+
+      // Range Toggle
+      document.getElementById('reportRange').onchange = function() { document.getElementById('customRange').style.display = this.value==='custom'?'grid':'none'; };
+
+      // Generate Logic
+      async function gen() {
+        if (isGen) return; isGen = true; const btn = document.getElementById('generateReportBtn'); btn.textContent = '...'; btn.disabled = true;
+        try {
+          document.getElementById('statsGrid').style.display = 'grid'; document.getElementById('chartCard').style.display = 'block'; document.getElementById('tableBody').innerHTML = `<tr><td colspan="6"><div class="empty-state">Loading...</div></td></tr>`;
+          const type = document.getElementById('reportType').value;
+          const rng = document.getElementById('reportRange').value;
+          const sd = rng==='custom' ? document.getElementById('startDate').value : new Date(Date.now() - parseInt(rng)*86400000).toISOString().split('T')[0];
+          const ed = rng==='custom' ? document.getElementById('endDate').value : new Date().toISOString().split('T')[0];
+          
+          // Fetch Base Data
+          const { data: projs } = await supabase.from('projects').select('*');
+          const { data: pays } = await supabase.from('payments').select('*');
+          const paid = (pays||[]).filter(p=>p.status==='paid' && p.payment_date >= sd && p.payment_date <= ed);
+          const rev = paid.reduce((s,p)=>s+(p.amount||0), 0);
+          
+          let res = [], ch = { l:[], v:[] }, st = { r:0, p:0, py:0, avg:0 };
+          st.py = pays.length; st.r = rev; st.p = (projs||[]).filter(p=>p.status==='active').length; st.avg = st.p?rev/st.p:0;
+          document.getElementById('statRevenue').textContent = fmt(rev); document.getElementById('statProjects').textContent = st.p; document.getElementById('statPayments').textContent = st.py; document.getElementById('statAvgValue').textContent = fmt(st.avg);
+
+          if (type==='revenue') {
+            const m = new Array(12).fill(0);
+            paid.forEach(p => { const mo = new Date(p.payment_date).getMonth(); m[mo] += p.amount||0; });
+            const mx = Math.max(...m,1);
+            document.getElementById('tableTitle').textContent = 'Monthly Revenue';
+            res = m.map((v,i)=>[`Month ${i+1}`, fmt(v), '$'+(v*0.00027).toFixed(2)]);
+            ch = { l: ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'], v: m };
+            renderTable(['Month','UGX','USD'], res);
+          } else if (type==='projects') {
+            document.getElementById('tableTitle').textContent = 'Project List';
+            res = (projs||[]).map(p=>[p.name, p.client, fmt(p.monthly_rate), `${p.plan_months} mo`, p.status]);
+            ch = { l: ['Active','Completed','Hold'], v: [(projs||[]).filter(x=>x.status==='active').length, (projs||[]).filter(x=>x.status==='completed').length, (projs||[]).filter(x=>x.status==='on-hold').length] };
+            renderTable(['Project','Client','Rate','Plan','Status'], res);
+          } else if (type==='clients') {
+            // Client Stats via JS merging
+            const cMap = {};
+            (projs||[]).forEach(p => { if(!cMap[p.client]) cMap[p.client] = {n:p.client, c:0, r:0}; cMap[p.client].c++; });
+            paid.forEach(py => { const pr = projs?.find(x=>x.id===py.project_id); if(pr && cMap[pr.client]) cMap[pr.client].r += py.amount||0; });
+            const cData = Object.values(cMap).sort((a,b)=>b.r-a.r);
+            ch = { l: cData.slice(0,10).map(c=>c.n), v: cData.slice(0,10).map(c=>c.r) };
+            res = cData.map(c=>[c.n, c.c, fmt(c.r), '$'+(c.r*0.00027).toFixed(2)]);
+            document.getElementById('tableTitle').textContent = 'Client Revenue';
+            renderTable(['Client','Projects','Revenue','USD'], res);
+          } else if (type==='payments') {
+            document.getElementById('tableTitle').textContent = 'Payment History';
+            res = paid.map(p=>{ const pr = projs?.find(x=>x.id===p.project_id); return [p.payment_date, pr?.name||'—', pr?.client||'—', fmt(p.amount), p.status]; });
+            renderTable(['Date','Project','Client','Amount','Status'], res);
           }
-        });
+          
+          drawChart(ch.l, ch.v, type);
+          toast('Generated!');
+        } catch(e) { toast('Error: '+e.message, 'error'); document.getElementById('statsGrid').style.display='none'; document.getElementById('chartCard').style.display='none'; }
+        finally { btn.textContent = '📊 Generate Report'; btn.disabled = false; isGen = false; }
       }
 
-      // === EXPORT CSV ===
-      function exportCSV() {
-        const headers = Array.from(document.querySelectorAll('#tableHead th')).map(th => th.textContent);
-        const rows = Array.from(document.querySelectorAll('#tableBody tr')).map(tr => 
-          Array.from(tr.querySelectorAll('td')).map(td => td.textContent)
-        ).filter(row => row.length > 1); // Skip empty state row
-        
-        if (rows.length === 0 || rows[0][0].includes('No data')) {
-          showToast('No data to export', 'error');
-          return;
-        }
-        
-        const csv = [headers, ...rows].map(row => row.map(cell => `"${cell.replace(/"/g, '""')}"`).join(',')).join('\n');
-        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `report-${new Date().toISOString().split('T')[0]}.csv`;
-        a.click();
-        URL.revokeObjectURL(url);
-        showToast('CSV exported successfully!');
+      // Export
+      function exp() {
+        const h = Array.from(document.querySelectorAll('#tableHead th')).map(t=>t.textContent);
+        const r = Array.from(document.querySelectorAll('#tableBody tr')).map(t=>Array.from(t.querySelectorAll('td')).map(c=>c.textContent));
+        if(!r.length || r[0][0].includes('No data')) { toast('No data', 'error'); return; }
+        const csv = [h,...r].map(x=>x.map(c=>`"${c}"`).join(',')).join('\n');
+        const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([csv],{type:'text/csv'})); a.download = `report-${Date.now()}.csv`; a.click();
       }
 
-      // === EVENT LISTENERS ===
-      document.getElementById('logoBtn').addEventListener('click', () => window.location.href = 'index.html');
-      
-      // Custom date range toggle
-      document.getElementById('reportRange').addEventListener('change', function() {
-        document.getElementById('customRange').style.display = this.value === 'custom' ? 'grid' : 'none';
-      });
-      
-      // Generate report button
-      document.getElementById('generateReportBtn').addEventListener('click', generateReport);
-      
-      // Export CSV button
-      document.getElementById('exportCsvBtn').addEventListener('click', exportCSV);
-      
-      // Auto-generate on load with default filters
-      setTimeout(generateReport, 300);
+      document.getElementById('logoBtn').onclick = () => location.href = 'index.html';
+      document.getElementById('generateReportBtn').onclick = gen;
+      document.getElementById('exportCsvBtn').onclick = exp;
     });
   })();
 </script>
