@@ -90,7 +90,6 @@
     }
     
     .live-status-icon { font-size: .9rem; }
-    .live-status-time { font-family: 'SF Mono', Monaco, monospace; font-size: .72rem; opacity: .9; }
     
     .project-row { transition: background .5s ease, border-color .5s ease; border-left: 3px solid transparent; }
     .project-row.health-excellent { border-left-color: var(--accent); background: rgba(5,150,105,.02); }
@@ -104,7 +103,6 @@
     .progress-fill { height: 100%; border-radius: 3px; transition: width .6s ease; }
     .progress-info { display: flex; justify-content: space-between; font-size: .72rem; color: var(--text-muted); margin-top: 4px; font-variant-numeric: tabular-nums; }
     
-    /* FIXED: Table wrapper handles scrolling, preventing header interference */
     .table-wrapper { 
       overflow: auto; 
       max-height: calc(100vh - 240px); 
@@ -115,7 +113,7 @@
     table { width: 100%; border-collapse: collapse; font-size: .85rem; }
     thead { 
       position: sticky; 
-      top: 0; /* Sticks to the top of the wrapper, not the window */
+      top: 0; 
       z-index: 10; 
     }
     th { text-align: left; padding: 14px 16px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; font-size: .72rem; letter-spacing: .8px; border-bottom: 2px solid var(--border); background: var(--card-hover); }
@@ -152,21 +150,6 @@
     .form-textarea { resize: vertical; min-height: 80px; }
     .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
     @media (max-width: 500px) { .form-row { grid-template-columns: 1fr; } }
-    
-    .client-select-wrapper { position: relative; }
-    .client-search { width: 100%; padding: 10px 14px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--text); font-size: .85rem; }
-    .client-search:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-glow); }
-    .client-dropdown {
-      position: absolute; top: 100%; left: 0; right: 0; z-index: 10;
-      max-height: 200px; overflow-y: auto; background: var(--surface);
-      border: 1px solid var(--border); border-radius: var(--radius-sm);
-      box-shadow: var(--shadow-hover); margin-top: 4px; display: none;
-    }
-    .client-dropdown.show { display: block; }
-    .client-option { padding: 10px 14px; cursor: pointer; font-size: .85rem; }
-    .client-option:hover { background: var(--card-hover); }
-    .client-new { padding: 10px 14px; border-top: 1px solid var(--border); font-size: .8rem; color: var(--primary); cursor: pointer; }
-    .client-new:hover { background: var(--primary-glow); }
     
     .text-green { color: var(--accent); }
     .text-yellow { color: var(--warning); }
@@ -286,10 +269,12 @@
       <div class="form-row">
         <div class="form-group">
           <label class="form-label">Client *</label>
-          <div class="client-select-wrapper">
-            <input class="client-search" id="projClientSearch" placeholder="Search or type client name" autocomplete="off" />
-            <div class="client-dropdown" id="clientDropdown"></div>
-            <input type="hidden" id="projClient" />
+          <!-- 🚀 REPLACED: Standard dropdown linked to clients table -->
+          <select class="form-select" id="projClientSelect" required>
+            <option value="">Select a registered client...</option>
+          </select>
+          <div style="font-size: 0.75rem; color: var(--primary); margin-top: 6px; font-weight: 600;">
+            Don't see the client? <a href="clients.html" class="text-blue" target="_blank">Add them in the Clients directory</a>.
           </div>
         </div>
         <div class="form-group">
@@ -361,7 +346,6 @@
       await Promise.all([loadEmployees(), loadClients()]);
       await loadAllData();
       setupEventListeners();
-      setupClientSelect();
       document.getElementById('projStart').value = new Date().toISOString().split('T')[0];
       
       // Realtime subscription for instant updates
@@ -375,8 +359,6 @@
         })
         .subscribe();
       
-      // Update countdowns every second
-      setInterval(updateLiveTimers, 1000);
     } catch (err) {
       console.error('Init error:', err);
       showToast('Failed to initialize: ' + err.message, 'error');
@@ -421,13 +403,11 @@
 
     const projectPayments = payments.filter(p => p.project_id === project.id && p.status === 'paid');
     
-    // Sum up all the months this client has paid for
     let totalMonthsPaid = 0;
     projectPayments.forEach(p => {
-      totalMonthsPaid += (parseInt(p.period_number) || 1); // period_number stores duration in months
+      totalMonthsPaid += (parseInt(p.period_number) || 1); 
     });
 
-    // Calculate the date until which the project is fully covered
     const coveredUntil = new Date(start);
     coveredUntil.setMonth(coveredUntil.getMonth() + totalMonthsPaid);
 
@@ -476,12 +456,21 @@
     } catch (err) { console.warn('Failed to load employees:', err); }
   }
 
+  // 🚀 UPDATED: Fetches actual registered clients from the clients table
   async function loadClients() {
     try {
-      const { data, error } = await supabase.from('projects').select('client').not('client', 'is', null);
+      const { data, error } = await supabase
+        .from('clients')
+        .select('id, name, status')
+        .in('status', ['active', 'prospect']) // Only show active/prospect clients
+        .order('name', { ascending: true });
+        
       if (error) throw error;
-      clientsCache = [...new Set((data || []).map(p => p.client).filter(c => c && c.trim()))].sort();
-    } catch (err) { console.warn('Failed to load clients:', err); clientsCache = []; }
+      clientsCache = data || [];
+    } catch (err) { 
+      console.warn('Failed to load clients:', err); 
+      clientsCache = []; 
+    }
   }
 
   async function loadAllData() {
@@ -533,7 +522,7 @@
       if (s.state === 'paid') {
         const badgeClass = s.health === 'warning' ? 'warning' : 'paid';
         statusBadge = `
-          <div class="live-status ${badgeClass}" data-end="${s.coveredUntil.toISOString()}">
+          <div class="live-status ${badgeClass}">
             <span class="live-status-icon">${s.health === 'warning' ? '⚠' : '✓'}</span>
             <span>${s.label}</span>
           </div>
@@ -542,7 +531,7 @@
           </div>`;
       } else if (s.state === 'overdue') {
         statusBadge = `
-          <div class="live-status overdue" data-overdue-since="${s.coveredUntil.toISOString()}">
+          <div class="live-status overdue">
             <span class="live-status-icon">⚠</span>
             <span>${s.label}</span>
           </div>
@@ -584,45 +573,26 @@
       </tr>`;
     }).join('');
   }
-  
-  function updateLiveTimers() {
-    // Timers are now handled by the "Covered until" date text, 
-    // but we can add dynamic "X days left" updates here if needed.
-  }
 
-  function renderClientDropdown(searchTerm = '') {
-    const dropdown = document.getElementById('clientDropdown');
-    const search = searchTerm.toLowerCase().trim();
-    const matches = clientsCache.filter(c => c.toLowerCase().includes(search)).slice(0, 10);
-    let html = matches.map(c => `<div class="client-option" data-value="${c}">${c}</div>`).join('');
-    if (search && !matches.some(c => c.toLowerCase() === search)) {
-      html += `<div class="client-new" data-value="${search}">➕ Add new: "${search}"</div>`;
-    }
-    dropdown.innerHTML = html || '<div class="client-option" style="color:var(--text-muted)">Type to add new client</div>';
-    dropdown.classList.toggle('show', searchTerm.length > 0 || clientsCache.length > 0);
-  }
-
-  function setupClientSelect() {
-    const searchInput = document.getElementById('projClientSearch');
-    const hiddenInput = document.getElementById('projClient');
-    const dropdown = document.getElementById('clientDropdown');
-    searchInput.addEventListener('input', e => { renderClientDropdown(e.target.value); hiddenInput.value = ''; });
-    searchInput.addEventListener('focus', () => renderClientDropdown(searchInput.value));
-    document.addEventListener('click', e => { if (!e.target.closest('.client-select-wrapper')) dropdown.classList.remove('show'); });
-    dropdown.addEventListener('click', e => {
-      const option = e.target.closest('.client-option, .client-new');
-      if (!option) return;
-      searchInput.value = option.dataset.value;
-      hiddenInput.value = option.dataset.value;
-      dropdown.classList.remove('show');
-    });
-  }
-
+  // 🚀 UPDATED: Populates the standard <select> dropdown
   function openModal(title, data = null) {
     document.getElementById('projId').value = data?.id || '';
     document.getElementById('projName').value = data?.name || '';
-    document.getElementById('projClientSearch').value = data?.client || '';
-    document.getElementById('projClient').value = data?.client || '';
+    
+    // Populate the client dropdown
+    const clientSelect = document.getElementById('projClientSelect');
+    clientSelect.innerHTML = '<option value="">Select a registered client...</option>' +
+      clientsCache.map(c => `<option value="${c.id}">${c.name}${c.status === 'prospect' ? ' (Prospect)' : ''}</option>`).join('');
+      
+    // If editing, pre-select the correct client
+    if (data?.client_id) {
+      clientSelect.value = data.client_id;
+    } else if (data?.client) {
+      // Fallback: try to match by name if client_id is missing (for old records)
+      const match = clientsCache.find(c => c.name.toLowerCase() === data.client.toLowerCase());
+      if (match) clientSelect.value = match.id;
+    }
+
     document.getElementById('projRate').value = data?.monthly_rate || '';
     document.getElementById('projPlan').value = data?.plan_months || '1';
     document.getElementById('projStart').value = data?.start_date || new Date().toISOString().split('T')[0];
@@ -638,9 +608,9 @@
   function setupEventListeners() {
     document.getElementById('logoBtn').addEventListener('click', () => window.location.href = 'index.html');
     document.getElementById('newProjectBtn').addEventListener('click', async () => {
-      await loadClients();
+      await loadClients(); // Refresh clients list before opening
       openModal('New Project');
-      document.getElementById('projClientSearch').focus();
+      document.getElementById('projClientSelect').focus();
     });
     document.getElementById('closeModal').addEventListener('click', closeModal);
     document.getElementById('cancelModal').addEventListener('click', closeModal);
@@ -672,12 +642,22 @@
       try {
         const existingId = document.getElementById('projId').value;
         const id = existingId || generateUUID();
-        const clientVal = document.getElementById('projClient').value.trim() || document.getElementById('projClientSearch').value.trim();
+        
+        // 🚀 UPDATED: Get the UUID and Name from the dropdown
+        const clientSelect = document.getElementById('projClientSelect');
+        const selectedClientId = clientSelect.value;
+        const selectedClientName = clientSelect.options[clientSelect.selectedIndex]?.text.replace(' (Prospect)', '') || '';
+
+        if (!selectedClientId) {
+          showToast('Please select a registered client from the dropdown', 'error');
+          return;
+        }
         
         const data = {
           id,
           name: document.getElementById('projName').value.trim(),
-          client: clientVal,
+          client_id: selectedClientId, // 🚀 Save the UUID link
+          client: selectedClientName,  // Keep the text name for backward compatibility
           monthly_rate: parseInt(document.getElementById('projRate').value) || 0,
           plan_months: parseInt(document.getElementById('projPlan').value) || 1,
           start_date: document.getElementById('projStart').value,
@@ -687,7 +667,7 @@
           created_at: new Date().toISOString()
         };
         
-        if (!data.name || !data.client) throw new Error('Name and client required');
+        if (!data.name || !data.client_id) throw new Error('Name and client required');
         
         const { error } = await supabase.from('projects').upsert(data, { onConflict: 'id' });
         if (error) throw error;
