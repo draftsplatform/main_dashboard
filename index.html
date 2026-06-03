@@ -13,6 +13,9 @@
   <!-- Supabase JS (v2) -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   
+  <!-- 🚀 NEW: Chart.js for professional graphs -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  
   <style>
     :root {
       --bg: #f8fafc; --surface: #ffffff; --card: #ffffff; --card-hover: #f1f5f9;
@@ -73,8 +76,6 @@
     .btn-primary:hover { background: #1d4ed8; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(37,99,235,.3); }
     .btn-outline { background: transparent; color: var(--text-secondary); border: 1px solid var(--border); }
     .btn-outline:hover { border-color: var(--primary); color: var(--primary); background: var(--primary-glow); }
-    .btn-sm { padding: 6px 14px; font-size: .78rem; }
-    .btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none !important; }
     
     .card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.5rem; transition: var(--transition); box-shadow: var(--shadow); }
     .card:hover { border-color: rgba(37,99,235,.3); box-shadow: var(--shadow-hover); }
@@ -85,6 +86,7 @@
     
     .grid { display: grid; gap: 1rem; }
     .grid-4 { grid-template-columns: repeat(4, 1fr); }
+    .grid-3 { grid-template-columns: repeat(3, 1fr); }
     .grid-2 { grid-template-columns: repeat(2, 1fr); }
     
     .badge { display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: 20px; font-size: .72rem; font-weight: 600; letter-spacing: .3px; }
@@ -92,16 +94,20 @@
     .badge-yellow { background: rgba(217,119,6,.12); color: var(--warning); }
     .badge-red { background: rgba(220,38,38,.12); color: var(--danger); }
     .badge-blue { background: var(--primary-glow); color: var(--primary); }
-    .badge-gray { background: rgba(100,116,139,.12); color: var(--text-muted); }
     .badge-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
     
     .price-main { font-weight: 700; font-size: .88rem; color: var(--text); }
     .price-sub { font-size: .7rem; color: var(--text-muted); margin-left: 4px; }
     
-    .chart-area { width: 100%; height: 220px; background: linear-gradient(180deg, var(--primary-glow) 0%, transparent 100%); border-radius: var(--radius-sm); display: flex; align-items: flex-end; padding: 0 12px 28px; gap: 6px; }
-    .chart-bar { flex: 1; background: linear-gradient(180deg, var(--primary), rgba(37,99,235,.3)); border-radius: 4px 4px 0 0; min-height: 8px; transition: height .6s ease; }
+    /* 🚀 NEW: Chart Container Styling */
+    .chart-container {
+      position: relative;
+      height: 260px;
+      width: 100%;
+      margin-top: 8px;
+    }
     
-    .timeline { position: relative; padding-left: 24px; }
+    .timeline { position: relative; padding-left: 24px; max-height: 260px; overflow-y: auto; }
     .timeline::before { content: ''; position: absolute; left: 7px; top: 4px; bottom: 4px; width: 2px; background: var(--border); }
     .timeline-item { position: relative; padding-bottom: 1.25rem; }
     .timeline-dot { position: absolute; left: -24px; top: 3px; width: 14px; height: 14px; border-radius: 50%; border: 2px solid var(--primary); background: var(--surface); }
@@ -118,54 +124,22 @@
     .toast.error { border-left-color: var(--danger); }
     @keyframes slideIn { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
     
-    .empty-state { text-align: center; padding: 3rem 1rem; color: var(--text-muted); }
-    .empty-icon { font-size: 3rem; margin-bottom: .75rem; opacity: .4; }
-    
-    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.4); backdrop-filter: blur(4px); z-index: 200; place-items: center; pointer-events: none; opacity: 0; transition: opacity .2s ease; }
-    .modal-overlay.open { display: grid; pointer-events: auto; opacity: 1; }
-    .modal { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); width: 90%; max-width: 560px; max-height: 85vh; overflow-y: auto; box-shadow: var(--shadow-hover); animation: fadeUp .2s ease; pointer-events: auto; }
-    @keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-    .modal-header { display: flex; align-items: center; justify-content: space-between; padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--border); position: sticky; top: 0; background: var(--surface); z-index: 1; }
-    .modal-title { font-size: 1.1rem; font-weight: 700; color: var(--text); }
-    .modal-close { width: 32px; height: 32px; display: grid; place-items: center; border: none; background: transparent; color: var(--text-muted); cursor: pointer; border-radius: 6px; font-size: 1.2rem; transition: var(--transition); }
-    .modal-close:hover { background: var(--card-hover); color: var(--text); }
-    .modal-body { padding: 1.5rem; }
-    .modal-footer { padding: 1rem 1.5rem; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 8px; position: sticky; bottom: 0; background: var(--surface); }
-    
-    .form-group { margin-bottom: 1rem; }
-    .form-label { display: block; font-size: .78rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 6px; }
-    .form-input, .form-select, .form-textarea { width: 100%; padding: 10px 14px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--text); font-size: .85rem; font-family: inherit; transition: var(--transition); }
-    .form-input:focus, .form-select:focus, .form-textarea:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-glow); }
-    .form-textarea { resize: vertical; min-height: 80px; }
-    .form-select { cursor: pointer; }
-    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
-    @media (max-width: 500px) { .form-row { grid-template-columns: 1fr; } }
-    
     .text-green { color: var(--accent); }
     .text-yellow { color: var(--warning); }
     .text-red { color: var(--danger); }
     .text-blue { color: var(--primary); }
     .text-muted { color: var(--text-muted); }
     .fw-700 { font-weight: 700; }
-    .mt-1 { margin-top: .5rem; }
-    .mt-2 { margin-top: 1rem; }
     .mb-1 { margin-bottom: .5rem; }
     .mb-2 { margin-bottom: 1rem; }
-    .gap-1 { gap: .5rem; }
-    .flex { display: flex; }
-    .items-center { align-items: center; }
-    .justify-between { justify-content: space-between; }
-    .gap-2 { gap: 1rem; }
-    .wrap { flex-wrap: wrap; }
     
     @media (max-width: 1024px) {
       .grid-4 { grid-template-columns: repeat(2, 1fr); }
+      .grid-3 { grid-template-columns: 1fr; }
       .header { padding: 0 1rem; height: 80px; }
       .logo-img { height: 52px; }
       .nav { gap: 0; flex-wrap: wrap; }
       .nav-btn { padding: 8px 12px; font-size: .78rem; }
-      .logo-text { font-size: 1.2rem; }
-      .logo-subtitle { display: none; }
       .main { padding: 1rem; }
     }
     @media (max-width: 640px) {
@@ -206,6 +180,7 @@
     <a href="projects.html" class="btn btn-primary">＋ New Project</a>
   </div>
 
+  <!-- SUMMARY CARDS -->
   <div class="grid grid-4 mb-2">
     <div class="card">
       <div class="card-header">
@@ -213,7 +188,7 @@
         <span class="badge badge-blue"><span class="badge-dot"></span> Live</span>
       </div>
       <div class="card-value" id="dashActiveProjects">0</div>
-      <div class="card-sub">Currently being tracked</div>
+      <div class="card-sub" id="dashActiveProjectsSub">Calculating health...</div>
     </div>
     <div class="card">
       <div class="card-header">
@@ -241,13 +216,35 @@
     </div>
   </div>
 
-  <div class="grid grid-2">
-    <div class="card">
-      <div class="card-title mb-1">Monthly Revenue</div>
-      <div class="chart-area" id="revenueChart">
-        <div class="empty-state" style="padding:2rem"><div class="empty-icon">📊</div><p>Loading chart data...</p></div>
+  <!-- 🚀 NEW: ADVANCED CHARTS SECTION -->
+  <div class="grid grid-3 mb-2">
+    <!-- Monthly Revenue Bar Chart (Spans 2 columns) -->
+    <div class="card" style="grid-column: span 2;">
+      <div class="card-title mb-1">Monthly Revenue Trend</div>
+      <div class="chart-container">
+        <canvas id="monthlyRevenueChart"></canvas>
       </div>
     </div>
+    
+    <!-- Payment Status Doughnut Chart -->
+    <div class="card">
+      <div class="card-title mb-1">Payment Status</div>
+      <div class="chart-container">
+        <canvas id="paymentStatusChart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid grid-2">
+    <!-- Top Clients Pie Chart -->
+    <div class="card">
+      <div class="card-title mb-1">Top Clients by Revenue</div>
+      <div class="chart-container">
+        <canvas id="clientRevenueChart"></canvas>
+      </div>
+    </div>
+    
+    <!-- Recent Activity Timeline -->
     <div class="card">
       <div class="card-title mb-1">Recent Activity</div>
       <div class="timeline" id="dashTimeline">
@@ -261,72 +258,6 @@
   </div>
 </main>
 
-<!-- Project Modal -->
-<div class="modal-overlay" id="projectModal">
-  <div class="modal">
-    <div class="modal-header">
-      <h3 class="modal-title">New Project</h3>
-      <button class="modal-close" id="closeProjectModal">✕</button>
-    </div>
-    <div class="modal-body">
-      <input type="hidden" id="projId" />
-      <div class="form-group">
-        <label class="form-label">Project Name *</label>
-        <input class="form-input" id="projName" placeholder="e.g. Inventory Management System" />
-      </div>
-      <div class="form-row">
-        <div class="form-group">
-          <label class="form-label">Client Name *</label>
-          <input class="form-input" id="projClient" placeholder="Client / Company name" />
-        </div>
-        <div class="form-group">
-          <label class="form-label">Monthly Rate (UGX)</label>
-          <input class="form-input" id="projRate" type="number" placeholder="500,000" />
-        </div>
-      </div>
-      <div class="form-row">
-        <div class="form-group">
-          <label class="form-label">Plan Duration</label>
-          <select class="form-select" id="projPlan">
-            <option value="1">1 Month</option>
-            <option value="3">3 Months</option>
-            <option value="6">6 Months</option>
-            <option value="8">8 Months</option>
-            <option value="12">1 Year (12 Months)</option>
-            <option value="24">2 Years (24 Months)</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Start Date</label>
-          <input class="form-input" id="projStartDate" type="date" />
-        </div>
-      </div>
-      <div class="form-group">
-        <label class="form-label">Referred By (Optional)</label>
-        <select class="form-select" id="projEmployee">
-          <option value="">None</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label class="form-label">Status</label>
-        <select class="form-select" id="projStatus">
-          <option value="active">Active</option>
-          <option value="completed">Completed</option>
-          <option value="on-hold">On Hold</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label class="form-label">Notes</label>
-        <textarea class="form-textarea" id="projNotes" placeholder="Additional project details..."></textarea>
-      </div>
-    </div>
-    <div class="modal-footer">
-      <button class="btn btn-outline" id="cancelProject">Cancel</button>
-      <button class="btn btn-primary" id="saveProject">Save Project</button>
-    </div>
-  </div>
-</div>
-
 <script>
   (function() {
     'use strict';
@@ -335,6 +266,11 @@
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhuYnplcmhvcXFzbXpxeGNibnh2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkwNDg1MjksImV4cCI6MjA5NDYyNDUyOX0.a4rM51DQGih9SXMr71PREngZ_pT6dJFgv_fG9j5jAGc';
     const USD_RATE = 0.00027;
 
+    // 🚀 Global Chart.js Theme Defaults to match your Dashboard
+    Chart.defaults.font.family = "'Inter', sans-serif";
+    Chart.defaults.color = '#64748b'; // Matches --text-muted
+    Chart.defaults.borderColor = '#e2e8f0'; // Matches --border
+
     document.addEventListener('DOMContentLoaded', async function() {
       if (!window.supabase) {
         showToast('Database SDK failed to load', 'error');
@@ -342,15 +278,12 @@
       }
 
       const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-      let isSaving = false;
-      let employeesCache = [];
+      
+      // Store chart instances to destroy them on refresh (prevents memory leaks)
+      let monthlyChart, statusChart, clientChart;
 
-      function generateId() {
-        if (crypto?.randomUUID) return crypto.randomUUID();
-        return 'id-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
-      }
-      function formatUGX(n) { if (!n) return 'UGX 0'; return 'UGX ' + Number(n).toLocaleString(); }
-      function formatUSD(n) { if (!n) return '$0.00'; return '$' + (n * USD_RATE).toFixed(2); }
+      function formatUGX(n) { if (!n && n !== 0) return 'UGX 0'; return 'UGX ' + Number(n).toLocaleString(); }
+      function formatUSD(n) { if (!n && n !== 0) return '$0.00'; return '$' + (n * USD_RATE).toFixed(2); }
       function priceHTML(ugx) { return `<span class="price-main">${formatUGX(ugx)}</span><span class="price-sub">${formatUSD(ugx)}</span>`; }
       
       function showToast(msg, type = 'success') {
@@ -361,100 +294,178 @@
         c.appendChild(t);
         setTimeout(() => t.remove(), 3500);
       }
-      function openModal(id) { document.getElementById(id).classList.add('open'); }
-      function closeModal(id) { document.getElementById(id).classList.remove('open'); }
-
-      async function loadEmployeesForDropdown() {
-        try {
-          const { data, error } = await supabase.from('employees').select('id, name').eq('status', 'active').order('name');
-          if (error) throw error;
-          employeesCache = data || [];
-          
-          const sel = document.getElementById('projEmployee');
-          sel.innerHTML = '<option value="">None</option>' + 
-            employeesCache.map(e => `<option value="${e.id}">${e.name}</option>`).join('');
-        } catch (err) {
-          console.warn('Failed to load employees for dropdown:', err);
-        }
-      }
 
       async function loadDashboard() {
         try {
-          // === PROJECTS ===
-          const { data: projects, error: projErr } = await supabase.from('projects').select('*');
-          if (projErr) throw projErr;
-          const active = (projects || []).filter(p => p.status === 'active');
-          document.getElementById('dashActiveProjects').textContent = active.length;
-
-          // === PAYMENTS (with project join for timeline) ===
-          const { data: payments, error: payErr } = await supabase
-            .from('payments')
-            .select('*, projects(name)');
-          if (payErr) throw payErr;
+          const [projRes, payRes] = await Promise.all([
+            supabase.from('projects').select('*'),
+            supabase.from('payments').select('*, projects(name, client)')
+          ]);
           
-          const paid = (payments || []).filter(p => p.status === 'paid');
-          const pending = (payments || []).filter(p => p.status === 'pending');
-          const overdue = (payments || []).filter(p => p.status === 'overdue');
+          if (projRes.error) throw projRes.error;
+          if (payRes.error) throw payRes.error;
 
+          const projects = projRes.data || [];
+          const payments = payRes.data || [];
+          
+          const paid = payments.filter(p => p.status === 'paid');
+          const pending = payments.filter(p => p.status === 'pending');
+          const overdue = payments.filter(p => p.status === 'overdue');
+
+          // === 1. PROJECT HEALTH LOGIC ===
+          const now = new Date();
+          const activeProjects = projects.filter(p => p.status === 'active');
+          let healthyCount = 0, overdueCount = 0;
+
+          activeProjects.forEach(p => {
+            const projectPayments = paid.filter(pay => pay.project_id === p.id);
+            let totalMonthsPaid = 0;
+            projectPayments.forEach(pay => totalMonthsPaid += (parseInt(pay.period_number) || 1));
+
+            const start = new Date(p.start_date);
+            const coveredUntil = new Date(start);
+            coveredUntil.setMonth(coveredUntil.getMonth() + totalMonthsPaid);
+
+            if (now <= coveredUntil) healthyCount++;
+            else overdueCount++;
+          });
+
+          document.getElementById('dashActiveProjects').textContent = activeProjects.length;
+          document.getElementById('dashActiveProjectsSub').innerHTML = 
+            `<span class="text-green fw-700">${healthyCount} healthy</span> • <span class="text-red fw-700">${overdueCount} overdue</span>`;
+
+          // === 2. REVENUE & COMMISSIONS ===
           const totalRevenue = paid.reduce((s, p) => s + (p.amount || 0), 0);
           const totalPending = pending.reduce((s, p) => s + (p.amount || 0), 0);
           const totalOverdue = overdue.reduce((s, p) => s + (p.amount || 0), 0);
 
-          // Revenue card — show total with pending/overdue breakdown in subtitle
           document.getElementById('dashRevenue').innerHTML = priceHTML(totalRevenue);
           document.getElementById('dashRevenueSub').innerHTML = 
             `Collected • <span class="text-yellow fw-700">${formatUGX(totalPending)}</span> pending • <span class="text-red fw-700">${formatUGX(totalOverdue)}</span> overdue`;
 
-          // === COMMISSIONS ===
-          const { data: commissions, error: commErr } = await supabase
-            .from('employee_earnings')
-            .select('amount, employee_id')
-            .eq('type', 'commission')
-            .eq('status', 'paid');
-          
+          const { data: commissions } = await supabase.from('employee_earnings').select('amount, employee_id').eq('type', 'commission').eq('status', 'paid');
           const totalCommission = (commissions || []).reduce((s, c) => s + (c.amount || 0), 0);
           document.getElementById('dashCommission').innerHTML = priceHTML(totalCommission);
 
-          // === TOP REFERRER ===
           if (commissions && commissions.length) {
             const empMap = {};
-            commissions.forEach(c => {
-              if (c.employee_id) {
-                empMap[c.employee_id] = (empMap[c.employee_id] || 0) + (c.amount || 0);
-              }
-            });
+            commissions.forEach(c => { if (c.employee_id) empMap[c.employee_id] = (empMap[c.employee_id] || 0) + (c.amount || 0); });
             const topEmpId = Object.keys(empMap).sort((a, b) => empMap[b] - empMap[a])[0];
-            
             if (topEmpId) {
               const { data: emp } = await supabase.from('employees').select('name').eq('id', topEmpId).single();
-              const topAmount = empMap[topEmpId];
-              const projCount = commissions.filter(c => c.employee_id === topEmpId).length;
-              
               document.getElementById('dashTopReferrer').textContent = emp?.name || 'Unknown';
               document.getElementById('dashTopReferrerStats').textContent = 
-                `${projCount} project${projCount !== 1 ? 's' : ''} • ${formatUGX(topAmount)} earned`;
+                `${commissions.filter(c => c.employee_id === topEmpId).length} projects • ${formatUGX(empMap[topEmpId])} earned`;
             }
           }
 
-          // === CHART: Monthly Revenue ===
+          // === 🚀 3. RENDER CHARTS ===
+          
+          // Destroy old charts if refreshing
+          if (monthlyChart) monthlyChart.destroy();
+          if (statusChart) statusChart.destroy();
+          if (clientChart) clientChart.destroy();
+
+          // A. Monthly Revenue Bar Chart
           const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
           const monthlyTotals = new Array(12).fill(0);
           paid.forEach(p => {
             const d = new Date(p.payment_date);
             if (!isNaN(d.getMonth())) monthlyTotals[d.getMonth()] += (p.amount || 0);
           });
-          const max = Math.max(...monthlyTotals, 1);
-          const chart = document.getElementById('revenueChart');
-          chart.innerHTML = monthlyTotals.map((v, i) => {
-            const h = Math.max(4, (v / max) * 180);
-            return `<div style="flex:1; display:flex; flex-direction:column; align-items:center; gap:4px;">
-              <div class="chart-bar" style="height:${h}px; width:100%;" title="${months[i]}: ${formatUGX(v)}"></div>
-              <span style="font-size:.6rem; color:var(--text-muted)">${months[i]}</span>
-            </div>`;
-          }).join('');
 
-          // === TIMELINE: Recent Activity ===
-          const recent = (payments || [])
+          const monthlyCtx = document.getElementById('monthlyRevenueChart').getContext('2d');
+          monthlyChart = new Chart(monthlyCtx, {
+            type: 'bar',
+            data: {
+              labels: months,
+              datasets: [{
+                label: 'Revenue (UGX)',
+                data: monthlyTotals,
+                backgroundColor: 'rgba(37, 99, 235, 0.8)',
+                borderColor: '#2563eb',
+                borderWidth: 1,
+                borderRadius: 6,
+                hoverBackgroundColor: '#2563eb'
+              }]
+            },
+            options: {
+              responsive: true, maintainAspectRatio: false,
+              plugins: { 
+                legend: { display: false },
+                tooltip: {
+                  backgroundColor: '#1e293b', padding: 12, cornerRadius: 8,
+                  callbacks: { label: ctx => 'UGX ' + ctx.raw.toLocaleString() }
+                }
+              },
+              scales: {
+                y: { beginAtZero: true, grid: { color: '#f1f5f9' }, ticks: { callback: v => v >= 1000000 ? (v/1000000) + 'M' : v >= 1000 ? (v/1000) + 'k' : v } },
+                x: { grid: { display: false } }
+              }
+            }
+          });
+
+          // B. Payment Status Doughnut Chart
+          const statusCtx = document.getElementById('paymentStatusChart').getContext('2d');
+          statusChart = new Chart(statusCtx, {
+            type: 'doughnut',
+            data: {
+              labels: ['Paid', 'Pending', 'Overdue'],
+              datasets: [{
+                data: [totalRevenue, totalPending, totalOverdue],
+                backgroundColor: ['#059669', '#d97706', '#dc2626'],
+                borderWidth: 0, hoverOffset: 8
+              }]
+            },
+            options: {
+              responsive: true, maintainAspectRatio: false, cutout: '70%',
+              plugins: { 
+                legend: { position: 'bottom', labels: { boxWidth: 12, padding: 15, font: { size: 11 } } },
+                tooltip: {
+                  backgroundColor: '#1e293b', padding: 12, cornerRadius: 8,
+                  callbacks: { label: ctx => ' ' + ctx.label + ': UGX ' + ctx.raw.toLocaleString() }
+                }
+              }
+            }
+          });
+
+          // C. Top Clients Pie Chart
+          const clientRevenue = {};
+          paid.forEach(p => {
+            const clientName = p.projects?.client || 'Unassigned';
+            clientRevenue[clientName] = (clientRevenue[clientName] || 0) + (p.amount || 0);
+          });
+          const sortedClients = Object.entries(clientRevenue).sort((a,b) => b[1] - a[1]).slice(0, 5);
+          const clientLabels = sortedClients.map(c => c[0]);
+          const clientData = sortedClients.map(c => c[1]);
+
+          const clientCtx = document.getElementById('clientRevenueChart').getContext('2d');
+          clientChart = new Chart(clientCtx, {
+            type: 'pie',
+            data: {
+              labels: clientLabels.length > 0 ? clientLabels : ['No Data'],
+              datasets: [{
+                data: clientData.length > 0 ? clientData : [1],
+                backgroundColor: clientData.length > 0 ? 
+                  ['#2563eb', '#059669', '#d97706', '#dc2626', '#8b5cf6', '#ec4899'] : 
+                  ['#e2e8f0'],
+                borderWidth: 2, borderColor: '#fff'
+              }]
+            },
+            options: {
+              responsive: true, maintainAspectRatio: false,
+              plugins: { 
+                legend: { position: 'right', labels: { boxWidth: 12, padding: 10, font: { size: 11 } } },
+                tooltip: {
+                  backgroundColor: '#1e293b', padding: 12, cornerRadius: 8,
+                  callbacks: { label: ctx => ctx.label !== 'No Data' ? 'UGX ' + ctx.raw.toLocaleString() : '' }
+                }
+              }
+            }
+          });
+
+          // === 4. TIMELINE ===
+          const recent = [...payments]
             .sort((a, b) => new Date(b.created_at || b.payment_date || 0) - new Date(a.created_at || a.payment_date || 0))
             .slice(0, 5);
           const tl = document.getElementById('dashTimeline');
@@ -465,10 +476,11 @@
             tl.innerHTML = recent.map(p => {
               const dot = p.status === 'paid' ? 'green' : p.status === 'pending' ? 'yellow' : 'red';
               const projName = p.projects?.name || 'Project';
+              const clientName = p.projects?.client ? `(${p.projects.client})` : '';
               return `<div class="timeline-item">
                 <div class="timeline-dot ${dot}"></div>
                 <div class="timeline-title">${formatUGX(p.amount)} — ${p.status}</div>
-                <div class="timeline-desc">${projName} ${p.period ? '• ' + p.period : ''}</div>
+                <div class="timeline-desc">${projName} ${clientName} ${p.period ? '• ' + p.period : ''}</div>
                 <div class="timeline-date">${new Date(p.payment_date).toLocaleDateString()}</div>
               </div>`;
             }).join('');
@@ -479,72 +491,7 @@
         }
       }
 
-      // === EVENT LISTENERS ===
       document.getElementById('logoBtn').addEventListener('click', () => window.location.href = 'index.html');
-      document.getElementById('closeProjectModal').addEventListener('click', () => closeModal('projectModal'));
-      document.getElementById('cancelProject').addEventListener('click', () => closeModal('projectModal'));
-      
-      document.querySelectorAll('.modal-overlay').forEach(overlay => {
-        overlay.addEventListener('click', (e) => {
-          if (e.target === overlay) overlay.classList.remove('open');
-        });
-      });
-
-      // === SAVE PROJECT ===
-      document.getElementById('saveProject').addEventListener('click', async function() {
-        if (isSaving) return;
-        isSaving = true;
-        const btn = this;
-        const originalText = btn.textContent;
-        btn.textContent = 'Saving...';
-        btn.disabled = true;
-
-        try {
-          const id = document.getElementById('projId').value || generateId();
-          const data = {
-            id,
-            name: document.getElementById('projName').value.trim(),
-            client: document.getElementById('projClient').value.trim(),
-            monthly_rate: parseInt(document.getElementById('projRate').value) || 0,
-            plan_months: parseInt(document.getElementById('projPlan').value) || 1,
-            start_date: document.getElementById('projStartDate').value || new Date().toISOString().split('T')[0],
-            status: document.getElementById('projStatus').value,
-            notes: document.getElementById('projNotes').value.trim(),
-            referred_by_id: document.getElementById('projEmployee').value || null,
-            created_at: new Date().toISOString()
-          };
-          
-          if (!data.name || !data.client) {
-            showToast('Please fill in project name and client', 'error');
-            return;
-          }
-          
-          const { error } = await supabase.from('projects').upsert(data, { onConflict: 'id' });
-          if (error) throw new Error(error.message);
-          
-          showToast('Project saved successfully!');
-          closeModal('projectModal');
-          
-          ['projId','projName','projClient','projRate','projNotes'].forEach(el => 
-            document.getElementById(el).value = ''
-          );
-          document.getElementById('projPlan').value = '1';
-          document.getElementById('projStatus').value = 'active';
-          document.getElementById('projEmployee').value = '';
-          
-          await loadDashboard();
-        } catch (err) {
-          showToast('Error: ' + err.message, 'error');
-        } finally {
-          btn.textContent = originalText;
-          btn.disabled = false;
-          isSaving = false;
-        }
-      });
-
-      // === INIT ===
-      document.getElementById('projStartDate').value = new Date().toISOString().split('T')[0];
-      await loadEmployeesForDropdown();
       await loadDashboard();
     });
   })();
