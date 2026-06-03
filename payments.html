@@ -554,8 +554,10 @@
           window.currentProjectRate = rate;
           document.getElementById('payPeriod').value = payment.period || '';
           
+          // 🚀 UPDATED: Use saved months_covered, fallback to inferred
+          const savedMonths = payment.months_covered || 0;
           const inferredMonths = rate > 0 ? Math.round(payment.amount / rate) : 1;
-          document.getElementById('payMonths').value = inferredMonths > 0 ? inferredMonths : 1;
+          document.getElementById('payMonths').value = savedMonths > 0 ? savedMonths : (inferredMonths > 0 ? inferredMonths : 1);
           
           document.getElementById('payPaymentDate').value = payment.payment_date || '';
           document.getElementById('payDueDate').value = payment.due_date || '';
@@ -697,6 +699,7 @@
             project_id: projectId,
             period: document.getElementById('payPeriod').value.trim(),
             period_number: nextPeriodNum, 
+            months_covered: parseInt(document.getElementById('payMonths').value) || 1, // 🚀 ADDED: Save the months covered
             amount: parseInt(document.getElementById('payAmount').value) || 0,
             payment_date: document.getElementById('payPaymentDate').value,
             due_date: document.getElementById('payDueDate').value,
