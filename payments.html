@@ -348,22 +348,28 @@
         });
       }
 
+      // 🚀 UPDATED: Fetches directly from the clients table using UUIDs
       async function loadClientsDropdown() {
         try {
-          const { data: projects, error } = await supabase.from('projects').select('client').not('client', 'is', null);
+          const { data, error } = await supabase
+            .from('clients')
+            .select('id, name')
+            .in('status', ['active', 'prospect']) 
+            .order('name');
+            
           if (error) throw error;
-          const clients = [...new Set((projects || []).map(p => p.client).filter(c => c && c.trim()))].sort();
           const sel = document.getElementById('payClient');
           sel.innerHTML = '<option value="">Select a client...</option>' + 
-            clients.map(c => `<option value="${c}">${c}</option>`).join('');
+            (data || []).map(c => `<option value="${c.id}">${c.name}</option>`).join('');
         } catch (err) {
           console.error('Failed to load clients:', err);
         }
       }
 
-      async function loadClientProjects(clientName) {
+      // 🚀 UPDATED: Filters projects by client_id (UUID) instead of text name
+      async function loadClientProjects(clientId) {
         const projSelect = document.getElementById('payProject');
-        if (!clientName) {
+        if (!clientId) {
           projSelect.innerHTML = '<option value="">Select client first...</option>';
           projSelect.disabled = true;
           return;
@@ -372,7 +378,7 @@
         try {
           const { data, error } = await supabase.from('projects')
             .select('id, name, monthly_rate, start_date')
-            .eq('client', clientName)
+            .eq('client_id', clientId)
             .order('name');
           
           if (error) throw error;
@@ -467,17 +473,31 @@
             return;
           }
           
+          // 🚀 UPDATED: Fetch clients to map IDs to names for the table and filter
+          const { data: clients } = await supabase.from('clients').select('id, name');
+          const clientMap = {};
+          (clients || []).forEach(c => { clientMap[c.id] = c.name; });
+
+          const { data: projects } = await supabase.from('projects').select('id, name, client_id, client');
+          
+          // Populate the top filter dropdown with Project Name + Client Name
           try {
-            const { data: projects } = await supabase.from('projects').select('id, name');
             const sel = document.getElementById('paymentFilter');
             const currentVal = sel.value;
             sel.innerHTML = '<option value="all">All Projects</option>' + 
-              (projects || []).map(p => `<option value="${p.id}" ${currentVal === p.id ? 'selected' : ''}>${p.name}</option>`).join('');
+              (projects || []).map(p => {
+                const cName = clientMap[p.client_id] || p.client || '';
+                return `<option value="${p.id}" ${currentVal === p.id ? 'selected' : ''}>${p.name} ${cName ? `(${cName})` : ''}</option>`;
+              }).join('');
           } catch (e) { }
 
-          const { data: projects } = await supabase.from('projects').select('id, name, client');
           const pMap = {};
-          (projects || []).forEach(p => { pMap[p.id] = p; });
+          (projects || []).forEach(p => { 
+            pMap[p.id] = { 
+              name: p.name, 
+              clientName: clientMap[p.client_id] || p.client || 'Unknown Client' 
+            }; 
+          });
 
           if (!payments || payments.length === 0) {
             tbody.innerHTML = `<tr><td colspan="8"><div class="empty-state"><div class="empty-icon">💳</div><p>No payment records found.</p></div></td></tr>`;
@@ -489,7 +509,7 @@
             const statusBadge = p.status === 'paid' ? 'badge-green' : p.status === 'pending' ? 'badge-yellow' : 'badge-red';
             return `<tr data-status="${p.status}">
               <td>${new Date(p.payment_date).toLocaleDateString()}</td>
-              <td><strong>${proj.name || 'Unknown'}</strong><br><span class="text-muted" style="font-size:.75rem">${proj.client || ''}</span></td>
+              <td><strong>${proj.name || 'Unknown'}</strong><br><span class="text-muted" style="font-size:.75rem">${proj.clientName || ''}</span></td>
               <td style="font-size:.82rem">${p.period || '—'}</td>
               <td style="font-size:.82rem">${p.due_date ? new Date(p.due_date).toLocaleDateString() : '—'}</td>
               <td><strong>${formatUGX(p.amount)}</strong></td>
@@ -508,6 +528,7 @@
         }
       }
 
+      // 🚀 UPDATED: Uses client_id to pre-select the correct dropdowns
       async function editPayment(id) {
         try {
           const { data: payment, error } = await supabase.from('payments').select('*').eq('id', id).single();
@@ -516,8 +537,8 @@
             return;
           }
 
-          const { data: project } = await supabase.from('projects').select('client, monthly_rate, start_date').eq('id', payment.project_id).single();
-          const clientName = project?.client || '';
+          const { data: project } = await supabase.from('projects').select('client_id, monthly_rate, start_date').eq('id', payment.project_id).single();
+          const clientId = project?.client_id;
           const rate = project?.monthly_rate || 0;
 
           openModal('paymentModal');
@@ -526,8 +547,8 @@
           document.getElementById('payId').value = payment.id;
 
           await loadClientsDropdown();
-          document.getElementById('payClient').value = clientName;
-          await loadClientProjects(clientName);
+          document.getElementById('payClient').value = clientId; // Set by UUID
+          await loadClientProjects(clientId); // Load projects for this UUID
           document.getElementById('payProject').value = payment.project_id;
 
           window.currentProjectRate = rate;
@@ -541,7 +562,6 @@
           document.getElementById('payStatus').value = payment.status || 'paid';
           document.getElementById('payNotes').value = payment.notes || '';
 
-          // Set up base date for editing (the due date of the PREVIOUS period, or start date)
           window.startPeriodNum = payment.period_number || 1;
           if (window.startPeriodNum > 1) {
             const { data: prevPay } = await supabase.from('payments')
@@ -554,7 +574,6 @@
             window.baseDueDateForCalc = project.start_date || getLocalDateString();
           }
           
-          // Run calculations so the hint and readonly fields are accurate
           updateAllCalculations();
 
         } catch (err) {
@@ -619,6 +638,7 @@
         if (deleteBtn) deletePayment(deleteBtn.dataset.id);
       });
 
+      // 🚀 UPDATED: Passes the UUID (this.value) to loadClientProjects
       document.getElementById('payClient').addEventListener('change', function() {
         loadClientProjects(this.value);
       });
@@ -627,7 +647,6 @@
         onProjectSelect(this.value);
       });
 
-      // 🚀 MAGIC: Listen for ANY change to "Months Covered" and auto-update everything instantly
       document.getElementById('payMonths').addEventListener('input', updateAllCalculations);
 
       function resetPaymentForm() {
@@ -667,7 +686,6 @@
           const projectId = document.getElementById('payProject').value;
           if (!projectId) throw new Error('Please select a project');
           
-          // Auto-calculate the next period number in the background to keep DB happy
           const { data: pays } = await supabase.from('payments')
             .select('period_number')
             .eq('project_id', projectId)
@@ -678,7 +696,7 @@
           const paymentData = {
             project_id: projectId,
             period: document.getElementById('payPeriod').value.trim(),
-            period_number: nextPeriodNum, // Saved silently in the background
+            period_number: nextPeriodNum, 
             amount: parseInt(document.getElementById('payAmount').value) || 0,
             payment_date: document.getElementById('payPaymentDate').value,
             due_date: document.getElementById('payDueDate').value,
@@ -691,7 +709,6 @@
           
           let error;
           if (isEdit) {
-            // When editing, we keep the original period_number to avoid messing up the timeline sequence
             delete paymentData.period_number; 
             const { error: updateErr } = await supabase.from('payments').update(paymentData).eq('id', payId);
             error = updateErr;
