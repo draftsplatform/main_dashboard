@@ -33,7 +33,6 @@
     ::-webkit-scrollbar-track { background:transparent; }
     ::-webkit-scrollbar-thumb { background:var(--border); border-radius:3px; }
     
-    /* === HEADER STYLES === */
     .header {
       position: sticky; top: 0; z-index: 100;
       display: flex; align-items: center; justify-content: space-between;
@@ -51,6 +50,7 @@
       position: relative; padding: 10px 18px; border: none; background: transparent;
       color: var(--text-secondary); font-size: .88rem; font-weight: 500;
       border-radius: var(--radius-sm); cursor: pointer; transition: var(--transition);
+      text-decoration: none;
     }
     .nav-btn:hover { background: var(--primary-glow); color: var(--primary); }
     .nav-btn.active { background: var(--primary-glow); color: var(--primary); font-weight: 600; }
@@ -63,13 +63,12 @@
     .status-dot { width: 8px; height: 8px; background: var(--accent); border-radius: 50%; box-shadow: 0 0 8px rgba(5,150,105,.4); }
     .status-text { font-size: .75rem; color: var(--accent); font-weight: 600; }
     
-    /* === PAGE STYLES === */
     .main { padding: 2rem; max-width: 1440px; margin: 0 auto; }
     .page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem; }
     .page-title { font-size: 1.5rem; font-weight: 700; letter-spacing: -.3px; color: var(--text); }
     .page-desc { font-size: .85rem; color: var(--text-muted); margin-top: 2px; }
     
-    .btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; border: none; border-radius: var(--radius-sm); font-size: .85rem; font-weight: 600; cursor: pointer; transition: var(--transition); pointer-events: auto; }
+    .btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; border: none; border-radius: var(--radius-sm); font-size: .85rem; font-weight: 600; cursor: pointer; transition: var(--transition); pointer-events: auto; text-decoration: none; }
     .btn-primary { background: var(--primary); color: #fff; box-shadow: 0 2px 8px rgba(37,99,235,.2); }
     .btn-primary:hover { background: #1d4ed8; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(37,99,235,.3); }
     .btn-outline { background: transparent; color: var(--text-secondary); border: 1px solid var(--border); }
@@ -99,7 +98,7 @@
     .price-main { font-weight: 700; font-size: .88rem; color: var(--text); }
     .price-sub { font-size: .7rem; color: var(--text-muted); margin-left: 4px; }
     
-    .chart-area { width: 100%; height: 200px; background: linear-gradient(180deg, var(--primary-glow) 0%, transparent 100%); border-radius: var(--radius-sm); display: flex; align-items: flex-end; padding: 0 12px 12px; gap: 6px; }
+    .chart-area { width: 100%; height: 220px; background: linear-gradient(180deg, var(--primary-glow) 0%, transparent 100%); border-radius: var(--radius-sm); display: flex; align-items: flex-end; padding: 0 12px 28px; gap: 6px; }
     .chart-bar { flex: 1; background: linear-gradient(180deg, var(--primary), rgba(37,99,235,.3)); border-radius: 4px 4px 0 0; min-height: 8px; transition: height .6s ease; }
     
     .timeline { position: relative; padding-left: 24px; }
@@ -222,7 +221,7 @@
         <span class="badge badge-green"><span class="badge-dot"></span> Collected</span>
       </div>
       <div class="card-value" id="dashRevenue"><span class="price-main">UGX 0</span><span class="price-sub">$0.00</span></div>
-      <div class="card-sub">All-time collected payments</div>
+      <div class="card-sub" id="dashRevenueSub">All-time collected payments</div>
     </div>
     <div class="card">
       <div class="card-header">
@@ -262,7 +261,7 @@
   </div>
 </main>
 
-<!-- Project Modal (for quick access) -->
+<!-- Project Modal -->
 <div class="modal-overlay" id="projectModal">
   <div class="modal">
     <div class="modal-header">
@@ -332,7 +331,6 @@
   (function() {
     'use strict';
     
-    // === CONFIG ===
     const SUPABASE_URL = 'https://hnbzerhoqqsmzqxcbnxv.supabase.co';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhuYnplcmhvcXFzbXpxeGNibnh2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkwNDg1MjksImV4cCI6MjA5NDYyNDUyOX0.a4rM51DQGih9SXMr71PREngZ_pT6dJFgv_fG9j5jAGc';
     const USD_RATE = 0.00027;
@@ -347,7 +345,6 @@
       let isSaving = false;
       let employeesCache = [];
 
-      // === UTILS ===
       function generateId() {
         if (crypto?.randomUUID) return crypto.randomUUID();
         return 'id-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
@@ -367,7 +364,6 @@
       function openModal(id) { document.getElementById(id).classList.add('open'); }
       function closeModal(id) { document.getElementById(id).classList.remove('open'); }
 
-      // === LOAD EMPLOYEES FOR PROJECT MODAL ===
       async function loadEmployeesForDropdown() {
         try {
           const { data, error } = await supabase.from('employees').select('id, name').eq('status', 'active').order('name');
@@ -382,17 +378,18 @@
         }
       }
 
-      // === LOAD DASHBOARD ===
       async function loadDashboard() {
         try {
-          // Stats: Projects
+          // === PROJECTS ===
           const { data: projects, error: projErr } = await supabase.from('projects').select('*');
           if (projErr) throw projErr;
           const active = (projects || []).filter(p => p.status === 'active');
           document.getElementById('dashActiveProjects').textContent = active.length;
 
-          // Stats: Payments
-          const { data: payments, error: payErr } = await supabase.from('payments').select('*');
+          // === PAYMENTS (with project join for timeline) ===
+          const { data: payments, error: payErr } = await supabase
+            .from('payments')
+            .select('*, projects(name)');
           if (payErr) throw payErr;
           
           const paid = (payments || []).filter(p => p.status === 'paid');
@@ -403,25 +400,28 @@
           const totalPending = pending.reduce((s, p) => s + (p.amount || 0), 0);
           const totalOverdue = overdue.reduce((s, p) => s + (p.amount || 0), 0);
 
+          // Revenue card — show total with pending/overdue breakdown in subtitle
           document.getElementById('dashRevenue').innerHTML = priceHTML(totalRevenue);
-          document.getElementById('dashPending').innerHTML = priceHTML(totalPending);
-          document.getElementById('dashOverdue').innerHTML = priceHTML(totalOverdue);
+          document.getElementById('dashRevenueSub').innerHTML = 
+            `Collected • <span class="text-yellow fw-700">${formatUGX(totalPending)}</span> pending • <span class="text-red fw-700">${formatUGX(totalOverdue)}</span> overdue`;
 
-          // Commission payouts to employees
+          // === COMMISSIONS ===
           const { data: commissions, error: commErr } = await supabase
             .from('employee_earnings')
-            .select('amount')
+            .select('amount, employee_id')
             .eq('type', 'commission')
             .eq('status', 'paid');
           
-          const totalCommission = commissions?.reduce((s, c) => s + (c.amount || 0), 0) || 0;
+          const totalCommission = (commissions || []).reduce((s, c) => s + (c.amount || 0), 0);
           document.getElementById('dashCommission').innerHTML = priceHTML(totalCommission);
 
-          // Top referrer
-          if (commissions?.length) {
+          // === TOP REFERRER ===
+          if (commissions && commissions.length) {
             const empMap = {};
             commissions.forEach(c => {
-              empMap[c.employee_id] = (empMap[c.employee_id] || 0) + (c.amount || 0);
+              if (c.employee_id) {
+                empMap[c.employee_id] = (empMap[c.employee_id] || 0) + (c.amount || 0);
+              }
             });
             const topEmpId = Object.keys(empMap).sort((a, b) => empMap[b] - empMap[a])[0];
             
@@ -436,10 +436,10 @@
             }
           }
 
-          // Chart: Monthly Revenue
+          // === CHART: Monthly Revenue ===
           const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
           const monthlyTotals = new Array(12).fill(0);
-          (payments || []).filter(p => p.status === 'paid').forEach(p => {
+          paid.forEach(p => {
             const d = new Date(p.payment_date);
             if (!isNaN(d.getMonth())) monthlyTotals[d.getMonth()] += (p.amount || 0);
           });
@@ -453,9 +453,9 @@
             </div>`;
           }).join('');
 
-          // Timeline: Recent Activity
+          // === TIMELINE: Recent Activity ===
           const recent = (payments || [])
-            .sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0))
+            .sort((a, b) => new Date(b.created_at || b.payment_date || 0) - new Date(a.created_at || a.payment_date || 0))
             .slice(0, 5);
           const tl = document.getElementById('dashTimeline');
           
@@ -467,15 +467,15 @@
               const projName = p.projects?.name || 'Project';
               return `<div class="timeline-item">
                 <div class="timeline-dot ${dot}"></div>
-                <div class="timeline-title">${formatUGX(p.amount)} ${p.status}</div>
-                <div class="timeline-desc">${projName} — ${p.period || 'N/A'}</div>
+                <div class="timeline-title">${formatUGX(p.amount)} — ${p.status}</div>
+                <div class="timeline-desc">${projName} ${p.period ? '• ' + p.period : ''}</div>
                 <div class="timeline-date">${new Date(p.payment_date).toLocaleDateString()}</div>
               </div>`;
             }).join('');
           }
         } catch (err) {
           console.error('Dashboard load error:', err);
-          showToast('Failed to load dashboard data', 'error');
+          showToast('Failed to load dashboard: ' + err.message, 'error');
         }
       }
 
@@ -525,7 +525,6 @@
           showToast('Project saved successfully!');
           closeModal('projectModal');
           
-          // Reset form
           ['projId','projName','projClient','projRate','projNotes'].forEach(el => 
             document.getElementById(el).value = ''
           );
