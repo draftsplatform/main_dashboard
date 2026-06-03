@@ -5,12 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Projects — Drafts</title>
   
-  <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  
-  <!-- Supabase JS (v2) -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   
   <style>
@@ -33,24 +30,21 @@
     ::-webkit-scrollbar-track { background:transparent; }
     ::-webkit-scrollbar-thumb { background:var(--border); border-radius:3px; }
     
-    /* === HEADER STYLES === */
     .header {
       position: sticky; top: 0; z-index: 100;
       display: flex; align-items: center; justify-content: space-between;
       padding: 0 2rem; height: 88px;
       background: rgba(255,255,255,.95); backdrop-filter: blur(12px);
       border-bottom: 1px solid var(--border);
-      box-shadow: 0 1px 0 rgba(0,0,0,.02);
     }
     .logo { display: flex; align-items: center; gap: 16px; cursor: pointer; user-select: none; }
     .logo-img { height: 64px; width: auto; object-fit: contain; }
-    .logo-text { font-size: 1.6rem; font-weight: 800; letter-spacing: -.3px; color: var(--text); }
-    .logo-subtitle { font-size: .65rem; color: var(--text-muted); letter-spacing: 2px; text-transform: uppercase; margin-top: -4px; }
     .nav { display: flex; gap: 4px; }
     .nav-btn {
       position: relative; padding: 10px 18px; border: none; background: transparent;
       color: var(--text-secondary); font-size: .88rem; font-weight: 500;
       border-radius: var(--radius-sm); cursor: pointer; transition: var(--transition);
+      text-decoration: none;
     }
     .nav-btn:hover { background: var(--primary-glow); color: var(--primary); }
     .nav-btn.active { background: var(--primary-glow); color: var(--primary); font-weight: 600; }
@@ -60,22 +54,21 @@
       background: var(--primary); border-radius: 1px;
     }
     .header-right { display: flex; align-items: center; gap: 12px; }
-    .status-dot { width: 8px; height: 8px; background: var(--accent); border-radius: 50%; box-shadow: 0 0 8px rgba(5,150,105,.4); }
+    .status-dot { width: 8px; height: 8px; background: var(--accent); border-radius: 50%; box-shadow: 0 0 8px rgba(5,150,105,.4); animation: pulse 2s infinite; }
+    @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: .5; } }
     .status-text { font-size: .75rem; color: var(--accent); font-weight: 600; }
     
-    /* === PAGE STYLES === */
     .main { padding: 2rem; max-width: 1440px; margin: 0 auto; }
     .page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem; }
     .page-title { font-size: 1.5rem; font-weight: 700; letter-spacing: -.3px; color: var(--text); }
     .page-desc { font-size: .85rem; color: var(--text-muted); margin-top: 2px; }
     
-    .btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; border: none; border-radius: var(--radius-sm); font-size: .85rem; font-weight: 600; cursor: pointer; transition: var(--transition); pointer-events: auto; }
+    .btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; border: none; border-radius: var(--radius-sm); font-size: .85rem; font-weight: 600; cursor: pointer; transition: var(--transition); text-decoration: none; }
     .btn-primary { background: var(--primary); color: #fff; box-shadow: 0 2px 8px rgba(37,99,235,.2); }
-    .btn-primary:hover { background: #1d4ed8; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(37,99,235,.3); }
+    .btn-primary:hover { background: #1d4ed8; transform: translateY(-1px); }
     .btn-outline { background: transparent; color: var(--text-secondary); border: 1px solid var(--border); }
     .btn-outline:hover { border-color: var(--primary); color: var(--primary); background: var(--primary-glow); }
-    .btn-sm { padding: 6px 14px; font-size: .78rem; }
-    .btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none !important; }
+    .btn-sm { padding: 6px 12px; font-size: .75rem; }
     
     .badge { display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: 20px; font-size: .72rem; font-weight: 600; letter-spacing: .3px; }
     .badge-green { background: var(--accent-glow); color: var(--accent); }
@@ -85,20 +78,50 @@
     .badge-gray { background: rgba(100,116,139,.12); color: var(--text-muted); }
     .badge-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
     
-    .price-main { font-weight: 700; font-size: .88rem; color: var(--text); }
-    .price-sub { font-size: .7rem; color: var(--text-muted); margin-left: 4px; }
+    .live-status { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 20px; font-size: .75rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+    .live-status.paid { background: rgba(5,150,105,.12); color: var(--accent); border: 1px solid rgba(5,150,105,.2); }
+    .live-status.warning { background: rgba(217,119,6,.12); color: var(--warning); border: 1px solid rgba(217,119,6,.2); }
+    .live-status.overdue { background: rgba(220,38,38,.12); color: var(--danger); border: 1px solid rgba(220,38,38,.2); animation: overduePulse 2s infinite; }
+    .live-status.completed { background: rgba(100,116,139,.12); color: var(--text-muted); border: 1px solid var(--border); }
+    
+    @keyframes overduePulse {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(220,38,38,.4); }
+      50% { box-shadow: 0 0 0 6px rgba(220,38,38,0); }
+    }
+    
+    .live-status-icon { font-size: .9rem; }
+    .live-status-time { font-family: 'SF Mono', Monaco, monospace; font-size: .72rem; opacity: .9; }
+    
+    .project-row { transition: background .5s ease, border-color .5s ease; border-left: 3px solid transparent; }
+    .project-row.health-excellent { border-left-color: var(--accent); background: rgba(5,150,105,.02); }
+    .project-row.health-good { border-left-color: #84cc16; background: rgba(132,204,22,.02); }
+    .project-row.health-warning { border-left-color: var(--warning); background: rgba(217,119,6,.03); }
+    .project-row.health-danger { border-left-color: var(--danger); background: rgba(220,38,38,.03); }
+    .project-row.health-overdue { border-left-color: var(--danger); background: rgba(220,38,38,.06); }
+    .project-row.health-completed { border-left-color: var(--text-muted); opacity: .75; }
     
     .progress-track { width: 100%; height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
     .progress-fill { height: 100%; border-radius: 3px; transition: width .6s ease; }
-    .progress-info { display: flex; justify-content: space-between; font-size: .75rem; color: var(--text-muted); margin-top: 4px; }
+    .progress-info { display: flex; justify-content: space-between; font-size: .72rem; color: var(--text-muted); margin-top: 4px; font-variant-numeric: tabular-nums; }
     
-    .table-wrapper { overflow-x: auto; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); }
+    /* FIXED: Table wrapper handles scrolling, preventing header interference */
+    .table-wrapper { 
+      overflow: auto; 
+      max-height: calc(100vh - 240px); 
+      border: 1px solid var(--border); 
+      border-radius: var(--radius); 
+      background: var(--surface); 
+    }
     table { width: 100%; border-collapse: collapse; font-size: .85rem; }
-    thead { background: var(--card-hover); }
-    th { text-align: left; padding: 12px 16px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; font-size: .72rem; letter-spacing: .8px; border-bottom: 1px solid var(--border); }
-    td { padding: 12px 16px; border-bottom: 1px solid var(--border); vertical-align: middle; color: var(--text); }
+    thead { 
+      position: sticky; 
+      top: 0; /* Sticks to the top of the wrapper, not the window */
+      z-index: 10; 
+    }
+    th { text-align: left; padding: 14px 16px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; font-size: .72rem; letter-spacing: .8px; border-bottom: 2px solid var(--border); background: var(--card-hover); }
+    td { padding: 14px 16px; border-bottom: 1px solid var(--border); vertical-align: middle; color: var(--text); }
     tr:last-child td { border-bottom: none; }
-    tbody tr { transition: var(--transition); cursor: default; }
+    tbody tr { transition: var(--transition); }
     tbody tr:hover { background: var(--card-hover); }
     
     .empty-state { text-align: center; padding: 3rem 1rem; color: var(--text-muted); }
@@ -108,31 +131,30 @@
     .toast { background: var(--surface); border: 1px solid var(--border); border-left: 3px solid var(--accent); border-radius: var(--radius-sm); padding: 12px 16px; font-size: .82rem; box-shadow: var(--shadow-hover); animation: slideIn .3s ease; max-width: 320px; color: var(--text); }
     .toast.success { border-left-color: var(--accent); }
     .toast.error { border-left-color: var(--danger); }
+    .toast.info { border-left-color: var(--primary); }
     @keyframes slideIn { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
     
     .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.4); backdrop-filter: blur(4px); z-index: 200; place-items: center; pointer-events: none; opacity: 0; transition: opacity .2s ease; }
     .modal-overlay.open { display: grid; pointer-events: auto; opacity: 1; }
-    .modal { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); width: 90%; max-width: 640px; max-height: 90vh; overflow-y: auto; box-shadow: var(--shadow-hover); animation: fadeUp .2s ease; pointer-events: auto; }
+    .modal { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); width: 90%; max-width: 640px; max-height: 90vh; overflow-y: auto; box-shadow: var(--shadow-hover); animation: fadeUp .2s ease; }
     @keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     .modal-header { display: flex; align-items: center; justify-content: space-between; padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--border); position: sticky; top: 0; background: var(--surface); z-index: 1; }
-    .modal-title { font-size: 1.1rem; font-weight: 700; color: var(--text); }
-    .modal-close { width: 32px; height: 32px; display: grid; place-items: center; border: none; background: transparent; color: var(--text-muted); cursor: pointer; border-radius: 6px; font-size: 1.2rem; transition: var(--transition); }
+    .modal-title { font-size: 1.1rem; font-weight: 700; }
+    .modal-close { width: 32px; height: 32px; display: grid; place-items: center; border: none; background: transparent; color: var(--text-muted); cursor: pointer; border-radius: 6px; font-size: 1.2rem; }
     .modal-close:hover { background: var(--card-hover); color: var(--text); }
     .modal-body { padding: 1.5rem; }
     .modal-footer { padding: 1rem 1.5rem; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 8px; position: sticky; bottom: 0; background: var(--surface); }
     
     .form-group { margin-bottom: 1rem; }
     .form-label { display: block; font-size: .78rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 6px; }
-    .form-input, .form-select, .form-textarea { width: 100%; padding: 10px 14px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--text); font-size: .85rem; font-family: inherit; transition: var(--transition); }
+    .form-input, .form-select, .form-textarea { width: 100%; padding: 10px 14px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--text); font-size: .85rem; font-family: inherit; }
     .form-input:focus, .form-select:focus, .form-textarea:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-glow); }
     .form-textarea { resize: vertical; min-height: 80px; }
-    .form-select { cursor: pointer; }
     .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
     @media (max-width: 500px) { .form-row { grid-template-columns: 1fr; } }
     
-    /* === CLIENT SELECT WITH SEARCH === */
     .client-select-wrapper { position: relative; }
-    .client-search { width: 100%; padding: 10px 14px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--text); font-size: .85rem; font-family: inherit; }
+    .client-search { width: 100%; padding: 10px 14px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--text); font-size: .85rem; }
     .client-search:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-glow); }
     .client-dropdown {
       position: absolute; top: 100%; left: 0; right: 0; z-index: 10;
@@ -141,17 +163,9 @@
       box-shadow: var(--shadow-hover); margin-top: 4px; display: none;
     }
     .client-dropdown.show { display: block; }
-    .client-option {
-      padding: 10px 14px; cursor: pointer; font-size: .85rem;
-      display: flex; justify-content: space-between; align-items: center;
-    }
+    .client-option { padding: 10px 14px; cursor: pointer; font-size: .85rem; }
     .client-option:hover { background: var(--card-hover); }
-    .client-option.selected { background: var(--primary-glow); color: var(--primary); font-weight: 600; }
-    .client-new {
-      padding: 10px 14px; border-top: 1px solid var(--border);
-      font-size: .8rem; color: var(--primary); cursor: pointer;
-      display: flex; align-items: center; gap: 6px;
-    }
+    .client-new { padding: 10px 14px; border-top: 1px solid var(--border); font-size: .8rem; color: var(--primary); cursor: pointer; }
     .client-new:hover { background: var(--primary-glow); }
     
     .text-green { color: var(--accent); }
@@ -164,15 +178,25 @@
     .items-center { align-items: center; }
     .justify-between { justify-content: space-between; }
     .gap-1 { gap: .5rem; }
+    .gap-2 { gap: 1rem; }
     .wrap { flex-wrap: wrap; }
+    
+    .realtime-indicator {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 4px 10px; background: var(--accent-glow);
+      border-radius: 20px; font-size: .7rem; font-weight: 600;
+      color: var(--accent); margin-left: 12px;
+    }
+    .realtime-dot {
+      width: 6px; height: 6px; background: var(--accent);
+      border-radius: 50%; animation: pulse 2s infinite;
+    }
     
     @media (max-width: 1024px) {
       .header { padding: 0 1rem; height: 80px; }
       .logo-img { height: 52px; }
       .nav { gap: 0; flex-wrap: wrap; }
       .nav-btn { padding: 8px 12px; font-size: .78rem; }
-      .logo-text { font-size: 1.2rem; }
-      .logo-subtitle { display: none; }
       .main { padding: 1rem; }
     }
   </style>
@@ -195,7 +219,7 @@
   </nav>
   <div class="header-right">
     <div class="status-dot"></div>
-    <span class="status-text">Online</span>
+    <span class="status-text">Live</span>
   </div>
 </header>
 
@@ -204,8 +228,14 @@
 <main class="main">
   <div class="page-header">
     <div>
-      <h1 class="page-title">Project Tracking</h1>
-      <p class="page-desc">Monitor all active and completed projects</p>
+      <h1 class="page-title">
+        Project Tracking
+        <span class="realtime-indicator">
+          <span class="realtime-dot"></span>
+          Real-time
+        </span>
+      </h1>
+      <p class="page-desc">Live monitoring based on payment coverage duration</p>
     </div>
     <div class="flex gap-1 wrap">
       <select class="form-select" style="width:auto" id="projectFilter">
@@ -213,7 +243,9 @@
         <option value="active">Active</option>
         <option value="completed">Completed</option>
         <option value="on-hold">On Hold</option>
+        <option value="overdue">⚠ Overdue Only</option>
       </select>
+      <button class="btn btn-outline" id="refreshBtn">↻ Refresh</button>
       <button class="btn btn-primary" id="newProjectBtn">＋ New Project</button>
     </div>
   </div>
@@ -225,15 +257,14 @@
           <th>Project</th>
           <th>Client</th>
           <th>Rate</th>
-          <th>Plan</th>
+          <th>Live Status</th>
+          <th>Coverage Progress</th>
           <th>Referred By</th>
-          <th>Progress</th>
-          <th>Status</th>
           <th>Actions</th>
         </tr>
       </thead>
       <tbody id="projectsTable">
-        <tr><td colspan="8"><div class="empty-state"><div class="empty-icon">📁</div><p>Loading projects...</p></div></td></tr>
+        <tr><td colspan="7"><div class="empty-state"><div class="empty-icon">📁</div><p>Loading projects...</p></div></td></tr>
       </tbody>
     </table>
   </div>
@@ -268,7 +299,7 @@
       </div>
       <div class="form-row">
         <div class="form-group">
-          <label class="form-label">Plan Duration</label>
+          <label class="form-label">Expected Duration</label>
           <select class="form-select" id="projPlan">
             <option value="1">1 Month</option>
             <option value="3">3 Months</option>
@@ -310,385 +341,341 @@
 </div>
 
 <script>
-  (function() {
-    'use strict';
-    
-    // === CONFIG ===
-    const SUPABASE_URL = 'https://hnbzerhoqqsmzqxcbnxv.supabase.co';
-    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhuYnplcmhvcXFzbXpxeGNibnh2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkwNDg1MjksImV4cCI6MjA5NDYyNDUyOX0.a4rM51DQGih9SXMr71PREngZ_pT6dJFgv_fG9j5jAGc';
-    
-    let supabase, employeesCache = [], clientsCache = [], isSaving = false;
+(function() {
+  'use strict';
+  
+  const SUPABASE_URL = 'https://hnbzerhoqqsmzqxcbnxv.supabase.co';
+  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhuYnplcmhvcXFzbXpxeGNibnh2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkwNDg1MjksImV4cCI6MjA5NDYyNDUyOX0.a4rM51DQGih9SXMr71PREngZ_pT6dJFgv_fG9j5jAGc';
+  
+  let supabase, employeesCache = [], clientsCache = [], projectsCache = [], paymentsCache = [];
+  let isSaving = false;
 
-    document.addEventListener('DOMContentLoaded', async () => {
-      console.log('🚀 Projects page initializing...');
+  document.addEventListener('DOMContentLoaded', async () => {
+    if (!window.supabase) {
+      showToast('Database SDK failed to load', 'error');
+      return;
+    }
+    
+    try {
+      supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+      await Promise.all([loadEmployees(), loadClients()]);
+      await loadAllData();
+      setupEventListeners();
+      setupClientSelect();
+      document.getElementById('projStart').value = new Date().toISOString().split('T')[0];
       
-      if (!window.supabase) {
-        console.error('❌ Supabase SDK not loaded');
-        showToast('Database SDK failed to load', 'error');
-        return;
-      }
+      // Realtime subscription for instant updates
+      supabase.channel('projects-live')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'payments' }, async () => {
+          showToast('Payment updated - refreshing...', 'info');
+          await loadAllData();
+        })
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'projects' }, async () => {
+          await loadAllData();
+        })
+        .subscribe();
       
-      try {
-        supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-        console.log('✅ Supabase client created');
-        
-        // Load data in parallel
-        await Promise.all([
-          loadEmployees(),
-          loadClients(),
-          loadProjects()
-        ]);
-        
-        // Setup event listeners
-        setupEventListeners();
-        setupClientSelect();
-        
-        // Set default date
-        document.getElementById('projStart').value = new Date().toISOString().split('T')[0];
-        
-        console.log('✅ Projects page ready');
-        
-      } catch (err) {
-        console.error('❌ Init error:', err);
-        showToast('Failed to initialize: ' + err.message, 'error');
-      }
+      // Update countdowns every second
+      setInterval(updateLiveTimers, 1000);
+    } catch (err) {
+      console.error('Init error:', err);
+      showToast('Failed to initialize: ' + err.message, 'error');
+    }
+  });
+
+  function generateUUID() {
+    if (crypto?.randomUUID) return crypto.randomUUID();
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
+      const r = Math.random() * 16 | 0;
+      return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
+    });
+  }
+  
+  function formatUGX(n) { 
+    if (!n && n !== 0) return 'UGX 0'; 
+    return 'UGX ' + Number(n).toLocaleString(); 
+  }
+  
+  function formatUSD(n) { 
+    if (!n && n !== 0) return '$0.00'; 
+    return '$' + (n * 0.00027).toFixed(2); 
+  }
+  
+  function showToast(msg, type = 'success') {
+    const c = document.getElementById('toastContainer');
+    const t = document.createElement('div');
+    t.className = `toast ${type}`;
+    t.textContent = msg;
+    c.appendChild(t);
+    setTimeout(() => t.remove(), 3500);
+  }
+
+  // === CORE LOGIC: Calculate status based on total paid months ===
+  function computeProjectStatus(project, payments) {
+    const now = new Date();
+    const start = new Date(project.start_date);
+    const totalMonths = project.plan_months || 1;
+    
+    if (project.status === 'completed') return { state: 'completed', label: 'Completed', health: 'completed' };
+    if (project.status === 'on-hold') return { state: 'on-hold', label: 'On Hold', health: 'completed' };
+
+    const projectPayments = payments.filter(p => p.project_id === project.id && p.status === 'paid');
+    
+    // Sum up all the months this client has paid for
+    let totalMonthsPaid = 0;
+    projectPayments.forEach(p => {
+      totalMonthsPaid += (parseInt(p.period_number) || 1); // period_number stores duration in months
     });
 
-    // === UTILS ===
-    
-    // ✅ FIXED: Generate proper UUID for Supabase
-    function generateUUID() {
-      if (crypto?.randomUUID) {
-        return crypto.randomUUID();
-      }
-      // Fallback for older browsers
-      return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-        const r = Math.random() * 16 | 0;
-        const v = c === 'x' ? r : (r & 0x3 | 0x8);
-        return v.toString(16);
-      });
-    }
-    
-    function formatUGX(n) { 
-      if (!n && n !== 0) return 'UGX 0'; 
-      return 'UGX ' + Number(n).toLocaleString(); 
-    }
-    
-    function formatUSD(n) { 
-      if (!n && n !== 0) return '$0.00'; 
-      return '$' + (n * 0.00027).toFixed(2); 
-    }
-    
-    function showToast(msg, type = 'success') {
-      const c = document.getElementById('toastContainer');
-      const t = document.createElement('div');
-      t.className = `toast ${type}`;
-      t.textContent = msg;
-      t.style.borderLeftColor = type === 'error' ? 'var(--danger)' : 'var(--accent)';
-      c.appendChild(t);
-      setTimeout(() => t.remove(), 3000);
-    }
-    
-    function openModal(title) {
-      document.getElementById('projId').value = '';
-      document.getElementById('projName').value = '';
-      document.getElementById('projClient').value = '';
-      document.getElementById('projClientSearch').value = '';
-      document.getElementById('projRate').value = '';
-      document.getElementById('projPlan').value = '1';
-      document.getElementById('projStart').value = new Date().toISOString().split('T')[0];
-      document.getElementById('projStatus').value = 'active';
-      document.getElementById('projNotes').value = '';
-      document.getElementById('projEmployee').value = '';
-      document.getElementById('clientDropdown').classList.remove('show');
-      document.getElementById('modalTitle').textContent = title;
-      document.getElementById('projectModal').classList.add('open');
-    }
-    
-    function closeModal() {
-      document.getElementById('projectModal').classList.remove('open');
-      document.getElementById('clientDropdown').classList.remove('show');
-    }
+    // Calculate the date until which the project is fully covered
+    const coveredUntil = new Date(start);
+    coveredUntil.setMonth(coveredUntil.getMonth() + totalMonthsPaid);
 
-    // === LOAD CLIENTS FOR DROPDOWN ===
-    async function loadClients() {
-      try {
-        console.log('👥 Loading clients...');
-        // Get unique client names from projects table (text-based)
-        const { data, error } = await supabase
-          .from('projects')
-          .select('client')
-          .not('client', 'is', null);
-        
-        if (error) throw error;
-        
-        // Extract unique, non-empty client names
-        const uniqueClients = [...new Set(
-          (data || [])
-            .map(p => p.client)
-            .filter(c => c && c.trim())
-        )].sort();
-        
-        clientsCache = uniqueClients;
-        console.log(`✅ Loaded ${clientsCache.length} unique clients`);
-        
-      } catch (err) {
-        console.warn('⚠️ Failed to load clients:', err);
-        clientsCache = [];
-      }
-    }
+    if (now <= coveredUntil) {
+      const daysRemaining = Math.ceil((coveredUntil - now) / (1000 * 60 * 60 * 24));
+      const pctOfTotal = Math.min(100, Math.round((totalMonthsPaid / totalMonths) * 100));
+      
+      let health = 'excellent';
+      if (daysRemaining <= 7) health = 'warning';
+      else if (daysRemaining <= 30) health = 'good';
 
-    // === LOAD EMPLOYEES FOR DROPDOWN ===
-    async function loadEmployees() {
-      try {
-        console.log('👤 Loading employees...');
-        const { data, error } = await supabase
-          .from('employees')
-          .select('id, name, status')
-          .eq('status', 'active')
-          .order('name');
-        
-        if (error) throw error;
-        
-        employeesCache = data || [];
-        console.log(`✅ Loaded ${employeesCache.length} employees`);
-        
-        const sel = document.getElementById('projEmployee');
-        sel.innerHTML = '<option value="">None</option>' + 
-          employeesCache.map(e => `<option value="${e.id}">${e.name}</option>`).join('');
-          
-      } catch (err) {
-        console.warn('⚠️ Failed to load employees:', err);
-        document.getElementById('projEmployee').innerHTML = '<option value="">Error loading</option>';
-      }
+      return {
+        state: 'paid',
+        label: totalMonthsPaid >= totalMonths ? 'Fully Paid' : `Paid (${daysRemaining}d left)`,
+        health: health,
+        daysRemaining,
+        coveredUntil,
+        pctOfTotal,
+        totalMonthsPaid,
+        totalMonths
+      };
+    } else {
+      const daysOverdue = Math.floor((now - coveredUntil) / (1000 * 60 * 60 * 24));
+      return {
+        state: 'overdue',
+        label: `Overdue by ${daysOverdue}d`,
+        health: 'overdue',
+        daysOverdue,
+        amount: project.monthly_rate || 0,
+        coveredUntil,
+        totalMonthsPaid,
+        totalMonths,
+        pctOfTotal: Math.min(100, Math.round((totalMonthsPaid / totalMonths) * 100))
+      };
     }
+  }
 
-    // === CLIENT SELECT WITH SEARCH ===
-    function renderClientDropdown(searchTerm = '') {
-      const dropdown = document.getElementById('clientDropdown');
-      const search = searchTerm.toLowerCase().trim();
+  async function loadEmployees() {
+    try {
+      const { data, error } = await supabase.from('employees').select('id, name').eq('status', 'active').order('name');
+      if (error) throw error;
+      employeesCache = data || [];
+      const sel = document.getElementById('projEmployee');
+      sel.innerHTML = '<option value="">None</option>' + 
+        employeesCache.map(e => `<option value="${e.id}">${e.name}</option>`).join('');
+    } catch (err) { console.warn('Failed to load employees:', err); }
+  }
+
+  async function loadClients() {
+    try {
+      const { data, error } = await supabase.from('projects').select('client').not('client', 'is', null);
+      if (error) throw error;
+      clientsCache = [...new Set((data || []).map(p => p.client).filter(c => c && c.trim()))].sort();
+    } catch (err) { console.warn('Failed to load clients:', err); clientsCache = []; }
+  }
+
+  async function loadAllData() {
+    try {
+      const filter = document.getElementById('projectFilter').value;
+      let query = supabase.from('projects').select('*').order('created_at', { ascending: false });
       
-      // Filter clients
-      const matches = clientsCache.filter(c => c.toLowerCase().includes(search)).slice(0, 10);
-      
-      // Build HTML
-      let html = matches.map(c => {
-        return `<div class="client-option" data-value="${c}">${c}</div>`;
-      }).join('');
-      
-      // Add "Add new client" option if no exact match
-      if (search && !matches.some(c => c.toLowerCase() === search)) {
-        html += `<div class="client-new" data-value="${search}">
-          ➕ Add new client: "${search}"
-        </div>`;
+      if (filter !== 'all' && filter !== 'overdue') {
+        query = query.eq('status', filter);
       }
       
-      dropdown.innerHTML = html || '<div class="client-option" style="color:var(--text-muted)">No clients found</div>';
-      dropdown.classList.toggle('show', searchTerm.length > 0 || matches.length > 0);
+      const [projRes, payRes] = await Promise.all([
+        query,
+        supabase.from('payments').select('id, project_id, period, period_number, status, amount, payment_date')
+      ]);
+      
+      if (projRes.error) throw projRes.error;
+      projectsCache = projRes.data || [];
+      paymentsCache = payRes.data || [];
+      renderProjects();
+    } catch (err) {
+      console.error('Load error:', err);
+      showToast('Failed to load: ' + err.message, 'error');
     }
+  }
 
-    function setupClientSelect() {
-      const searchInput = document.getElementById('projClientSearch');
-      const hiddenInput = document.getElementById('projClient');
-      const dropdown = document.getElementById('clientDropdown');
-      
-      // Search input events
-      searchInput.addEventListener('input', (e) => {
-        renderClientDropdown(e.target.value);
-        hiddenInput.value = ''; // Clear until selection
-      });
-      
-      searchInput.addEventListener('focus', () => {
-        if (searchInput.value) renderClientDropdown(searchInput.value);
-      });
-      
-      // Close dropdown on outside click
-      document.addEventListener('click', (e) => {
-        if (!e.target.closest('.client-select-wrapper')) {
-          dropdown.classList.remove('show');
-        }
-      });
-      
-      // Option click handler (delegation)
-      dropdown.addEventListener('click', (e) => {
-        const option = e.target.closest('.client-option, .client-new');
-        if (!option) return;
-        
-        const value = option.dataset.value;
-        searchInput.value = value;
-        hiddenInput.value = value;
-        dropdown.classList.remove('show');
-        
-        // Highlight selected
-        dropdown.querySelectorAll('.client-option').forEach(o => o.classList.remove('selected'));
-        if (option.classList.contains('client-option')) {
-          option.classList.add('selected');
-        }
-      });
-      
-      // Keyboard navigation
-      searchInput.addEventListener('keydown', (e) => {
-        if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
-          e.preventDefault();
-          const options = dropdown.querySelectorAll('.client-option, .client-new');
-          if (!options.length) return;
-          
-          const current = dropdown.querySelector('.client-option.selected, .client-new.selected');
-          const idx = Array.from(options).indexOf(current);
-          const nextIdx = e.key === 'ArrowDown' 
-            ? Math.min(idx + 1, options.length - 1) 
-            : Math.max(idx - 1, 0);
-          
-          options.forEach(o => o.classList.remove('selected'));
-          options[nextIdx].classList.add('selected');
-          options[nextIdx].scrollIntoView({ block: 'nearest' });
-        } else if (e.key === 'Enter' && dropdown.classList.contains('show')) {
-          e.preventDefault();
-          const selected = dropdown.querySelector('.client-option.selected, .client-new.selected');
-          if (selected) selected.click();
-        } else if (e.key === 'Escape') {
-          dropdown.classList.remove('show');
-        }
-      });
+  function renderProjects() {
+    const tb = document.getElementById('projectsTable');
+    const filter = document.getElementById('projectFilter').value;
+    
+    let projects = projectsCache.map(p => {
+      return { ...p, liveStatus: computeProjectStatus(p, paymentsCache) };
+    });
+    
+    if (filter === 'overdue') {
+      projects = projects.filter(p => p.liveStatus.state === 'overdue');
     }
-
-    // === LOAD PROJECTS TABLE ===
-    async function loadProjects() {
-      try {
-        console.log('📁 Loading projects...');
-        const filter = document.getElementById('projectFilter').value;
-        
-        let query = supabase.from('projects').select('*').order('created_at', { ascending: false });
-        if (filter !== 'all') {
-          query = query.eq('status', filter);
-          console.log(`🔍 Filtering by status: ${filter}`);
-        }
-        
-        const { data, error } = await query;
-        const tb = document.getElementById('projectsTable');
-        
-        if (error) {
-          console.error('❌ Projects query error:', error);
-          tb.innerHTML = `<tr><td colspan="8"><div class="empty-state"><div class="empty-icon">⚠️</div><p>Error: ${error.message}</p></div></td></tr>`;
-          return;
-        }
-        
-        if (!data || data.length === 0) {
-          console.log('ℹ️ No projects found');
-          tb.innerHTML = `<tr><td colspan="8"><div class="empty-state"><div class="empty-icon">📁</div><p>No projects found. Create your first project!</p></div></td></tr>`;
-          return;
-        }
-        
-        console.log(`✅ Loaded ${data.length} projects`);
-        
-        tb.innerHTML = data.map(p => {
-          // Calculate progress
-          const start = new Date(p.start_date);
-          const end = new Date(start);
-          end.setMonth(end.getMonth() + (p.plan_months || 1));
-          const now = new Date();
-          const totalMonths = p.plan_months || 1;
-          const elapsed = Math.max(0, Math.floor((now - start) / (1000 * 60 * 60 * 24 * 30)));
-          const pct = Math.min(100, Math.max(0, Math.round((elapsed / totalMonths) * 100)));
-          
-          // Find referring employee
-          const emp = employeesCache.find(e => e.id === p.referred_by_id);
-          
-          // Status badge color
-          const statusClass = p.status === 'active' ? 'badge-green' : 
-                             p.status === 'completed' ? 'badge-blue' : 'badge-yellow';
-          
-          // Progress bar color
-          const progressColor = pct > 90 ? 'var(--danger)' : 
-                               pct > 60 ? 'var(--warning)' : 'var(--accent)';
-          
-          return `<tr>
-            <td><strong>${p.name || 'Untitled'}</strong></td>
-            <td>${p.client || '—'}</td>
-            <td><strong>${formatUGX(p.monthly_rate)}</strong><br><span class="text-muted" style="font-size:.75rem">${formatUSD(p.monthly_rate)}</span></td>
-            <td><span class="badge badge-gray">${p.plan_months || 1} mo</span></td>
-            <td>${emp ? `<span class="text-blue fw-700">${emp.name}</span>` : '<span class="text-muted">—</span>'}</td>
-            <td style="min-width:120px">
-              <div class="progress-track">
-                <div class="progress-fill" style="width:${pct}%; background:${progressColor}"></div>
-              </div>
-              <div class="progress-info">
-                <span>${pct}%</span>
-                <span>${elapsed}/${totalMonths} mo</span>
-              </div>
-            </td>
-            <td><span class="badge ${statusClass}"><span class="badge-dot"></span>${p.status || 'unknown'}</span></td>
-            <td class="flex gap-1">
-              <button class="btn btn-sm btn-outline edit-btn" data-id="${p.id}">Edit</button>
-              <button class="btn btn-sm btn-outline extend-btn" data-id="${p.id}">Extend</button>
-            </td>
-          </tr>`;
-        }).join('');
-        
-      } catch (err) {
-        console.error('❌ Load projects error:', err);
-        showToast('Failed to load projects: ' + err.message, 'error');
-        document.getElementById('projectsTable').innerHTML = 
-          `<tr><td colspan="8"><div class="empty-state"><div class="empty-icon">⚠️</div><p>Error loading projects</p></div></td></tr>`;
+    
+    if (projects.length === 0) {
+      tb.innerHTML = `<tr><td colspan="7"><div class="empty-state"><div class="empty-icon">📁</div><p>No projects found</p></div></td></tr>`;
+      return;
+    }
+    
+    tb.innerHTML = projects.map(p => {
+      const s = p.liveStatus;
+      const emp = employeesCache.find(e => e.id === p.referred_by_id);
+      
+      let statusBadge = '';
+      if (s.state === 'paid') {
+        const badgeClass = s.health === 'warning' ? 'warning' : 'paid';
+        statusBadge = `
+          <div class="live-status ${badgeClass}" data-end="${s.coveredUntil.toISOString()}">
+            <span class="live-status-icon">${s.health === 'warning' ? '⚠' : '✓'}</span>
+            <span>${s.label}</span>
+          </div>
+          <div style="font-size:.7rem; color:var(--text-muted); margin-top:4px;">
+            Covered until: ${s.coveredUntil.toLocaleDateString()}
+          </div>`;
+      } else if (s.state === 'overdue') {
+        statusBadge = `
+          <div class="live-status overdue" data-overdue-since="${s.coveredUntil.toISOString()}">
+            <span class="live-status-icon">⚠</span>
+            <span>${s.label}</span>
+          </div>
+          <div style="font-size:.7rem; color:var(--danger); margin-top:4px; font-weight:600;">
+            ${formatUGX(s.amount)} due
+          </div>`;
+      } else if (s.state === 'completed') {
+        statusBadge = `<div class="live-status completed"><span class="live-status-icon">✓</span><span>Completed</span></div>`;
+      } else {
+        statusBadge = `<div class="live-status completed"><span class="live-status-icon">⏸</span><span>On Hold</span></div>`;
       }
-    }
+      
+      const progressColor = s.state === 'overdue' ? 'var(--danger)' :
+                           s.state === 'completed' ? 'var(--text-muted)' :
+                           s.health === 'excellent' ? 'var(--accent)' :
+                           s.health === 'good' ? '#84cc16' : 'var(--warning)';
+      
+      let actions = `<button class="btn btn-sm btn-outline edit-btn" data-id="${p.id}">Edit</button>`;
+      
+      return `<tr class="project-row health-${s.health}" data-id="${p.id}">
+        <td><strong>${p.name || 'Untitled'}</strong></td>
+        <td>${p.client || '—'}</td>
+        <td>
+          <strong>${formatUGX(p.monthly_rate)}</strong>
+          <div class="text-muted" style="font-size:.72rem">${formatUSD(p.monthly_rate)}</div>
+        </td>
+        <td>${statusBadge}</td>
+        <td style="min-width:140px">
+          <div class="progress-track">
+            <div class="progress-fill" style="width:${s.pctOfTotal}%; background:${progressColor}"></div>
+          </div>
+          <div class="progress-info">
+            <span>${s.pctOfTotal}%</span>
+            <span>${s.totalMonthsPaid || 0}/${s.totalMonths} mo paid</span>
+          </div>
+        </td>
+        <td>${emp ? `<span class="text-blue fw-700">${emp.name}</span>` : '<span class="text-muted">—</span>'}</td>
+        <td><div class="flex gap-1 wrap">${actions}</div></td>
+      </tr>`;
+    }).join('');
+  }
+  
+  function updateLiveTimers() {
+    // Timers are now handled by the "Covered until" date text, 
+    // but we can add dynamic "X days left" updates here if needed.
+  }
 
-    // === EDIT PROJECT ===
-    async function editProject(id) {
-      try {
-        console.log(`✏️ Editing project: ${id}`);
-        const { data, error } = await supabase.from('projects').select('*').eq('id', id).single();
-        
-        if (error) throw error;
-        if (!data) {
-          showToast('Project not found', 'error');
-          return;
-        }
-        
-        openModal('Edit Project');
-        document.getElementById('projId').value = data.id;
-        document.getElementById('projName').value = data.name || '';
-        
-        // Set client in both search and hidden field
-        const clientVal = data.client || '';
-        document.getElementById('projClientSearch').value = clientVal;
-        document.getElementById('projClient').value = clientVal;
-        
-        document.getElementById('projRate').value = data.monthly_rate || '';
-        document.getElementById('projPlan').value = data.plan_months || '1';
-        document.getElementById('projStart').value = data.start_date || '';
-        document.getElementById('projStatus').value = data.status || 'active';
-        document.getElementById('projNotes').value = data.notes || '';
-        document.getElementById('projEmployee').value = data.referred_by_id || '';
-        
-      } catch (err) {
-        console.error('❌ Edit error:', err);
-        showToast('Failed to load project: ' + err.message, 'error');
+  function renderClientDropdown(searchTerm = '') {
+    const dropdown = document.getElementById('clientDropdown');
+    const search = searchTerm.toLowerCase().trim();
+    const matches = clientsCache.filter(c => c.toLowerCase().includes(search)).slice(0, 10);
+    let html = matches.map(c => `<div class="client-option" data-value="${c}">${c}</div>`).join('');
+    if (search && !matches.some(c => c.toLowerCase() === search)) {
+      html += `<div class="client-new" data-value="${search}">➕ Add new: "${search}"</div>`;
+    }
+    dropdown.innerHTML = html || '<div class="client-option" style="color:var(--text-muted)">Type to add new client</div>';
+    dropdown.classList.toggle('show', searchTerm.length > 0 || clientsCache.length > 0);
+  }
+
+  function setupClientSelect() {
+    const searchInput = document.getElementById('projClientSearch');
+    const hiddenInput = document.getElementById('projClient');
+    const dropdown = document.getElementById('clientDropdown');
+    searchInput.addEventListener('input', e => { renderClientDropdown(e.target.value); hiddenInput.value = ''; });
+    searchInput.addEventListener('focus', () => renderClientDropdown(searchInput.value));
+    document.addEventListener('click', e => { if (!e.target.closest('.client-select-wrapper')) dropdown.classList.remove('show'); });
+    dropdown.addEventListener('click', e => {
+      const option = e.target.closest('.client-option, .client-new');
+      if (!option) return;
+      searchInput.value = option.dataset.value;
+      hiddenInput.value = option.dataset.value;
+      dropdown.classList.remove('show');
+    });
+  }
+
+  function openModal(title, data = null) {
+    document.getElementById('projId').value = data?.id || '';
+    document.getElementById('projName').value = data?.name || '';
+    document.getElementById('projClientSearch').value = data?.client || '';
+    document.getElementById('projClient').value = data?.client || '';
+    document.getElementById('projRate').value = data?.monthly_rate || '';
+    document.getElementById('projPlan').value = data?.plan_months || '1';
+    document.getElementById('projStart').value = data?.start_date || new Date().toISOString().split('T')[0];
+    document.getElementById('projStatus').value = data?.status || 'active';
+    document.getElementById('projNotes').value = data?.notes || '';
+    document.getElementById('projEmployee').value = data?.referred_by_id || '';
+    document.getElementById('modalTitle').textContent = title;
+    document.getElementById('projectModal').classList.add('open');
+  }
+  
+  function closeModal() { document.getElementById('projectModal').classList.remove('open'); }
+
+  function setupEventListeners() {
+    document.getElementById('logoBtn').addEventListener('click', () => window.location.href = 'index.html');
+    document.getElementById('newProjectBtn').addEventListener('click', async () => {
+      await loadClients();
+      openModal('New Project');
+      document.getElementById('projClientSearch').focus();
+    });
+    document.getElementById('closeModal').addEventListener('click', closeModal);
+    document.getElementById('cancelModal').addEventListener('click', closeModal);
+    document.getElementById('refreshBtn').addEventListener('click', async () => {
+      showToast('Refreshing...', 'info');
+      await loadAllData();
+    });
+    document.querySelectorAll('.modal-overlay').forEach(o => {
+      o.addEventListener('click', e => { if (e.target === o) closeModal(); });
+    });
+    document.getElementById('projectFilter').addEventListener('change', loadAllData);
+    
+    document.getElementById('projectsTable').addEventListener('click', async (e) => {
+      const editBtn = e.target.closest('.edit-btn');
+      if (editBtn) {
+        const p = projectsCache.find(x => x.id === editBtn.dataset.id);
+        if (p) openModal('Edit Project', p);
       }
-    }
-
-    // === SAVE PROJECT ===
-    async function saveProject() {
+    });
+    
+    document.getElementById('saveProject').addEventListener('click', async function() {
       if (isSaving) return;
-      
       isSaving = true;
-      const btn = document.getElementById('saveProject');
+      const btn = this;
       const originalText = btn.textContent;
       btn.textContent = 'Saving...';
       btn.disabled = true;
       
-      console.log('💾 Saving project...');
-      
       try {
-        // ✅ FIXED: Use proper UUID generation
-        const id = document.getElementById('projId').value || generateUUID();
-        
-        // Get client value from either selected or typed
-        const clientVal = document.getElementById('projClient').value.trim() || 
-                         document.getElementById('projClientSearch').value.trim();
+        const existingId = document.getElementById('projId').value;
+        const id = existingId || generateUUID();
+        const clientVal = document.getElementById('projClient').value.trim() || document.getElementById('projClientSearch').value.trim();
         
         const data = {
-          id, // Now a valid UUID
+          id,
           name: document.getElementById('projName').value.trim(),
           client: clientVal,
           monthly_rate: parseInt(document.getElementById('projRate').value) || 0,
@@ -700,106 +687,24 @@
           created_at: new Date().toISOString()
         };
         
-        // Validation
-        if (!data.name || !data.client) {
-          throw new Error('Project name and client are required');
-        }
-        if (data.monthly_rate < 0) {
-          throw new Error('Monthly rate cannot be negative');
-        }
-        
-        console.log('📤 Sending to Supabase:', data);
+        if (!data.name || !data.client) throw new Error('Name and client required');
         
         const { error } = await supabase.from('projects').upsert(data, { onConflict: 'id' });
+        if (error) throw error;
         
-        if (error) {
-          console.error('❌ Save error:', error);
-          throw error;
-        }
-        
-        console.log('✅ Project saved');
-        showToast('Project saved successfully!');
+        showToast(existingId ? 'Project updated!' : 'Project created!');
         closeModal();
-        await loadProjects();
-        await loadClients(); // Refresh client list with new entry if added
-        
+        await Promise.all([loadClients(), loadAllData()]);
       } catch (err) {
-        console.error('❌ Save failed:', err);
         showToast('Error: ' + err.message, 'error');
       } finally {
         btn.textContent = originalText;
         btn.disabled = false;
         isSaving = false;
-        console.log('🔓 Save button unlocked');
       }
-    }
-
-    // === SETUP EVENT LISTENERS ===
-    function setupEventListeners() {
-      console.log('🔗 Setting up event listeners...');
-      
-      // Logo navigation
-      document.getElementById('logoBtn').addEventListener('click', () => {
-        console.log('🏠 Navigating to dashboard');
-        window.location.href = 'index.html';
-      });
-      
-      // Modal controls
-      document.getElementById('newProjectBtn').addEventListener('click', async () => {
-        console.log('➕ Opening new project modal');
-        await loadClients(); // Refresh client list when opening modal
-        openModal('New Project');
-        document.getElementById('projClientSearch').focus();
-      });
-      
-      document.getElementById('closeModal').addEventListener('click', () => {
-        console.log('❌ Closing modal');
-        closeModal();
-      });
-      
-      document.getElementById('cancelModal').addEventListener('click', () => {
-        console.log('❌ Cancel clicked');
-        closeModal();
-      });
-      
-      // Modal overlay click to close
-      document.querySelectorAll('.modal-overlay').forEach(overlay => {
-        overlay.addEventListener('click', (e) => {
-          if (e.target === overlay) {
-            console.log('🔙 Overlay click - closing modal');
-            closeModal();
-          }
-        });
-      });
-      
-      // Filter change
-      document.getElementById('projectFilter').addEventListener('change', (e) => {
-        console.log(`🔄 Filter changed to: ${e.target.value}`);
-        loadProjects();
-      });
-      
-      // Table button delegation
-      document.getElementById('projectsTable').addEventListener('click', (e) => {
-        const editBtn = e.target.closest('.edit-btn');
-        if (editBtn) {
-          console.log(`✏️ Edit clicked for: ${editBtn.dataset.id}`);
-          editProject(editBtn.dataset.id);
-          return;
-        }
-        
-        const extendBtn = e.target.closest('.extend-btn');
-        if (extendBtn) {
-          console.log(`📅 Extend clicked for: ${extendBtn.dataset.id}`);
-          showToast('Extension feature coming soon!', 'info');
-        }
-      });
-      
-      // Save button
-      document.getElementById('saveProject').addEventListener('click', saveProject);
-      
-      console.log('✅ Event listeners setup complete');
-    }
-  })();
+    });
+  }
+})();
 </script>
 </body>
 </html>
