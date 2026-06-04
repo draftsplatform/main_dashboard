@@ -25,11 +25,13 @@
     body {
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
       background: var(--bg); color: var(--text); min-height: 100vh; line-height: 1.5;
+      -webkit-tap-highlight-color: transparent;
     }
     ::-webkit-scrollbar { width:6px; }
     ::-webkit-scrollbar-track { background:transparent; }
     ::-webkit-scrollbar-thumb { background:var(--border); border-radius:3px; }
     
+    /* HEADER */
     .header {
       position: sticky; top: 0; z-index: 100;
       display: flex; align-items: center; justify-content: space-between;
@@ -39,6 +41,8 @@
     }
     .logo { display: flex; align-items: center; gap: 16px; cursor: pointer; user-select: none; }
     .logo-img { height: 64px; width: auto; object-fit: contain; }
+    
+    /* DESKTOP NAV */
     .nav { display: flex; gap: 4px; }
     .nav-btn {
       position: relative; padding: 10px 18px; border: none; background: transparent;
@@ -57,10 +61,54 @@
     .status-dot { width: 8px; height: 8px; background: var(--accent); border-radius: 50%; box-shadow: 0 0 8px rgba(5,150,105,.4); animation: pulse 2s infinite; }
     @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: .5; } }
     .status-text { font-size: .75rem; color: var(--accent); font-weight: 600; }
+
+    /* 📱 MOBILE NAV TOGGLE */
+    .mobile-nav-toggle {
+      display: none; background: none; border: 1px solid var(--border);
+      font-size: 1.3rem; cursor: pointer; padding: 6px 10px;
+      color: var(--text); border-radius: var(--radius-sm);
+      transition: var(--transition); line-height: 1;
+    }
+    .mobile-nav-toggle:hover { background: var(--primary-glow); border-color: var(--primary); color: var(--primary); }
+
+    /* 📱 MOBILE NAV DRAWER */
+    .nav-drawer-overlay {
+      display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(15,23,42,.5); backdrop-filter: blur(4px);
+      z-index: 200; opacity: 0; transition: opacity .3s;
+    }
+    .nav-drawer-overlay.active { display: block; opacity: 1; }
+    .nav-drawer {
+      position: fixed; top: 0; left: -300px; width: 280px; height: 100vh; height: 100dvh;
+      background: var(--surface); z-index: 201;
+      transition: left .3s cubic-bezier(.4,0,.2,1);
+      box-shadow: 4px 0 32px rgba(0,0,0,.15);
+      padding: 1.5rem 1rem; display: flex; flex-direction: column; gap: 4px;
+      overflow-y: auto;
+    }
+    .nav-drawer.active { left: 0; }
+    .nav-drawer-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 8px 16px; border-bottom: 1px solid var(--border); margin-bottom: 8px;
+    }
+    .nav-drawer-title { font-size: 1rem; font-weight: 700; color: var(--text); }
+    .nav-drawer-close {
+      background: none; border: none; font-size: 1.4rem; cursor: pointer;
+      color: var(--text-muted); padding: 4px 8px; border-radius: var(--radius-sm);
+      transition: var(--transition); line-height: 1;
+    }
+    .nav-drawer-close:hover { background: var(--card-hover); color: var(--text); }
+    .nav-drawer .nav-btn {
+      display: flex; align-items: center; padding: 14px 16px;
+      font-size: .95rem; border-radius: var(--radius-sm); width: 100%; text-align: left;
+    }
+    .nav-drawer .nav-btn.active::after { display: none; }
+    .nav-drawer .nav-btn.active { background: var(--primary); color: #fff; }
     
+    /* MAIN CONTENT */
     .main { padding: 2rem; max-width: 1440px; margin: 0 auto; }
     .page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem; }
-    .page-title { font-size: 1.5rem; font-weight: 700; letter-spacing: -.3px; color: var(--text); }
+    .page-title { font-size: 1.5rem; font-weight: 700; letter-spacing: -.3px; color: var(--text); display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
     .page-desc { font-size: .85rem; color: var(--text-muted); margin-top: 2px; }
     
     .btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; border: none; border-radius: var(--radius-sm); font-size: .85rem; font-weight: 600; cursor: pointer; transition: var(--transition); text-decoration: none; }
@@ -201,6 +249,111 @@
       width: 6px; height: 6px; background: var(--accent);
       border-radius: 50%; animation: pulse 2s infinite;
     }
+
+    /* 📱 RESPONSIVE: TABLET */
+    @media (max-width: 1024px) {
+      .header { padding: 0 1rem; height: 80px; }
+      .logo-img { height: 52px; }
+      .nav { gap: 0; flex-wrap: wrap; }
+      .nav-btn { padding: 8px 12px; font-size: .78rem; }
+      .main { padding: 1rem; }
+    }
+
+    /* 📱 RESPONSIVE: MOBILE */
+    @media (max-width: 768px) {
+      .header { padding: 0 1rem; height: 64px; }
+      .logo-img { height: 44px; }
+      .nav { display: none; }
+      .mobile-nav-toggle { display: flex; align-items: center; justify-content: center; }
+      .main { padding: 1rem; padding-bottom: 2rem; }
+      .page-header { margin-bottom: 1rem; flex-direction: column; align-items: flex-start; }
+      .page-title { font-size: 1.25rem; }
+      .page-desc { font-size: .78rem; }
+      .btn { padding: 8px 16px; font-size: .8rem; }
+      
+      /* Modal full screen on mobile */
+      .modal { width: 100%; max-width: 100%; height: 100dvh; max-height: 100dvh; border-radius: 0; border: none; }
+      .modal-header, .modal-footer { position: sticky; }
+
+      /* 📱 MOBILE TABLE TO CARDS */
+      .table-wrapper {
+        border: none;
+        background: transparent;
+        max-height: none;
+        overflow: visible;
+      }
+      .table-wrapper table, 
+      .table-wrapper thead, 
+      .table-wrapper tbody, 
+      .table-wrapper th, 
+      .table-wrapper td, 
+      .table-wrapper tr {
+        display: block;
+      }
+      .table-wrapper thead tr {
+        position: absolute; top: -9999px; left: -9999px;
+      }
+      .table-wrapper tr {
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        margin-bottom: 1rem;
+        background: var(--surface);
+        padding: 1rem;
+        box-shadow: var(--shadow);
+        overflow: hidden;
+      }
+      .table-wrapper tr.health-green { border-left: 4px solid var(--accent); }
+      .table-wrapper tr.health-red { border-left: 4px solid var(--danger); }
+      .table-wrapper tr.health-completed { border-left: 4px solid var(--text-muted); }
+      
+      .table-wrapper td {
+        border: none;
+        position: relative;
+        padding: 10px 0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        text-align: right;
+      }
+      .table-wrapper td::before {
+        content: attr(data-label);
+        font-weight: 600;
+        color: var(--text-muted);
+        font-size: .72rem;
+        text-transform: uppercase;
+        letter-spacing: .5px;
+        flex-shrink: 0;
+        margin-right: 1rem;
+        text-align: left;
+      }
+      .table-wrapper td.meter-cell {
+        flex-direction: column;
+        align-items: flex-start;
+        justify-content: flex-start;
+      }
+      .table-wrapper td.meter-cell::before {
+        margin-bottom: 10px;
+      }
+      .table-wrapper td.meter-cell > div {
+        width: 100%;
+      }
+      .table-wrapper td.actions-cell {
+        justify-content: flex-end;
+        border-top: 1px solid var(--border);
+        margin-top: 8px;
+        padding-top: 12px;
+      }
+      .table-wrapper td.actions-cell::before {
+        display: none;
+      }
+    }
+
+    /* 📱 VERY SMALL MOBILE */
+    @media (max-width: 380px) {
+      .main { padding: .75rem; }
+      .page-title { font-size: 1.1rem; }
+      .realtime-indicator { margin-left: 0; margin-top: 8px; }
+    }
   </style>
 </head>
 <body>
@@ -220,10 +373,28 @@
     <a href="employees.html" class="nav-btn">Employees</a>
   </nav>
   <div class="header-right">
+    <button class="mobile-nav-toggle" id="mobileNavToggle" aria-label="Open navigation menu">☰</button>
     <div class="status-dot"></div>
     <span class="status-text">Live</span>
   </div>
 </header>
+
+<!-- 📱 MOBILE NAV DRAWER -->
+<div class="nav-drawer-overlay" id="navDrawerOverlay"></div>
+<div class="nav-drawer" id="navDrawer" role="dialog" aria-label="Navigation menu">
+  <div class="nav-drawer-header">
+    <span class="nav-drawer-title">Menu</span>
+    <button class="nav-drawer-close" id="navDrawerClose" aria-label="Close menu">✕</button>
+  </div>
+  <a href="index.html" class="nav-btn">📊 Dashboard</a>
+  <a href="projects.html" class="nav-btn active">📁 Projects</a>
+  <a href="payments.html" class="nav-btn">💳 Payments</a>
+  <a href="clients.html" class="nav-btn">👥 Clients</a>
+  <a href="reports.html" class="nav-btn">📈 Reports</a>
+  <a href="performance.html" class="nav-btn">⚡ Performance</a>
+  <a href="finance.html" class="nav-btn">💰 Finance</a>
+  <a href="employees.html" class="nav-btn">🧑‍💼 Employees</a>
+</div>
 
 <div class="toast-container" id="toastContainer"></div>
 
@@ -234,7 +405,7 @@
         Project Tracking
         <span class="realtime-indicator">
           <span class="realtime-dot"></span>
-          Green→Red payment meter
+          Green→Red meter
         </span>
       </h1>
       <p class="page-desc">0% = Green active / 100% = Red overdue — real-time transition</p>
@@ -338,6 +509,29 @@
   document.addEventListener('DOMContentLoaded', async () => {
     if (!window.supabase) return showToast('SDK error', 'error');
     supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    
+    // === MOBILE NAV DRAWER ===
+    const navToggle = document.getElementById('mobileNavToggle');
+    const navDrawer = document.getElementById('navDrawer');
+    const navOverlay = document.getElementById('navDrawerOverlay');
+    const navClose = document.getElementById('navDrawerClose');
+
+    function openDrawer() {
+      navDrawer.classList.add('active');
+      navOverlay.classList.add('active');
+      document.body.style.overflow = 'hidden';
+    }
+    function closeDrawer() {
+      navDrawer.classList.remove('active');
+      navOverlay.classList.remove('active');
+      document.body.style.overflow = '';
+    }
+
+    navToggle.addEventListener('click', openDrawer);
+    navClose.addEventListener('click', closeDrawer);
+    navOverlay.addEventListener('click', closeDrawer);
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeDrawer(); });
+
     await Promise.all([loadEmployees(), loadClients()]);
     await loadAllData();
     setupEventListeners();
@@ -408,7 +602,6 @@
       let statusSection = '';
       if (prog.state === 'paid') {
         const endDate = prog.coveredUntil;
-        const diffDays = Math.max(0, Math.floor((endDate - new Date()) / (1000*3600*24)));
         statusSection = `
           <div class="live-status paid" style="border-color: ${fillColor}; color: ${fillColor};">
             <span class="live-status-icon">💳</span>
@@ -444,13 +637,14 @@
         statusSection = `<div class="live-status completed"><span>${prog.label}</span></div>`;
       }
       
+      // Added data-label attributes for mobile card transformation
       return `<tr class="project-row health-${prog.state === 'paid' ? 'green' : (prog.state === 'overdue' ? 'red' : 'completed')}" data-id="${p.id}">
-        <td><strong>${escapeHtml(p.name)}</strong></td>
-        <td>${escapeHtml(p.client || '—')}</td>
-        <td><strong>${formatUGX(p.monthly_rate)}</strong><div class="text-muted" style="font-size:.7rem">≈ ${(p.monthly_rate * 0.00027).toFixed(2)} USD</div></td>
-        <td style="min-width: 260px;">${statusSection}</td>
-        <td>${employee ? `<span class="text-blue fw-700">${escapeHtml(employee.name)}</span>` : '—'}</td>
-        <td><div class="flex gap-1"><button class="btn btn-sm btn-outline edit-btn" data-id="${p.id}">Edit</button><button class="btn btn-sm btn-outline text-red delete-btn" data-id="${p.id}">Del</button></div></td>
+        <td data-label="Project"><strong>${escapeHtml(p.name)}</strong></td>
+        <td data-label="Client">${escapeHtml(p.client || '—')}</td>
+        <td data-label="Rate"><strong>${formatUGX(p.monthly_rate)}</strong><div class="text-muted" style="font-size:.7rem">≈ ${(p.monthly_rate * 0.00027).toFixed(2)} USD</div></td>
+        <td data-label="Status & Meter" class="meter-cell" style="min-width: 260px;">${statusSection}</td>
+        <td data-label="Referred By">${employee ? `<span class="text-blue fw-700">${escapeHtml(employee.name)}</span>` : '—'}</td>
+        <td class="actions-cell"><div class="flex gap-1"><button class="btn btn-sm btn-outline edit-btn" data-id="${p.id}">Edit</button><button class="btn btn-sm btn-outline text-red delete-btn" data-id="${p.id}">Del</button></div></td>
       </tr>`;
     }).join('');
     
@@ -470,7 +664,7 @@
         if (row && !row.classList.contains('health-red')) {
           row.classList.remove('health-green');
           row.classList.add('health-red');
-          const meterCell = row.children[3];
+          const meterCell = row.querySelector('.meter-cell');
           if (meterCell && !meterCell.innerHTML.includes('OVERDUE')) {
             meterCell.innerHTML = `
               <div class="live-status overdue"><span class="live-status-icon">⚠️</span><span class="fw-700">OVERDUE</span><span style="margin:0 6px">•</span><span>payment required</span></div>
@@ -492,7 +686,7 @@
       
       // update progress fill color & width dynamically
       const row = el.closest('tr.project-row');
-      if (row && row.children[3]) {
+      if (row) {
         const start = new Date(startDate);
         const end = endDate;
         const total = end - start;
@@ -606,6 +800,7 @@
         const clientId=document.getElementById('projClientSelect').value;
         const clientObj=clientsCache.find(c=>c.id===clientId);
         if(!clientId) throw new Error('Select a client');
+        
         const data={
           id, name: document.getElementById('projName').value.trim(),
           client_id: clientId, client: clientObj?.name || '',
@@ -613,9 +808,14 @@
           start_date: document.getElementById('projStart').value,
           status: document.getElementById('projStatus').value,
           notes: document.getElementById('projNotes').value.trim(),
-          referred_by_id: document.getElementById('projEmployee').value||null,
-          created_at: new Date().toISOString()
+          referred_by_id: document.getElementById('projEmployee').value||null
         };
+        
+        // Only set created_at if it's a new project (Bug fix: prevents overwriting timestamp on edit)
+        if (!existingId) {
+          data.created_at = new Date().toISOString();
+        }
+
         if(!data.name) throw new Error('Project name required');
         const {error}=await supabase.from('projects').upsert(data, {onConflict:'id'});
         if(error) throw error;
