@@ -4,66 +4,462 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Employee Dashboard — Drafts</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <style>
-    :root { --bg:#f8fafc; --surface:#fff; --card:#fff; --border:#e2e8f0; --primary:#2563eb; --accent:#059669; --warning:#d97706; --danger:#dc2626; --text:#1e293b; --text-muted:#64748b; --radius:12px; --radius-sm:8px; }
-    * { margin:0; padding:0; box-sizing:border-box; } body { font-family:'Inter',system-ui,sans-serif; background:var(--bg); color:var(--text); min-height:100vh; line-height:1.5; }
-    .header { position:sticky; top:0; z-index:100; display:flex; align-items:center; justify-content:space-between; padding:0 2rem; height:72px; background:rgba(255,255,255,.95); backdrop-filter:blur(12px); border-bottom:1px solid var(--border); }
-    .logo { display:flex; align-items:center; gap:12px; } .logo-img { height:40px; } .logo-text { font-size:1.2rem; font-weight:700; }
-    .header-right { display:flex; align-items:center; gap:1rem; } .emp-info { text-align:right; } .emp-name { font-weight:600; } .emp-code { font-size:.7rem; color:var(--text-muted); font-family:monospace; }
-    .btn { padding:8px 16px; border:none; border-radius:var(--radius-sm); font-weight:600; cursor:pointer; font-size:.85rem; } .btn-primary { background:var(--primary); color:#fff; } .btn-outline { background:transparent; color:var(--text); border:1px solid var(--border); }
-    .main { padding:1.5rem; max-width:1200px; margin:0 auto; } .page-title { font-size:1.3rem; font-weight:700; margin-bottom:1.5rem; }
-    .stats { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:1rem; margin-bottom:1.5rem; } .stat { background:var(--card); border:1px solid var(--border); border-radius:var(--radius); padding:1.25rem; text-align:center; } .stat-val { font-size:1.5rem; font-weight:800; margin:.25rem 0; } .stat-lbl { font-size:.75rem; color:var(--text-muted); text-transform:uppercase; }
-    .tabs { display:flex; gap:2px; background:var(--card); padding:4px; border-radius:var(--radius-sm); margin-bottom:1.25rem; width:fit-content; border:1px solid var(--border); } .tab { padding:8px 16px; border:none; background:transparent; color:var(--text-muted); font-size:.8rem; font-weight:500; border-radius:6px; cursor:pointer; } .tab:hover { background:var(--card-hover); } .tab.active { background:var(--primary); color:#fff; }
-    .table-wrap { overflow-x:auto; border:1px solid var(--border); border-radius:var(--radius); background:var(--surface); } table { width:100%; border-collapse:collapse; font-size:.85rem; } th { text-align:left; padding:12px 16px; font-weight:600; color:var(--text-muted); text-transform:uppercase; font-size:.72rem; background:var(--card-hover); border-bottom:1px solid var(--border); } td { padding:12px 16px; border-bottom:1px solid var(--border); } tr:hover { background:var(--card-hover); } .badge { display:inline-flex; padding:4px 8px; border-radius:20px; font-size:.72rem; font-weight:600; } .badge-green { background:rgba(5,150,105,.12); color:var(--accent); } .badge-yellow { background:rgba(217,119,6,.12); color:var(--warning); } .badge-blue { background:rgba(37,99,235,.1); color:var(--primary); }
-    .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.4); backdrop-filter:blur(4px); z-index:200; place-items:center; } .modal-overlay.open { display:grid; } .modal { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); width:90%; max-width:480px; max-height:85vh; overflow-y:auto; } .modal-head { display:flex; align-items:center; justify-content:space-between; padding:1.25rem 1.5rem; border-bottom:1px solid var(--border); position:sticky; top:0; background:var(--surface); } .modal-close { width:32px; height:32px; display:grid; place-items:center; border:none; background:transparent; cursor:pointer; } .modal-body { padding:1.5rem; } .modal-foot { padding:1rem 1.5rem; border-top:1px solid var(--border); display:flex; justify-content:flex-end; gap:8px; position:sticky; bottom:0; background:var(--surface); }
-    .form-group { margin-bottom:1rem; } .form-lbl { display:block; font-size:.78rem; font-weight:600; color:var(--text); margin-bottom:6px; } .form-inp { width:100%; padding:10px 14px; border:1px solid var(--border); border-radius:8px; } .form-inp:focus { outline:none; border-color:var(--primary); box-shadow:0 0 0 3px rgba(37,99,235,.1); }
-    .toast-container { position:fixed; top:100px; right:16px; z-index:300; display:flex; flex-direction:column; gap:8px; } .toast { background:var(--surface); border:1px solid var(--border); border-left:3px solid var(--accent); border-radius:8px; padding:12px 16px; font-size:.82rem; box-shadow:0 8px 32px rgba(0,0,0,.12); animation:slide .3s ease; } @keyframes slide { from{transform:translateX(20px);opacity:0} to{transform:translateX(0);opacity:1} }
+    :root { 
+      --bg:#f8fafc; --surface:#fff; --card:#fff; --card-hover:#f1f5f9;
+      --border:#e2e8f0; --primary:#2563eb; --primary-glow:rgba(37,99,235,.1);
+      --accent:#059669; --accent-glow:rgba(5,150,105,.1);
+      --warning:#d97706; --danger:#dc2626; 
+      --text:#1e293b; --text-secondary:#475569; --text-muted:#64748b; 
+      --radius:12px; --radius-sm:8px;
+      --shadow: 0 4px 24px rgba(0,0,0,.08); --shadow-hover: 0 8px 32px rgba(0,0,0,.12);
+      --transition: .2s cubic-bezier(.4,0,.2,1);
+    }
+    * { margin:0; padding:0; box-sizing:border-box; } 
+    body { 
+      font-family:'Inter',system-ui,sans-serif; 
+      background:var(--bg); color:var(--text); min-height:100vh; line-height:1.5;
+      -webkit-tap-highlight-color: transparent;
+    }
+    ::-webkit-scrollbar { width:6px; }
+    ::-webkit-scrollbar-track { background:transparent; }
+    ::-webkit-scrollbar-thumb { background:var(--border); border-radius:3px; }
+
+    /* HEADER */
+    .header { 
+      position:sticky; top:0; z-index:100; 
+      display:flex; align-items:center; justify-content:space-between; 
+      padding:0 2rem; height:72px; 
+      background:rgba(255,255,255,.95); backdrop-filter:blur(12px); 
+      border-bottom:1px solid var(--border); 
+      box-shadow: 0 1px 0 rgba(0,0,0,.02);
+    }
+    .logo { display:flex; align-items:center; gap:12px; } 
+    .logo-img { height:40px; } 
+    .logo-text { font-size:1.2rem; font-weight:700; color:var(--text); }
+    
+    .header-right { display:flex; align-items:center; gap:1rem; } 
+    .emp-info { text-align:right; } 
+    .emp-name { font-weight:600; font-size:.88rem; color:var(--text); } 
+    .emp-code { font-size:.7rem; color:var(--text-muted); font-family:monospace; }
+    
+    .btn { 
+      display:inline-flex; align-items:center; gap:8px;
+      padding:8px 16px; border:none; border-radius:var(--radius-sm); 
+      font-weight:600; cursor:pointer; font-size:.85rem; 
+      transition: var(--transition); text-decoration: none;
+    } 
+    .btn-primary { background:var(--primary); color:#fff; box-shadow: 0 2px 8px rgba(37,99,235,.2); }
+    .btn-primary:hover { background: #1d4ed8; transform: translateY(-1px); }
+    .btn-outline { background:transparent; color:var(--text); border:1px solid var(--border); }
+    .btn-outline:hover { border-color: var(--primary); color: var(--primary); background: var(--primary-glow); }
+    .btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none !important; }
+    
+    /* MAIN */
+    .main { padding:1.5rem; max-width:1200px; margin:0 auto; } 
+    .page-title { font-size:1.3rem; font-weight:700; margin-bottom:1.5rem; color:var(--text); }
+    
+    /* STATS */
+    .stats { 
+      display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); 
+      gap:1rem; margin-bottom:1.5rem; 
+    } 
+    .stat { 
+      background:var(--card); border:1px solid var(--border); 
+      border-radius:var(--radius); padding:1.25rem; text-align:center;
+      box-shadow: var(--shadow);
+      transition: var(--transition);
+    }
+    .stat:hover { border-color: rgba(37,99,235,.3); box-shadow: var(--shadow-hover); }
+    .stat-val { font-size:1.5rem; font-weight:800; margin:.25rem 0; color:var(--text); } 
+    .stat-lbl { font-size:.75rem; color:var(--text-muted); text-transform:uppercase; letter-spacing: .5px; }
+    
+    /* TABS */
+    .tabs { 
+      display:flex; gap:2px; background:var(--card); padding:4px; 
+      border-radius:var(--radius-sm); margin-bottom:1.25rem; width:fit-content; 
+      border:1px solid var(--border); 
+    } 
+    .tab { 
+      padding:8px 16px; border:none; background:transparent; 
+      color:var(--text-muted); font-size:.8rem; font-weight:500; 
+      border-radius:6px; cursor:pointer; transition: var(--transition);
+    } 
+    .tab:hover { background:var(--card-hover); color: var(--text); } 
+    .tab.active { background:var(--primary); color:#fff; }
+    
+    /* TABLE */
+    .table-wrap { 
+      overflow-x:auto; border:1px solid var(--border); 
+      border-radius:var(--radius); background:var(--surface);
+      box-shadow: var(--shadow);
+    } 
+    table { width:100%; border-collapse:collapse; font-size:.85rem; } 
+    th { 
+      text-align:left; padding:12px 16px; font-weight:600; 
+      color:var(--text-muted); text-transform:uppercase; font-size:.72rem; 
+      background:var(--card-hover); border-bottom:1px solid var(--border);
+      letter-spacing: .5px;
+    } 
+    td { padding:12px 16px; border-bottom:1px solid var(--border); color:var(--text); } 
+    tr:last-child td { border-bottom: none; }
+    tbody tr { transition: var(--transition); }
+    tbody tr:hover { background:var(--card-hover); } 
+    
+    .badge { 
+      display:inline-flex; align-items:center; gap:5px;
+      padding:4px 10px; border-radius:20px; font-size:.72rem; font-weight:600;
+      letter-spacing: .3px;
+    } 
+    .badge-green { background:var(--accent-glow); color:var(--accent); } 
+    .badge-yellow { background:rgba(217,119,6,.12); color:var(--warning); } 
+    .badge-blue { background:var(--primary-glow); color:var(--primary); }
+    .badge-red { background:rgba(220,38,38,.12); color:var(--danger); }
+    .badge-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+    
     .empty { text-align:center; padding:2rem 1rem; color:var(--text-muted); }
+    .empty-icon { font-size: 2.5rem; margin-bottom: .5rem; opacity: .4; }
+    
+    /* MODAL */
+    .modal-overlay { 
+      display:none; position:fixed; inset:0; 
+      background:rgba(0,0,0,.4); backdrop-filter:blur(4px); 
+      z-index:200; place-items:center; 
+      opacity: 0; transition: opacity .2s ease;
+    } 
+    .modal-overlay.open { display:grid; opacity: 1; } 
+    .modal { 
+      background:var(--surface); border:1px solid var(--border); 
+      border-radius:var(--radius); width:90%; max-width:480px; 
+      max-height:85vh; overflow-y:auto;
+      box-shadow: var(--shadow-hover);
+      animation: fadeUp .2s ease;
+    }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    .modal-head { 
+      display:flex; align-items:center; justify-content:space-between; 
+      padding:1.25rem 1.5rem; border-bottom:1px solid var(--border); 
+      position:sticky; top:0; background:var(--surface); z-index: 1;
+    }
+    .modal-head h3 { font-size: 1.1rem; font-weight: 700; color: var(--text); }
+    .modal-close { 
+      width:32px; height:32px; display:grid; place-items:center; 
+      border:none; background:transparent; cursor:pointer; 
+      border-radius: 6px; font-size: 1.2rem; color: var(--text-muted);
+      transition: var(--transition);
+    }
+    .modal-close:hover { background: var(--card-hover); color: var(--text); }
+    .modal-body { padding:1.5rem; } 
+    .modal-foot { 
+      padding:1rem 1.5rem; border-top:1px solid var(--border); 
+      display:flex; justify-content:flex-end; gap:8px; 
+      position:sticky; bottom:0; background:var(--surface);
+    }
+    
+    .form-group { margin-bottom:1rem; } 
+    .form-lbl { display:block; font-size:.78rem; font-weight:600; color:var(--text-secondary); margin-bottom:6px; } 
+    .form-inp { 
+      width:100%; padding:10px 14px; border:1px solid var(--border); 
+      border-radius:var(--radius-sm); font-size:.85rem; font-family: inherit;
+      color: var(--text); background: var(--surface);
+      transition: var(--transition);
+    } 
+    .form-inp:focus { outline:none; border-color:var(--primary); box-shadow:0 0 0 3px var(--primary-glow); }
+    
+    /* TOAST */
+    .toast-container { position:fixed; top:100px; right:16px; z-index:300; display:flex; flex-direction:column; gap:8px; } 
+    .toast { 
+      background:var(--surface); border:1px solid var(--border); 
+      border-left:3px solid var(--accent); border-radius:var(--radius-sm); 
+      padding:12px 16px; font-size:.82rem; box-shadow:var(--shadow-hover); 
+      animation:slide .3s ease; max-width: 320px; color: var(--text);
+    } 
+    .toast.error { border-left-color: var(--danger); }
+    @keyframes slide { from{transform:translateX(20px);opacity:0} to{transform:translateX(0);opacity:1} }
+
+    /* 📱 RESPONSIVE: TABLET */
+    @media (max-width: 1024px) {
+      .header { padding: 0 1rem; height: 68px; }
+      .main { padding: 1rem; }
+    }
+
+    /* 📱 RESPONSIVE: MOBILE */
+    @media (max-width: 768px) {
+      .header { padding: 0 1rem; height: 64px; }
+      .logo-img { height: 36px; }
+      .logo-text { font-size: 1rem; }
+      .emp-info { text-align: right; }
+      .emp-name { font-size: .8rem; }
+      .emp-code { font-size: .65rem; }
+      .btn { padding: 6px 12px; font-size: .78rem; }
+      
+      .main { padding: 1rem; padding-bottom: 2rem; }
+      .page-title { font-size: 1.15rem; margin-bottom: 1rem; }
+      
+      /* Stats 2x2 grid on mobile */
+      .stats { grid-template-columns: repeat(2, 1fr); gap: .75rem; }
+      .stat { padding: 1rem; }
+      .stat-val { font-size: 1.2rem; }
+      .stat-lbl { font-size: .68rem; }
+
+      /* Tabs scrollable */
+      .tabs { 
+        width: 100%; 
+        overflow-x: auto; 
+        white-space: nowrap;
+        -webkit-overflow-scrolling: touch;
+      }
+      .tabs::-webkit-scrollbar { display: none; }
+      .tab { flex-shrink: 0; }
+
+      /* Modal full screen on mobile */
+      #wdModal .modal {
+        width: 100% !important; max-width: 100% !important;
+        height: 100dvh !important; max-height: 100dvh !important;
+        border-radius: 0 !important; border: none !important;
+      }
+
+      /* 📱 MOBILE TABLE TO CARDS */
+      .table-wrap {
+        border: none;
+        background: transparent;
+        overflow: visible;
+        box-shadow: none;
+      }
+      .table-wrap table, 
+      .table-wrap thead, 
+      .table-wrap tbody, 
+      .table-wrap th, 
+      .table-wrap td, 
+      .table-wrap tr {
+        display: block;
+      }
+      .table-wrap thead tr {
+        position: absolute; top: -9999px; left: -9999px;
+      }
+      .table-wrap tr {
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        margin-bottom: 1rem;
+        background: var(--surface);
+        padding: 1rem;
+        box-shadow: var(--shadow);
+        overflow: hidden;
+      }
+      
+      /* Status colors on cards */
+      .table-wrap tr[data-status="paid"],
+      .table-wrap tr[data-status="completed"],
+      .table-wrap tr[data-status="active"] { border-left: 4px solid var(--accent); }
+      .table-wrap tr[data-status="pending"] { border-left: 4px solid var(--warning); }
+      .table-wrap tr[data-status="rejected"],
+      .table-wrap tr[data-status="overdue"] { border-left: 4px solid var(--danger); }
+      
+      .table-wrap td {
+        border: none;
+        position: relative;
+        padding: 8px 0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        text-align: right;
+      }
+      .table-wrap td::before {
+        content: attr(data-label);
+        font-weight: 600;
+        color: var(--text-muted);
+        font-size: .72rem;
+        text-transform: uppercase;
+        letter-spacing: .5px;
+        flex-shrink: 0;
+        margin-right: 1rem;
+        text-align: left;
+      }
+      
+      /* Header cells for cards */
+      .table-wrap td.card-header-cell {
+        flex-direction: column;
+        align-items: flex-start;
+        border-bottom: 1px solid var(--border);
+        padding-bottom: 12px;
+        margin-bottom: 8px;
+      }
+      .table-wrap td.card-header-cell::before { margin-bottom: 6px; }
+      .table-wrap td.card-header-cell > div {
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 8px;
+      }
+      .table-wrap td.card-header-cell strong {
+        font-size: .95rem;
+      }
+
+      /* Amount cells */
+      .table-wrap td.amount-cell {
+        flex-direction: column;
+        align-items: flex-end;
+      }
+      .table-wrap td.amount-cell strong { font-size: 1.05rem; }
+
+      /* Actions/Notes cell */
+      .table-wrap td.actions-cell {
+        justify-content: flex-end;
+        border-top: 1px solid var(--border);
+        margin-top: 8px;
+        padding-top: 12px;
+      }
+      .table-wrap td.actions-cell::before { display: none; }
+    }
+
+    /* 📱 VERY SMALL MOBILE */
+    @media (max-width: 380px) {
+      .main { padding: .75rem; }
+      .page-title { font-size: 1rem; }
+      .stats { gap: .5rem; }
+      .stat { padding: .85rem; }
+      .stat-val { font-size: 1.05rem; }
+      .stat-lbl { font-size: .62rem; }
+    }
   </style>
 </head>
 <body>
 <header class="header">
-  <div class="logo"><img src="https://i.ibb.co/p6GCfY1x/Screenshot-2026-05-30-at-17-06-41.png" alt="Logo" class="logo-img"><div class="logo-text">Drafts</div></div>
-  <div class="header-right"><div class="emp-info"><div class="emp-name" id="empName">Loading...</div><div class="emp-code" id="empCode">EMP-XXX</div></div><button class="btn btn-outline" id="logoutBtn">Log Out</button></div>
+  <div class="logo">
+    <img src="https://i.ibb.co/p6GCfY1x/Screenshot-2026-05-30-at-17-06-41.png" alt="Logo" class="logo-img">
+    <div class="logo-text">Drafts</div>
+  </div>
+  <div class="header-right">
+    <div class="emp-info">
+      <div class="emp-name" id="empName">Loading...</div>
+      <div class="emp-code" id="empCode">EMP-XXX</div>
+    </div>
+    <button class="btn btn-outline" id="logoutBtn">Log Out</button>
+  </div>
 </header>
+
 <div class="toast-container" id="toastContainer"></div>
+
 <main class="main">
   <h1 class="page-title">My Dashboard</h1>
+  
   <div class="stats">
-    <div class="stat"><div class="stat-lbl">Account Balance</div><div class="stat-val" style="color:var(--accent)" id="bal">UGX 0</div></div>
-    <div class="stat"><div class="stat-lbl">Total Earned</div><div class="stat-val" id="totalEarned">UGX 0</div></div>
-    <div class="stat"><div class="stat-lbl">My Projects</div><div class="stat-val" id="projCount">0</div></div>
-    <div class="stat"><div class="stat-lbl">Pending Requests</div><div class="stat-val" id="pendReq">0</div></div>
+    <div class="stat">
+      <div class="stat-lbl">Account Balance</div>
+      <div class="stat-val" style="color:var(--accent)" id="bal">UGX 0</div>
+    </div>
+    <div class="stat">
+      <div class="stat-lbl">Total Earned</div>
+      <div class="stat-val" id="totalEarned">UGX 0</div>
+    </div>
+    <div class="stat">
+      <div class="stat-lbl">My Projects</div>
+      <div class="stat-val" id="projCount">0</div>
+    </div>
+    <div class="stat">
+      <div class="stat-lbl">Pending Requests</div>
+      <div class="stat-val" id="pendReq">0</div>
+    </div>
   </div>
+  
   <div class="tabs">
     <button class="tab active" data-tab="earnings">Earnings</button>
     <button class="tab" data-tab="projects">My Projects</button>
     <button class="tab" data-tab="withdrawals">Withdrawals</button>
   </div>
+  
   <div id="earningsTab">
-    <div class="table-wrap"><table><thead><tr><th>Date</th><th>Type</th><th>Project</th><th>Amount</th><th>Status</th></tr></thead><tbody id="earningsTb"><tr><td colspan="5"><div class="empty">Loading...</div></td></tr></tbody></table></div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Type</th>
+            <th>Project</th>
+            <th>Amount</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="earningsTb">
+          <tr><td colspan="5"><div class="empty"><div class="empty-icon">💰</div><p>Loading...</p></div></td></tr>
+        </tbody>
+      </table>
+    </div>
   </div>
+  
   <div id="projectsTab" style="display:none">
-    <div class="table-wrap"><table><thead><tr><th>Project</th><th>Client</th><th>Rate</th><th>Commission</th><th>Earned</th><th>Status</th></tr></thead><tbody id="projTb"><tr><td colspan="6"><div class="empty">Loading...</div></td></tr></tbody></table></div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Project</th>
+            <th>Client</th>
+            <th>Rate</th>
+            <th>Commission</th>
+            <th>Earned</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="projTb">
+          <tr><td colspan="6"><div class="empty"><div class="empty-icon">📁</div><p>Loading...</p></div></td></tr>
+        </tbody>
+      </table>
+    </div>
   </div>
+  
   <div id="withdrawalsTab" style="display:none">
-    <div class="flex justify-between items-center mb-2" style="margin-bottom:1rem; display:flex; justify-content:space-between; align-items:center;"><h3 style="font-size:1rem; font-weight:600">Withdrawal Requests</h3><button class="btn btn-primary" id="withdrawBtn">💰 Request Withdraw</button></div>
-    <div class="table-wrap"><table><thead><tr><th>Date</th><th>Amount</th><th>Status</th><th>Processed</th><th>Notes</th></tr></thead><tbody id="wdTb"><tr><td colspan="5"><div class="empty">No requests</div></td></tr></tbody></table></div>
+    <div style="margin-bottom:1rem; display:flex; justify-content:space-between; align-items:center; flex-wrap: wrap; gap: 1rem;">
+      <h3 style="font-size:1rem; font-weight:600; color: var(--text);">Withdrawal Requests</h3>
+      <button class="btn btn-primary" id="withdrawBtn">💰 Request Withdraw</button>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Amount</th>
+            <th>Status</th>
+            <th>Processed</th>
+            <th>Notes</th>
+          </tr>
+        </thead>
+        <tbody id="wdTb">
+          <tr><td colspan="5"><div class="empty"><div class="empty-icon">💸</div><p>No requests</p></div></td></tr>
+        </tbody>
+      </table>
+    </div>
   </div>
 </main>
 
 <div class="modal-overlay" id="wdModal">
   <div class="modal">
-    <div class="modal-head"><h3>Request Withdrawal</h3><button class="modal-close" id="closeWd">✕</button></div>
-    <div class="modal-body">
-      <p style="margin-bottom:1rem; color:var(--text-muted)">Available: <strong id="wdBal" style="color:var(--accent)">UGX 0</strong></p>
-      <div class="form-group"><label class="form-lbl">Amount (UGX) *</label><input class="form-inp" id="wdAmt" type="number" min="10000" placeholder="10,000 min" /></div>
-      <div class="form-group"><label class="form-lbl">Notes</label><input class="form-inp" id="wdNote" placeholder="Mobile number / Bank details" /></div>
+    <div class="modal-head">
+      <h3>Request Withdrawal</h3>
+      <button class="modal-close" id="closeWd">✕</button>
     </div>
-    <div class="modal-foot"><button class="btn btn-outline" id="cancelWd">Cancel</button><button class="btn btn-primary" id="submitWd">Submit</button></div>
+    <div class="modal-body">
+      <p style="margin-bottom:1rem; color:var(--text-muted); font-size: .85rem;">
+        Available: <strong id="wdBal" style="color:var(--accent); font-size: 1rem;">UGX 0</strong>
+      </p>
+      <div class="form-group">
+        <label class="form-lbl">Amount (UGX) *</label>
+        <input class="form-inp" id="wdAmt" type="number" min="10000" placeholder="10,000 min" />
+      </div>
+      <div class="form-group">
+        <label class="form-lbl">Notes</label>
+        <input class="form-inp" id="wdNote" placeholder="Mobile number / Bank details" />
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-outline" id="cancelWd">Cancel</button>
+      <button class="btn btn-primary" id="submitWd">Submit</button>
+    </div>
   </div>
 </div>
 
@@ -76,30 +472,74 @@
   const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
   let empData = null;
 
+  // === UTILS ===
+  function escapeHtml(str) {
+    if (!str) return '';
+    return String(str).replace(/[&<>"']/g, m => ({
+      '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+    }[m]));
+  }
+
   function fmt(n){ return 'UGX ' + Number(n||0).toLocaleString(); }
-  function toast(m){ const c=document.getElementById('toastContainer'); const d=document.createElement('div'); d.className='toast'; d.textContent=m; c.appendChild(d); setTimeout(()=>d.remove(),3000); }
-  function open(id){ document.getElementById(id).classList.add('open'); } function close(id){ document.getElementById(id).classList.remove('open'); }
+  
+  function toast(m, type = 'success'){ 
+    const c=document.getElementById('toastContainer'); 
+    const d=document.createElement('div'); 
+    d.className=`toast ${type}`; 
+    d.textContent=m; 
+    c.appendChild(d); 
+    setTimeout(()=>d.remove(),3000); 
+  }
+  
+  function open(id){ document.getElementById(id).classList.add('open'); } 
+  function close(id){ document.getElementById(id).classList.remove('open'); }
 
   document.addEventListener('DOMContentLoaded', async () => {
     try {
       const { data } = await supabase.from('employee_earnings_summary').select('*').eq('id', empId).single();
       if(!data) throw new Error('Profile not found');
       empData = data;
-      document.getElementById('empName').textContent = data.name;
-      document.getElementById('empCode').textContent = data.employee_code;
+      document.getElementById('empName').textContent = escapeHtml(data.name);
+      document.getElementById('empCode').textContent = escapeHtml(data.employee_code);
       document.getElementById('bal').textContent = fmt(data.account_balance);
       document.getElementById('totalEarned').textContent = fmt(data.total_commissions + data.total_salary);
       document.getElementById('pendReq').textContent = data.pending_withdrawals || 0;
 
-      await loadEarnings(); await loadProjects(); await loadWithdrawals();
-    } catch(e) { toast('Session expired'); localStorage.clear(); location.href='employee-login.html'; }
+      await loadEarnings(); 
+      await loadProjects(); 
+      await loadWithdrawals();
+    } catch(e) { 
+      toast('Session expired', 'error'); 
+      localStorage.clear(); 
+      location.href='employee-login.html'; 
+    }
   });
 
   async function loadEarnings() {
     const { data } = await supabase.from('employee_earnings').select('*, projects(name)').eq('employee_id', empId).order('payment_date',{ascending:false});
     const tb = document.getElementById('earningsTb');
-    if(!data?.length) { tb.innerHTML = `<tr><td colspan="5"><div class="empty">No earnings yet</div></td></tr>`; return; }
-    tb.innerHTML = data.map(e => `<tr><td>${new Date(e.payment_date).toLocaleDateString()}</td><td><span class="badge badge-blue">${e.type}</span></td><td>${e.projects?.name||'—'}</td><td><strong>${fmt(e.amount)}</strong></td><td><span class="badge ${e.status==='paid'?'badge-green':'badge-yellow'}">${e.status}</span></td></tr>`).join('');
+    if(!data?.length) { 
+      tb.innerHTML = `<tr><td colspan="5"><div class="empty"><div class="empty-icon">💰</div><p>No earnings yet</p></div></td></tr>`; 
+      return; 
+    }
+    tb.innerHTML = data.map(e => {
+      const statusBadge = e.status === 'paid' ? 'badge-green' : 'badge-yellow';
+      return `<tr data-status="${e.status}">
+        <td class="card-header-cell" data-label="Date">
+          <div>
+            <strong>${new Date(e.payment_date).toLocaleDateString()}</strong>
+            <span class="badge badge-blue"><span class="badge-dot"></span>${escapeHtml(e.type)}</span>
+          </div>
+        </td>
+        <td data-label="Project">${escapeHtml(e.projects?.name) || '—'}</td>
+        <td class="amount-cell" data-label="Amount">
+          <strong>${fmt(e.amount)}</strong>
+        </td>
+        <td data-label="Status">
+          <span class="badge ${statusBadge}"><span class="badge-dot"></span>${escapeHtml(e.status)}</span>
+        </td>
+      </tr>`;
+    }).join('');
   }
 
   async function loadProjects() {
@@ -107,24 +547,62 @@
     const { data: earns } = await supabase.from('employee_earnings').select('project_id, amount').eq('employee_id', empId).eq('type','commission');
     const tb = document.getElementById('projTb');
     document.getElementById('projCount').textContent = refs?.length || 0;
-    if(!refs?.length) { tb.innerHTML = `<tr><td colspan="6"><div class="empty">No referred projects</div></td></tr>`; return; }
-    const earnedMap = {}; (earns||[]).forEach(e => earnedMap[e.project_id] = (earnedMap[e.project_id]||0) + e.amount);
+    if(!refs?.length) { 
+      tb.innerHTML = `<tr><td colspan="6"><div class="empty"><div class="empty-icon">📁</div><p>No referred projects</p></div></td></tr>`; 
+      return; 
+    }
+    const earnedMap = {}; 
+    (earns||[]).forEach(e => earnedMap[e.project_id] = (earnedMap[e.project_id]||0) + e.amount);
     tb.innerHTML = refs.map(r => {
-      const p = r.projects, com = (p?.monthly_rate||0) * r.commission_rate, ear = earnedMap[r.project_id]||0;
-      return `<tr><td><strong>${p?.name}</strong></td><td>${p?.client}</td><td>${fmt(p?.monthly_rate)}/mo</td><td>${(r.commission_rate*100).toFixed(1)}%</td><td>${fmt(ear)}</td><td><span class="badge badge-green">${r.status}</span></td></tr>`;
+      const p = r.projects;
+      const ear = earnedMap[r.project_id] || 0;
+      const statusBadge = r.status === 'active' ? 'badge-green' : r.status === 'pending' ? 'badge-yellow' : 'badge-gray';
+      return `<tr data-status="${r.status}">
+        <td class="card-header-cell" data-label="Project">
+          <div>
+            <strong>${escapeHtml(p?.name) || 'Untitled'}</strong>
+            <span class="badge ${statusBadge}"><span class="badge-dot"></span>${escapeHtml(r.status)}</span>
+          </div>
+        </td>
+        <td data-label="Client">${escapeHtml(p?.client) || '—'}</td>
+        <td data-label="Rate">${fmt(p?.monthly_rate)}/mo</td>
+        <td data-label="Commission">${(r.commission_rate*100).toFixed(1)}%</td>
+        <td class="amount-cell" data-label="Earned">
+          <strong>${fmt(ear)}</strong>
+        </td>
+      </tr>`;
     }).join('');
   }
 
   async function loadWithdrawals() {
     const { data } = await supabase.from('withdrawal_requests').select('*').eq('employee_id', empId).order('requested_at',{ascending:false});
     const tb = document.getElementById('wdTb');
-    if(!data?.length) { tb.innerHTML = `<tr><td colspan="5"><div class="empty">No requests</div></td></tr>`; return; }
-    tb.innerHTML = data.map(w => `<tr><td>${new Date(w.requested_at).toLocaleDateString()}</td><td><strong>${fmt(w.amount)}</strong></td><td><span class="badge ${w.status==='completed'?'badge-green':w.status==='pending'?'badge-yellow':'badge-red'}">${w.status}</span></td><td>${w.processed_at?new Date(w.processed_at).toLocaleDateString():'—'}</td><td>${w.employee_notes||'—'}</td></tr>`).join('');
+    if(!data?.length) { 
+      tb.innerHTML = `<tr><td colspan="5"><div class="empty"><div class="empty-icon">💸</div><p>No requests</p></div></td></tr>`; 
+      return; 
+    }
+    tb.innerHTML = data.map(w => {
+      const statusBadge = w.status === 'completed' ? 'badge-green' : w.status === 'pending' ? 'badge-yellow' : 'badge-red';
+      return `<tr data-status="${w.status}">
+        <td class="card-header-cell" data-label="Date">
+          <div>
+            <strong>${new Date(w.requested_at).toLocaleDateString()}</strong>
+            <span class="badge ${statusBadge}"><span class="badge-dot"></span>${escapeHtml(w.status)}</span>
+          </div>
+        </td>
+        <td class="amount-cell" data-label="Amount">
+          <strong>${fmt(w.amount)}</strong>
+        </td>
+        <td data-label="Processed">${w.processed_at ? new Date(w.processed_at).toLocaleDateString() : '—'}</td>
+        <td class="actions-cell" data-label="Notes">${escapeHtml(w.employee_notes) || '—'}</td>
+      </tr>`;
+    }).join('');
   }
 
   // Tabs
   document.querySelectorAll('.tab').forEach(b => b.onclick = function() {
-    document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active')); this.classList.add('active');
+    document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active')); 
+    this.classList.add('active');
     const t = this.dataset.tab;
     document.getElementById('earningsTab').style.display = t==='earnings'?'':'none';
     document.getElementById('projectsTab').style.display = t==='projects'?'':'none';
@@ -132,21 +610,47 @@
   });
 
   // Withdraw
-  document.getElementById('logoutBtn').onclick = () => { localStorage.clear(); location.href='employee-login.html'; };
+  document.getElementById('logoutBtn').onclick = () => { 
+    localStorage.clear(); 
+    location.href='employee-login.html'; 
+  };
   document.getElementById('closeWd').onclick = document.getElementById('cancelWd').onclick = () => close('wdModal');
-  document.getElementById('wdModal').onclick = e => { if(e.target.classList.contains('modal-overlay')) close('wdModal'); };
-  document.getElementById('withdrawBtn').onclick = () => { document.getElementById('wdBal').textContent = fmt(empData?.account_balance||0); document.getElementById('wdAmt').max = empData?.account_balance||0; open('wdModal'); };
+  document.getElementById('wdModal').onclick = e => { 
+    if(e.target.classList.contains('modal-overlay')) close('wdModal'); 
+  };
+  document.getElementById('withdrawBtn').onclick = () => { 
+    document.getElementById('wdBal').textContent = fmt(empData?.account_balance||0); 
+    document.getElementById('wdAmt').max = empData?.account_balance||0; 
+    open('wdModal'); 
+  };
   document.getElementById('submitWd').onclick = async () => {
     const amt = parseInt(document.getElementById('wdAmt').value);
-    if(amt < 10000) return toast('Minimum: UGX 10,000');
-    if(amt > empData.account_balance) return toast('Insufficient balance');
-    const btn = document.getElementById('submitWd'); btn.disabled=true; btn.textContent='Submitting...';
+    if(amt < 10000) return toast('Minimum: UGX 10,000', 'error');
+    if(amt > empData.account_balance) return toast('Insufficient balance', 'error');
+    const btn = document.getElementById('submitWd'); 
+    btn.disabled=true; 
+    btn.textContent='Submitting...';
     try {
-      const { error } = await supabase.from('withdrawal_requests').insert({ id: 'w'+Date.now(), employee_id: empId, amount: amt, status:'pending', requested_at: new Date().toISOString(), employee_notes: document.getElementById('wdNote').value });
+      const { error } = await supabase.from('withdrawal_requests').insert({ 
+        id: 'w'+Date.now(), 
+        employee_id: empId, 
+        amount: amt, 
+        status:'pending', 
+        requested_at: new Date().toISOString(), 
+        employee_notes: document.getElementById('wdNote').value 
+      });
       if(error) throw error;
-      toast('Requested!'); close('wdModal'); document.getElementById('wdAmt').value=''; document.getElementById('wdNote').value='';
+      toast('Requested!'); 
+      close('wdModal'); 
+      document.getElementById('wdAmt').value=''; 
+      document.getElementById('wdNote').value='';
       await loadWithdrawals();
-    } catch(e) { toast('Error: '+e.message); } finally { btn.disabled=false; btn.textContent='Submit'; }
+    } catch(e) { 
+      toast('Error: '+e.message, 'error'); 
+    } finally { 
+      btn.disabled=false; 
+      btn.textContent='Submit'; 
+    }
   };
 })();
 </script>
