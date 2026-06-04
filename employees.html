@@ -5,13 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Employees — Drafts</title>
   
-  <!-- Google Fonts + QR Code Library -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
-  
-  <!-- Supabase JS (v2) -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   
   <style>
@@ -24,6 +21,11 @@
       --radius: 12px; --radius-sm: 8px;
       --shadow: 0 4px 24px rgba(0,0,0,.08); --shadow-hover: 0 8px 32px rgba(0,0,0,.12);
       --transition: .2s cubic-bezier(.4,0,.2,1);
+      
+      /* Classic alternating row colors */
+      --row-odd: #fafbfd;
+      --row-even: #ffffff;
+      --row-hover: #f0f4ff;
     }
     * { margin:0; padding:0; box-sizing:border-box; }
     body {
@@ -34,7 +36,6 @@
     ::-webkit-scrollbar-track { background:transparent; }
     ::-webkit-scrollbar-thumb { background:var(--border); border-radius:3px; }
     
-    /* === HEADER STYLES === */
     .header {
       position: sticky; top: 0; z-index: 100;
       display: flex; align-items: center; justify-content: space-between;
@@ -45,13 +46,11 @@
     }
     .logo { display: flex; align-items: center; gap: 16px; cursor: pointer; user-select: none; }
     .logo-img { height: 64px; width: auto; object-fit: contain; }
-    .logo-text { font-size: 1.6rem; font-weight: 800; letter-spacing: -.3px; color: var(--text); }
-    .logo-subtitle { font-size: .65rem; color: var(--text-muted); letter-spacing: 2px; text-transform: uppercase; margin-top: -4px; }
     .nav { display: flex; gap: 4px; }
     .nav-btn {
       position: relative; padding: 10px 18px; border: none; background: transparent;
       color: var(--text-secondary); font-size: .88rem; font-weight: 500;
-      border-radius: var(--radius-sm); cursor: pointer; transition: var(--transition);
+      border-radius: var(--radius-sm); cursor: pointer; transition: var(--transition); text-decoration: none;
     }
     .nav-btn:hover { background: var(--primary-glow); color: var(--primary); }
     .nav-btn.active { background: var(--primary-glow); color: var(--primary); font-weight: 600; }
@@ -64,21 +63,23 @@
     .status-dot { width: 8px; height: 8px; background: var(--accent); border-radius: 50%; box-shadow: 0 0 8px rgba(5,150,105,.4); }
     .status-text { font-size: .75rem; color: var(--accent); font-weight: 600; }
     
-    /* === PAGE STYLES === */
     .main { padding: 2rem; max-width: 1440px; margin: 0 auto; }
     .page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem; }
     .page-title { font-size: 1.5rem; font-weight: 700; letter-spacing: -.3px; color: var(--text); }
     .page-desc { font-size: .85rem; color: var(--text-muted); margin-top: 2px; }
     
-    .btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; border: none; border-radius: var(--radius-sm); font-size: .85rem; font-weight: 600; cursor: pointer; transition: var(--transition); pointer-events: auto; }
+    .btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; border: none; border-radius: var(--radius-sm); font-size: .85rem; font-weight: 600; cursor: pointer; transition: var(--transition); pointer-events: auto; text-decoration: none; }
     .btn-primary { background: var(--primary); color: #fff; box-shadow: 0 2px 8px rgba(37,99,235,.2); }
     .btn-primary:hover { background: #1d4ed8; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(37,99,235,.3); }
     .btn-outline { background: transparent; color: var(--text-secondary); border: 1px solid var(--border); }
     .btn-outline:hover { border-color: var(--primary); color: var(--primary); background: var(--primary-glow); }
     .btn-sm { padding: 6px 14px; font-size: .78rem; }
+    .btn-success { background: var(--accent); color: #fff; box-shadow: 0 2px 8px rgba(5,150,105,.2); }
+    .btn-success:hover { background: #047857; transform: translateY(-1px); }
+    .btn-danger { background: var(--danger); color: #fff; }
+    .btn-danger:hover { background: #b91c1c; }
     .btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none !important; }
     
-    .card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.5rem; transition: var(--transition); box-shadow: var(--shadow); }
     .badge { display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: 20px; font-size: .72rem; font-weight: 600; letter-spacing: .3px; }
     .badge-green { background: var(--accent-glow); color: var(--accent); }
     .badge-yellow { background: rgba(217,119,6,.12); color: var(--warning); }
@@ -87,17 +88,47 @@
     .badge-gray { background: rgba(100,116,139,.12); color: var(--text-muted); }
     .badge-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
     
-    .price-main { font-weight: 700; font-size: .88rem; color: var(--text); }
-    .price-sub { font-size: .7rem; color: var(--text-muted); margin-left: 4px; }
-    
-    .table-wrapper { overflow-x: auto; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); }
+    /* 🎨 CLASSIC TABLE WITH ALTERNATING ROWS */
+    .table-wrapper { 
+      overflow-x: auto; 
+      border: 1px solid var(--border); 
+      border-radius: var(--radius); 
+      background: var(--surface);
+      box-shadow: 0 1px 3px rgba(0,0,0,.04);
+    }
     table { width: 100%; border-collapse: collapse; font-size: .85rem; }
-    thead { background: var(--card-hover); }
-    th { text-align: left; padding: 12px 16px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; font-size: .72rem; letter-spacing: .8px; border-bottom: 1px solid var(--border); }
-    td { padding: 12px 16px; border-bottom: 1px solid var(--border); vertical-align: middle; color: var(--text); }
+    thead { background: linear-gradient(to bottom, #f8fafc, #f1f5f9); }
+    th { 
+      text-align: left; padding: 14px 16px; font-weight: 700; color: var(--text-secondary); 
+      text-transform: uppercase; font-size: .72rem; letter-spacing: .8px; 
+      border-bottom: 2px solid var(--border);
+    }
+    td { padding: 14px 16px; border-bottom: 1px solid var(--border); vertical-align: middle; color: var(--text); }
     tr:last-child td { border-bottom: none; }
-    tbody tr { transition: var(--transition); cursor: default; }
-    tbody tr:hover { background: var(--card-hover); }
+    
+    /* Alternating row colors */
+    tbody tr { transition: var(--transition); cursor: pointer; }
+    tbody tr:nth-child(odd) { background: var(--row-odd); }
+    tbody tr:nth-child(even) { background: var(--row-even); }
+    tbody tr:hover { background: var(--row-hover) !important; transform: scale(1.001); }
+    
+    /* Employee card inside row */
+    .employee-card { display: flex; gap: 1rem; align-items: center; }
+    .employee-avatar { 
+      width: 48px; height: 48px; border-radius: 50%; 
+      background: linear-gradient(135deg, var(--primary-glow), rgba(37,99,235,.2)); 
+      display: grid; place-items: center; font-weight: 700; color: var(--primary); 
+      flex-shrink: 0; border: 2px solid white; box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    }
+    .employee-avatar img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
+    .employee-info { flex: 1; }
+    .employee-name { font-weight: 700; font-size: .95rem; margin-bottom: 2px; color: var(--text); }
+    .employee-title { font-size: .78rem; color: var(--text-muted); margin-bottom: 4px; }
+    .employee-code { 
+      font-family: 'SF Mono', Monaco, monospace; font-size: .7rem; 
+      background: var(--card-hover); padding: 2px 8px; border-radius: 4px; 
+      display: inline-block; color: var(--text-secondary); font-weight: 600;
+    }
     
     .empty-state { text-align: center; padding: 3rem 1rem; color: var(--text-muted); }
     .empty-icon { font-size: 3rem; margin-bottom: .75rem; opacity: .4; }
@@ -108,7 +139,7 @@
     .toast.error { border-left-color: var(--danger); }
     @keyframes slideIn { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
     
-    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.4); backdrop-filter: blur(4px); z-index: 200; place-items: center; pointer-events: none; opacity: 0; transition: opacity .2s ease; }
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.5); backdrop-filter: blur(4px); z-index: 200; place-items: center; pointer-events: none; opacity: 0; transition: opacity .2s ease; }
     .modal-overlay.open { display: grid; pointer-events: auto; opacity: 1; }
     .modal { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); width: 90%; max-width: 720px; max-height: 90vh; overflow-y: auto; box-shadow: var(--shadow-hover); animation: fadeUp .2s ease; pointer-events: auto; }
     @keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
@@ -128,33 +159,96 @@
     .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
     @media (max-width: 500px) { .form-row { grid-template-columns: 1fr; } }
     
-    /* === EMPLOYEE-SPECIFIC STYLES === */
-    .employee-card { display: flex; gap: 1rem; padding: 1rem; border: 1px solid var(--border); border-radius: var(--radius-sm); margin-bottom: 1rem; background: var(--surface); }
-    .employee-avatar { width: 64px; height: 64px; border-radius: 50%; background: var(--primary-glow); display: grid; place-items: center; font-weight: 700; color: var(--primary); flex-shrink: 0; }
-    .employee-avatar img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
-    .employee-info { flex: 1; }
-    .employee-name { font-weight: 700; font-size: 1rem; margin-bottom: 2px; }
-    .employee-title { font-size: .8rem; color: var(--text-muted); margin-bottom: 4px; }
-    .employee-code { font-family: monospace; font-size: .75rem; background: var(--card-hover); padding: 2px 6px; border-radius: 4px; }
-    .employee-balance { font-weight: 700; color: var(--accent); margin-top: 4px; }
-    .qr-container { text-align: center; padding: 1rem; background: var(--card-hover); border-radius: var(--radius-sm); }
-    .qr-code { width: 120px; height: 120px; margin: 0 auto 8px; }
-    .qr-label { font-size: .75rem; color: var(--text-muted); }
-    
     .text-green { color: var(--accent); }
+    .text-red { color: var(--danger); }
+    .text-muted { color: var(--text-muted); }
     .flex { display: flex; }
     .items-center { align-items: center; }
     .justify-between { justify-content: space-between; }
     .gap-1 { gap: .5rem; }
+    .gap-2 { gap: 1rem; }
     .wrap { flex-wrap: wrap; }
+    
+    /* 🎨 EMPLOYEE WALLET POPUP */
+    .wallet-modal { max-width: 600px; }
+    .wallet-header {
+      background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+      color: white; padding: 2rem; border-radius: var(--radius) var(--radius) 0 0;
+      position: relative; overflow: hidden;
+    }
+    .wallet-header::before {
+      content: ''; position: absolute; top: -50%; right: -20%; width: 200px; height: 200px;
+      background: rgba(255,255,255,.1); border-radius: 50%;
+    }
+    .wallet-header::after {
+      content: ''; position: absolute; bottom: -30%; left: -10%; width: 150px; height: 150px;
+      background: rgba(255,255,255,.08); border-radius: 50%;
+    }
+    .wallet-employee {
+      display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem;
+      position: relative; z-index: 1;
+    }
+    .wallet-avatar {
+      width: 64px; height: 64px; border-radius: 50%; background: rgba(255,255,255,.2);
+      display: grid; place-items: center; font-weight: 700; font-size: 1.5rem;
+      border: 3px solid rgba(255,255,255,.3);
+    }
+    .wallet-avatar img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
+    .wallet-name { font-size: 1.2rem; font-weight: 700; margin-bottom: 2px; }
+    .wallet-code { font-size: .8rem; opacity: .9; font-family: monospace; }
+    
+    .wallet-balance-card {
+      background: rgba(255,255,255,.15); backdrop-filter: blur(10px);
+      border-radius: var(--radius-sm); padding: 1.5rem; text-align: center;
+      border: 1px solid rgba(255,255,255,.2); position: relative; z-index: 1;
+    }
+    .wallet-balance-label { font-size: .75rem; text-transform: uppercase; letter-spacing: 1px; opacity: .9; margin-bottom: 8px; }
+    .wallet-balance-amount { font-size: 2.5rem; font-weight: 800; letter-spacing: -1px; margin-bottom: 4px; }
+    .wallet-balance-usd { font-size: .9rem; opacity: .85; }
+    
+    .wallet-actions {
+      display: flex; gap: 1rem; padding: 1.5rem; border-bottom: 1px solid var(--border);
+    }
+    .wallet-action-btn {
+      flex: 1; padding: 12px; border: 1px solid var(--border); border-radius: var(--radius-sm);
+      background: var(--surface); cursor: pointer; transition: var(--transition);
+      display: flex; flex-direction: column; align-items: center; gap: 6px;
+      font-size: .85rem; font-weight: 600; color: var(--text-secondary);
+    }
+    .wallet-action-btn:hover { border-color: var(--primary); color: var(--primary); background: var(--primary-glow); }
+    .wallet-action-btn .icon { font-size: 1.5rem; }
+    
+    .wallet-history { padding: 1.5rem; }
+    .wallet-history-title { font-size: .9rem; font-weight: 700; margin-bottom: 1rem; color: var(--text); display: flex; align-items: center; gap: 8px; }
+    .wallet-history-list { display: flex; flex-direction: column; gap: 10px; max-height: 300px; overflow-y: auto; }
+    .wallet-history-item {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 12px; background: var(--row-odd); border-radius: var(--radius-sm);
+      border: 1px solid var(--border); transition: var(--transition);
+    }
+    .wallet-history-item:hover { background: var(--row-hover); border-color: var(--primary); }
+    .wallet-history-info { flex: 1; }
+    .wallet-history-date { font-size: .75rem; color: var(--text-muted); margin-bottom: 2px; }
+    .wallet-history-notes { font-size: .82rem; color: var(--text-secondary); }
+    .wallet-history-amount { font-weight: 700; color: var(--danger); font-size: .95rem; }
+    .wallet-history-status { margin-left: 12px; }
+    
+    .empty-history { text-align: center; padding: 2rem; color: var(--text-muted); font-size: .85rem; }
+    
+    /* Withdraw Modal */
+    .withdraw-modal { max-width: 400px; }
+    .withdraw-amount-display {
+      text-align: center; padding: 1.5rem; background: var(--row-odd);
+      border-radius: var(--radius-sm); margin-bottom: 1rem;
+    }
+    .withdraw-amount-label { font-size: .75rem; color: var(--text-muted); text-transform: uppercase; margin-bottom: 4px; }
+    .withdraw-amount-value { font-size: 1.8rem; font-weight: 800; color: var(--accent); }
     
     @media (max-width: 1024px) {
       .header { padding: 0 1rem; height: 80px; }
       .logo-img { height: 52px; }
       .nav { gap: 0; flex-wrap: wrap; }
       .nav-btn { padding: 8px 12px; font-size: .78rem; }
-      .logo-text { font-size: 1.2rem; }
-      .logo-subtitle { display: none; }
       .main { padding: 1rem; }
     }
   </style>
@@ -187,7 +281,7 @@
   <div class="page-header">
     <div>
       <h1 class="page-title">Employee Management</h1>
-      <p class="page-desc">Manage team members, referrals, and commissions</p>
+      <p class="page-desc">Manage team members, track commissions, and handle withdrawals</p>
     </div>
     <button class="btn btn-primary" id="newEmployeeBtn">＋ Add Employee</button>
   </div>
@@ -200,7 +294,7 @@
           <th>Title</th>
           <th>Code</th>
           <th>Balance</th>
-          <th>Commission Rate</th>
+          <th>Commission</th>
           <th>Status</th>
           <th>Actions</th>
         </tr>
@@ -212,7 +306,7 @@
   </div>
 </main>
 
-<!-- Employee Modal -->
+<!-- Employee Form Modal -->
 <div class="modal-overlay" id="employeeModal">
   <div class="modal">
     <div class="modal-header">
@@ -243,12 +337,12 @@
       </div>
       <div class="form-row">
         <div class="form-group">
-          <label class="form-label">Monthly Salary (UGX)</label>
-          <input class="form-input" id="empSalary" type="number" placeholder="0" />
+          <label class="form-label">Overall Commission Rate (%)</label>
+          <input class="form-input" id="empOverallCommission" type="number" min="0" max="100" step="0.1" placeholder="e.g. 2" value="2" />
         </div>
         <div class="form-group">
-          <label class="form-label">Commission Rate (%)</label>
-          <input class="form-input" id="empCommission" type="number" min="0" max="100" step="0.1" placeholder="10" value="10" />
+          <label class="form-label">Referral Commission Rate (%)</label>
+          <input class="form-input" id="empReferralCommission" type="number" min="0" max="100" step="0.1" placeholder="e.g. 10" value="10" />
         </div>
       </div>
       <div class="form-group">
@@ -271,18 +365,89 @@
   </div>
 </div>
 
-<!-- Credentials Modal (shown after employee created) -->
+<!-- 🎨 WALLET POPUP MODAL -->
+<div class="modal-overlay" id="walletModal">
+  <div class="modal wallet-modal">
+    <div class="wallet-header">
+      <button class="modal-close" id="closeWalletModal" style="color: white; position: absolute; top: 1rem; right: 1rem;">✕</button>
+      <div class="wallet-employee">
+        <div class="wallet-avatar" id="walletAvatar">E</div>
+        <div>
+          <div class="wallet-name" id="walletName">Employee Name</div>
+          <div class="wallet-code" id="walletCode">EMP-001</div>
+        </div>
+      </div>
+      <div class="wallet-balance-card">
+        <div class="wallet-balance-label">Available Balance</div>
+        <div class="wallet-balance-amount" id="walletBalance">UGX 0</div>
+        <div class="wallet-balance-usd" id="walletBalanceUsd">$0.00</div>
+      </div>
+    </div>
+    <div class="wallet-actions">
+      <button class="wallet-action-btn" id="withdrawBtn">
+        <span class="icon">💸</span>
+        <span>Withdraw</span>
+      </button>
+      <button class="wallet-action-btn" id="recalcBtn">
+        <span class="icon">🔄</span>
+        <span>Recalculate</span>
+      </button>
+      <button class="wallet-action-btn" id="viewCredsBtn">
+        <span class="icon">🔑</span>
+        <span>Credentials</span>
+      </button>
+    </div>
+    <div class="wallet-history">
+      <div class="wallet-history-title">
+        <span>📜</span> Withdrawal History
+      </div>
+      <div class="wallet-history-list" id="walletHistory">
+        <div class="empty-history">No withdrawals yet</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- WITHDRAW MODAL -->
+<div class="modal-overlay" id="withdrawModal">
+  <div class="modal withdraw-modal">
+    <div class="modal-header">
+      <h3 class="modal-title">Withdraw Funds</h3>
+      <button class="modal-close" id="closeWithdrawModal">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="withdraw-amount-display">
+        <div class="withdraw-amount-label">Available Balance</div>
+        <div class="withdraw-amount-value" id="withdrawAvailable">UGX 0</div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Withdrawal Amount (UGX) *</label>
+        <input class="form-input" id="withdrawAmount" type="number" min="1" placeholder="Enter amount" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Notes (optional)</label>
+        <input class="form-input" id="withdrawNotes" placeholder="e.g. Mobile money, Bank transfer" />
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" id="cancelWithdraw">Cancel</button>
+      <button class="btn btn-success" id="confirmWithdraw">Confirm Withdrawal</button>
+    </div>
+  </div>
+</div>
+
+<!-- Credentials Modal -->
 <div class="modal-overlay" id="credentialsModal">
-  <div class="modal">
+  <div class="modal" style="max-width: 500px;">
     <div class="modal-header">
       <h3 class="modal-title">Employee Credentials</h3>
       <button class="modal-close" id="closeCredentialsModal">✕</button>
     </div>
     <div class="modal-body">
       <p style="margin-bottom:1rem; color:var(--text-muted)">
-        Share these credentials securely with the employee. They will use this to log in to their dashboard.
+        Share these credentials securely with the employee.
       </p>
-      <div class="card" style="margin-bottom:1rem">
+      <div style="background: var(--row-odd); padding: 1.5rem; border-radius: var(--radius-sm); border: 1px solid var(--border); margin-bottom: 1rem;">
         <div class="form-group">
           <label class="form-label">Username</label>
           <div class="flex justify-between items-center">
@@ -290,17 +455,13 @@
             <button class="btn btn-sm btn-outline" id="copyUsername">Copy</button>
           </div>
         </div>
-        <div class="form-group">
+        <div class="form-group" style="margin-bottom: 0;">
           <label class="form-label">Temporary Password</label>
           <div class="flex justify-between items-center">
             <code id="credPassword" style="font-weight:600; font-size:1.1rem; color:var(--danger)"></code>
             <button class="btn btn-sm btn-outline" id="copyPassword">Copy</button>
           </div>
         </div>
-      </div>
-      <div class="qr-container">
-        <div id="qrCode" class="qr-code"></div>
-        <div class="qr-label">Scan to access employee dashboard</div>
       </div>
     </div>
     <div class="modal-footer">
@@ -313,7 +474,6 @@
   (function() {
     'use strict';
     
-    // === CONFIG ===
     const SUPABASE_URL = 'https://hnbzerhoqqsmzqxcbnxv.supabase.co';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhuYnplcmhvcXFzbXpxeGNibnh2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkwNDg1MjksImV4cCI6MjA5NDYyNDUyOX0.a4rM51DQGih9SXMr71PREngZ_pT6dJFgv_fG9j5jAGc';
     const USD_RATE = 0.00027;
@@ -327,14 +487,15 @@
       const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
       let isSaving = false;
       let currentEmployeeId = null;
+      let currentEmployeeData = null;
 
       // === UTILS ===
       function generateId() {
         if (crypto?.randomUUID) return crypto.randomUUID();
         return 'id-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
       }
-      function formatUGX(n) { if (!n) return 'UGX 0'; return 'UGX ' + Number(n).toLocaleString(); }
-      function formatUSD(n) { if (!n) return '$0.00'; return '$' + (n * USD_RATE).toFixed(2); }
+      function formatUGX(n) { if (!n && n !== 0) return 'UGX 0'; return 'UGX ' + Number(n).toLocaleString(); }
+      function formatUSD(n) { if (!n && n !== 0) return '$0.00'; return '$' + (n * USD_RATE).toFixed(2); }
       
       function showToast(msg, type = 'success') {
         const c = document.getElementById('toastContainer');
@@ -347,7 +508,6 @@
       function openModal(id) { document.getElementById(id).classList.add('open'); }
       function closeModal(id) { document.getElementById(id).classList.remove('open'); }
       
-      // Generate random password
       function generatePassword(length = 12) {
         const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*';
         let result = '';
@@ -357,15 +517,12 @@
         return result;
       }
       
-      // Generate employee code (EMP-001, EMP-002...)
       async function generateEmployeeCode() {
         try {
-          const { data } = await supabase.rpc('generate_employee_code');
-          return data || 'EMP-001';
-        } catch (e) {
-          // Fallback if function doesn't exist yet
-          return 'EMP-' + String(Math.floor(Math.random() * 900) + 100);
-        }
+          const { data, error } = await supabase.rpc('generate_employee_code');
+          if (!error && data) return data;
+        } catch (e) {}
+        return 'EMP-' + String(Math.floor(Math.random() * 9000) + 1000);
       }
 
       // === LOAD EMPLOYEES TABLE ===
@@ -392,27 +549,36 @@
               ? `<img src="${e.profile_photo_url}" alt="${e.name}" />` 
               : `<span>${initials}</span>`;
             
-            return `<tr>
+            const overallRate = ((e.overall_commission_rate || 0) * 100).toFixed(1);
+            const referralRate = ((e.referral_commission_rate || 0) * 100).toFixed(1);
+            
+            return `<tr data-id="${e.id}">
               <td>
                 <div class="employee-card">
                   <div class="employee-avatar">${avatar}</div>
                   <div class="employee-info">
                     <div class="employee-name">${e.name || 'Untitled'}</div>
                     <div class="employee-title">${e.title || '—'}</div>
-                    <div class="employee-code">${e.employee_code}</div>
-                    <div class="employee-balance">${formatUGX(e.account_balance)}</div>
                   </div>
                 </div>
               </td>
               <td>${e.title || '—'}</td>
-              <td><code>${e.employee_code}</code></td>
-              <td><strong>${formatUGX(e.account_balance)}</strong><br><span class="text-muted" style="font-size:.75rem">${formatUSD(e.account_balance)}</span></td>
-              <td><span class="badge badge-blue">${(e.commission_rate * 100).toFixed(1)}%</span></td>
+              <td><span class="employee-code">${e.employee_code}</span></td>
+              <td>
+                <strong class="text-green">${formatUGX(e.account_balance)}</strong><br>
+                <span class="text-muted" style="font-size:.75rem">${formatUSD(e.account_balance)}</span>
+              </td>
+              <td>
+                <div style="font-size:.8rem; line-height: 1.6;">
+                  <div>Overall: <strong>${overallRate}%</strong></div>
+                  <div>Referral: <strong class="text-green">${referralRate}%</strong></div>
+                </div>
+              </td>
               <td><span class="badge ${statusBadge}"><span class="badge-dot"></span>${e.status}</span></td>
               <td>
-                <div class="flex gap-1">
+                <div class="flex gap-1 wrap" onclick="event.stopPropagation()">
                   <button class="btn btn-sm btn-outline edit-btn" data-id="${e.id}">Edit</button>
-                  <button class="btn btn-sm btn-outline creds-btn" data-id="${e.id}">Credentials</button>
+                  <button class="btn btn-sm btn-outline text-red delete-btn" data-id="${e.id}">Del</button>
                 </div>
               </td>
             </tr>`;
@@ -421,6 +587,171 @@
         } catch (err) {
           console.error('Employees load error:', err);
           showToast('Failed to load employees', 'error');
+        }
+      }
+
+      // === OPEN WALLET POPUP ===
+      async function openWalletPopup(empId) {
+        try {
+          const { data: emp, error } = await supabase.from('employees').select('*').eq('id', empId).single();
+          if (error || !emp) { showToast('Employee not found', 'error'); return; }
+          
+          currentEmployeeId = empId;
+          currentEmployeeData = emp;
+          
+          // Populate header
+          const initials = emp.name?.split(' ').map(n => n[0]).join('').toUpperCase() || 'E';
+          const avatarEl = document.getElementById('walletAvatar');
+          if (emp.profile_photo_url) {
+            avatarEl.innerHTML = `<img src="${emp.profile_photo_url}" alt="${emp.name}" />`;
+          } else {
+            avatarEl.textContent = initials;
+          }
+          document.getElementById('walletName').textContent = emp.name || 'Employee';
+          document.getElementById('walletCode').textContent = emp.employee_code;
+          document.getElementById('walletBalance').textContent = formatUGX(emp.account_balance);
+          document.getElementById('walletBalanceUsd').textContent = formatUSD(emp.account_balance);
+          
+          // Load withdrawal history
+          await loadWithdrawalHistory(empId);
+          
+          openModal('walletModal');
+        } catch (err) {
+          showToast('Error: ' + err.message, 'error');
+        }
+      }
+
+      // === LOAD WITHDRAWAL HISTORY ===
+      async function loadWithdrawalHistory(empId) {
+        try {
+          const { data, error } = await supabase
+            .from('employee_withdrawals')
+            .select('*')
+            .eq('employee_id', empId)
+            .order('created_at', { ascending: false });
+          
+          const historyEl = document.getElementById('walletHistory');
+          
+          if (error) throw error;
+          
+          if (!data || data.length === 0) {
+            historyEl.innerHTML = '<div class="empty-history">No withdrawals yet</div>';
+            return;
+          }
+          
+          historyEl.innerHTML = data.map(w => {
+            const statusBadge = w.status === 'completed' ? 'badge-green' : w.status === 'pending' ? 'badge-yellow' : 'badge-gray';
+            return `<div class="wallet-history-item">
+              <div class="wallet-history-info">
+                <div class="wallet-history-date">${new Date(w.withdrawal_date).toLocaleDateString()} at ${new Date(w.created_at).toLocaleTimeString()}</div>
+                <div class="wallet-history-notes">${w.notes || 'Withdrawal'}</div>
+              </div>
+              <div class="wallet-history-amount">-${formatUGX(w.amount)}</div>
+              <div class="wallet-history-status">
+                <span class="badge ${statusBadge}"><span class="badge-dot"></span>${w.status}</span>
+              </div>
+            </div>`;
+          }).join('');
+        } catch (err) {
+          console.error('History load error:', err);
+          document.getElementById('walletHistory').innerHTML = '<div class="empty-history">Failed to load history</div>';
+        }
+      }
+
+      // === WITHDRAW FUNDS ===
+      async function processWithdrawal() {
+        const amount = parseFloat(document.getElementById('withdrawAmount').value);
+        const notes = document.getElementById('withdrawNotes').value.trim();
+        
+        if (!amount || amount <= 0) {
+          showToast('Please enter a valid amount', 'error');
+          return;
+        }
+        
+        if (amount > (currentEmployeeData.account_balance || 0)) {
+          showToast('Insufficient balance', 'error');
+          return;
+        }
+        
+        const btn = document.getElementById('confirmWithdraw');
+        btn.disabled = true;
+        btn.textContent = 'Processing...';
+        
+        try {
+          // Create withdrawal record
+          const { error: withdrawErr } = await supabase.from('employee_withdrawals').insert({
+            id: generateId(),
+            employee_id: currentEmployeeId,
+            amount: amount,
+            withdrawal_date: new Date().toISOString().split('T')[0],
+            status: 'completed',
+            notes: notes || 'Withdrawal',
+            created_at: new Date().toISOString()
+          });
+          if (withdrawErr) throw withdrawErr;
+          
+          // Update employee balance
+          const newBalance = (currentEmployeeData.account_balance || 0) - amount;
+          const { error: updateErr } = await supabase.from('employees').update({ account_balance: newBalance }).eq('id', currentEmployeeId);
+          if (updateErr) throw updateErr;
+          
+          showToast(`Withdrawal of ${formatUGX(amount)} successful!`);
+          closeModal('withdrawModal');
+          
+          // Refresh wallet popup
+          await openWalletPopup(currentEmployeeId);
+          await loadEmployees();
+        } catch (err) {
+          showToast('Withdrawal failed: ' + err.message, 'error');
+        } finally {
+          btn.disabled = false;
+          btn.textContent = 'Confirm Withdrawal';
+        }
+      }
+
+      // === RECALCULATE BALANCE ===
+      async function recalculateBalance(empId) {
+        try {
+          const { data: emp } = await supabase.from('employees').select('overall_commission_rate, referral_commission_rate').eq('id', empId).single();
+          const overallRate = emp.overall_commission_rate || 0;
+          const referralRate = emp.referral_commission_rate || 0;
+
+          const { data: allPayments } = await supabase.from('payments').select('amount').eq('status', 'paid');
+          const totalIncome = (allPayments || []).reduce((sum, p) => sum + (p.amount || 0), 0);
+
+          let referralIncome = 0;
+          const { data: referredProjects } = await supabase.from('projects').select('id').eq('referred_by_id', empId);
+          if (referredProjects && referredProjects.length > 0) {
+            const projectIds = referredProjects.map(p => p.id);
+            const { data: refPayments } = await supabase.from('payments').select('amount').in('project_id', projectIds).eq('status', 'paid');
+            referralIncome = (refPayments || []).reduce((sum, p) => sum + (p.amount || 0), 0);
+          }
+
+          const newBalance = (totalIncome * overallRate) + (referralIncome * referralRate);
+          await supabase.from('employees').update({ account_balance: newBalance }).eq('id', empId);
+
+          showToast(`Balance recalculated: ${formatUGX(newBalance)}`);
+          await loadEmployees();
+          if (currentEmployeeId === empId) {
+            await openWalletPopup(empId);
+          }
+        } catch (err) {
+          showToast('Recalculate failed: ' + err.message, 'error');
+        }
+      }
+
+      // === DELETE EMPLOYEE ===
+      async function deleteEmployee(id) {
+        if (!confirm('Delete this employee? This cannot be undone.')) return;
+        try {
+          await supabase.from('employee_withdrawals').delete().eq('employee_id', id);
+          await supabase.from('employee_credentials').delete().eq('employee_id', id);
+          const { error } = await supabase.from('employees').delete().eq('id', id);
+          if (error) throw error;
+          showToast('Employee deleted');
+          await loadEmployees();
+        } catch (err) {
+          showToast('Delete failed: ' + err.message, 'error');
         }
       }
 
@@ -435,93 +766,63 @@
           document.getElementById('empTitle').value = data.title || '';
           document.getElementById('empEmail').value = data.email || '';
           document.getElementById('empPhone').value = data.phone || '';
-          document.getElementById('empSalary').value = data.salary_rate || '';
-          document.getElementById('empCommission').value = (data.commission_rate * 100) || 10;
+          document.getElementById('empOverallCommission').value = ((data.overall_commission_rate || 0) * 100) || 0;
+          document.getElementById('empReferralCommission').value = ((data.referral_commission_rate || 0) * 100) || 0;
           document.getElementById('empStatus').value = data.status || 'active';
           document.getElementById('empPhoto').value = data.profile_photo_url || '';
           document.getElementById('employeeModalTitle').textContent = 'Edit Employee';
           openModal('employeeModal');
         } catch (err) {
-          showToast('Error loading employee: ' + err.message, 'error');
+          showToast('Error: ' + err.message, 'error');
         }
       }
 
       // === SHOW CREDENTIALS ===
       async function showCredentials(employeeId) {
         try {
-          // Fetch employee and credentials
           const { data: emp } = await supabase.from('employees').select('*').eq('id', employeeId).single();
-          const { data: creds } = await supabase.from('employee_credentials').select('*').eq('employee_id', employeeId).single();
+          let { data: creds } = await supabase.from('employee_credentials').select('*').eq('employee_id', employeeId).single();
           
           if (!creds) {
-            // Generate new credentials
             const username = emp.employee_code.toLowerCase().replace('-', '');
             const password = generatePassword();
-            
             const { error } = await supabase.from('employee_credentials').upsert({
-              employee_id: employeeId,
-              username: username,
-              password_hash: password, // In production, hash this with bcrypt
-              created_at: new Date().toISOString()
+              employee_id: employeeId, username, password_hash: password, created_at: new Date().toISOString()
             });
             if (error) throw error;
-            
             creds = { username, password_hash: password };
           }
           
-          // Populate modal
           document.getElementById('credUsername').textContent = creds.username;
           document.getElementById('credPassword').textContent = creds.password_hash;
-          
-          // Generate QR code with login URL
-          const loginUrl = `${window.location.origin}/employee-dashboard.html?user=${creds.username}`;
-          document.getElementById('qrCode').innerHTML = '';
-          new QRCode(document.getElementById('qrCode'), {
-            text: loginUrl,
-            width: 120,
-            height: 120,
-            correctLevel: QRCode.CorrectLevel.M
-          });
-          
-          currentEmployeeId = employeeId;
           openModal('credentialsModal');
-          
         } catch (err) {
           showToast('Error: ' + err.message, 'error');
         }
       }
 
-      // === COPY TO CLIPBOARD ===
-      function setupCopyButtons() {
-        document.getElementById('copyUsername').onclick = async function() {
-          await navigator.clipboard.writeText(document.getElementById('credUsername').textContent);
-          showToast('Username copied!');
-        };
-        document.getElementById('copyPassword').onclick = async function() {
-          await navigator.clipboard.writeText(document.getElementById('credPassword').textContent);
-          showToast('Password copied!');
-        };
-      }
-
       // === EVENT LISTENERS ===
       document.getElementById('logoBtn').addEventListener('click', () => window.location.href = 'index.html');
+      
       document.getElementById('newEmployeeBtn').addEventListener('click', () => {
-        ['empId','empName','empTitle','empEmail','empPhone','empSalary','empPhoto'].forEach(id => 
+        ['empId','empName','empTitle','empEmail','empPhone','empPhoto'].forEach(id => 
           document.getElementById(id).value = ''
         );
-        document.getElementById('empCommission').value = '10';
+        document.getElementById('empOverallCommission').value = '2';
+        document.getElementById('empReferralCommission').value = '10';
         document.getElementById('empStatus').value = 'active';
         document.getElementById('employeeModalTitle').textContent = 'Add Employee';
         openModal('employeeModal');
       });
       
+      // Close modals
       document.getElementById('closeEmployeeModal').addEventListener('click', () => closeModal('employeeModal'));
       document.getElementById('cancelEmployee').addEventListener('click', () => closeModal('employeeModal'));
+      document.getElementById('closeWalletModal').addEventListener('click', () => closeModal('walletModal'));
       document.getElementById('closeCredentialsModal').addEventListener('click', () => closeModal('credentialsModal'));
-      document.getElementById('doneCredentials').addEventListener('click', () => {
-        closeModal('credentialsModal');
-        loadEmployees();
-      });
+      document.getElementById('doneCredentials').addEventListener('click', () => closeModal('credentialsModal'));
+      document.getElementById('closeWithdrawModal').addEventListener('click', () => closeModal('withdrawModal'));
+      document.getElementById('cancelWithdraw').addEventListener('click', () => closeModal('withdrawModal'));
       
       document.querySelectorAll('.modal-overlay').forEach(overlay => {
         overlay.addEventListener('click', (e) => {
@@ -529,15 +830,55 @@
         });
       });
 
-      // Table button delegation
+      // Table row click -> open wallet popup
       document.getElementById('employeesTable').addEventListener('click', (e) => {
         const editBtn = e.target.closest('.edit-btn');
-        const credsBtn = e.target.closest('.creds-btn');
-        if (editBtn) editEmployee(editBtn.dataset.id);
-        if (credsBtn) showCredentials(credsBtn.dataset.id);
+        const deleteBtn = e.target.closest('.delete-btn');
+        
+        if (editBtn) {
+          e.stopPropagation();
+          editEmployee(editBtn.dataset.id);
+          return;
+        }
+        if (deleteBtn) {
+          e.stopPropagation();
+          deleteEmployee(deleteBtn.dataset.id);
+          return;
+        }
+        
+        const row = e.target.closest('tr[data-id]');
+        if (row) {
+          openWalletPopup(row.dataset.id);
+        }
       });
 
-      setupCopyButtons();
+      // Wallet actions
+      document.getElementById('withdrawBtn').addEventListener('click', () => {
+        document.getElementById('withdrawAvailable').textContent = formatUGX(currentEmployeeData.account_balance);
+        document.getElementById('withdrawAmount').value = '';
+        document.getElementById('withdrawNotes').value = '';
+        openModal('withdrawModal');
+      });
+      
+      document.getElementById('recalcBtn').addEventListener('click', () => {
+        recalculateBalance(currentEmployeeId);
+      });
+      
+      document.getElementById('viewCredsBtn').addEventListener('click', () => {
+        showCredentials(currentEmployeeId);
+      });
+      
+      document.getElementById('confirmWithdraw').addEventListener('click', processWithdrawal);
+
+      // Copy credentials
+      document.getElementById('copyUsername').onclick = async function() {
+        await navigator.clipboard.writeText(document.getElementById('credUsername').textContent);
+        showToast('Username copied!');
+      };
+      document.getElementById('copyPassword').onclick = async function() {
+        await navigator.clipboard.writeText(document.getElementById('credPassword').textContent);
+        showToast('Password copied!');
+      };
 
       // === SAVE EMPLOYEE ===
       document.getElementById('saveEmployee').addEventListener('click', async function() {
@@ -550,39 +891,39 @@
 
         try {
           const id = document.getElementById('empId').value || generateId();
-          const commissionRate = parseFloat(document.getElementById('empCommission').value) / 100 || 0.1;
+          const isEdit = !!document.getElementById('empId').value;
+          
+          const overallRate = parseFloat(document.getElementById('empOverallCommission').value) / 100 || 0;
+          const referralRate = parseFloat(document.getElementById('empReferralCommission').value) / 100 || 0;
+          
+          let empCode = null;
+          if (isEdit) {
+            const { data: existing } = await supabase.from('employees').select('employee_code').eq('id', id).single();
+            empCode = existing?.employee_code || ('EMP-' + String(Math.floor(Math.random() * 9000) + 1000));
+          } else {
+            empCode = await generateEmployeeCode();
+          }
           
           const data = {
-            id,
-            employee_code: document.getElementById('empId').value ? undefined : await generateEmployeeCode(),
+            id, employee_code: empCode,
             name: document.getElementById('empName').value.trim(),
             title: document.getElementById('empTitle').value.trim(),
             email: document.getElementById('empEmail').value.trim() || null,
             phone: document.getElementById('empPhone').value.trim() || null,
             profile_photo_url: document.getElementById('empPhoto').value.trim() || null,
-            salary_rate: parseFloat(document.getElementById('empSalary').value) || 0,
-            commission_rate: commissionRate,
+            overall_commission_rate: overallRate,
+            referral_commission_rate: referralRate,
             status: document.getElementById('empStatus').value,
             updated_at: new Date().toISOString()
           };
           
-          if (!data.name) {
-            showToast('Please enter employee name', 'error');
-            return;
-          }
+          if (!data.name) { showToast('Please enter employee name', 'error'); return; }
           
           const { error } = await supabase.from('employees').upsert(data, { onConflict: 'id' });
           if (error) throw new Error(error.message);
           
-          showToast('Employee saved successfully!');
+          showToast('Employee saved!');
           closeModal('employeeModal');
-          
-          // If new employee, show credentials
-          if (!document.getElementById('empId').value) {
-            const { data: newEmp } = await supabase.from('employees').select('id').eq('employee_code', data.employee_code).single();
-            if (newEmp) showCredentials(newEmp.id);
-          }
-          
           await loadEmployees();
         } catch (err) {
           showToast('Error: ' + err.message, 'error');
@@ -593,7 +934,6 @@
         }
       });
 
-      // === INIT ===
       await loadEmployees();
     });
   })();
