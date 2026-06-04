@@ -22,7 +22,6 @@
       --shadow: 0 4px 24px rgba(0,0,0,.08); --shadow-hover: 0 8px 32px rgba(0,0,0,.12);
       --transition: .2s cubic-bezier(.4,0,.2,1);
       
-      /* Classic alternating row colors */
       --row-odd: #fafbfd;
       --row-even: #ffffff;
       --row-hover: #f0f4ff;
@@ -31,11 +30,13 @@
     body {
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
       background: var(--bg); color: var(--text); min-height: 100vh; line-height: 1.5;
+      -webkit-tap-highlight-color: transparent;
     }
     ::-webkit-scrollbar { width:6px; }
     ::-webkit-scrollbar-track { background:transparent; }
     ::-webkit-scrollbar-thumb { background:var(--border); border-radius:3px; }
     
+    /* HEADER */
     .header {
       position: sticky; top: 0; z-index: 100;
       display: flex; align-items: center; justify-content: space-between;
@@ -46,6 +47,8 @@
     }
     .logo { display: flex; align-items: center; gap: 16px; cursor: pointer; user-select: none; }
     .logo-img { height: 64px; width: auto; object-fit: contain; }
+    
+    /* DESKTOP NAV */
     .nav { display: flex; gap: 4px; }
     .nav-btn {
       position: relative; padding: 10px 18px; border: none; background: transparent;
@@ -62,7 +65,52 @@
     .header-right { display: flex; align-items: center; gap: 12px; }
     .status-dot { width: 8px; height: 8px; background: var(--accent); border-radius: 50%; box-shadow: 0 0 8px rgba(5,150,105,.4); }
     .status-text { font-size: .75rem; color: var(--accent); font-weight: 600; }
+
+    /* 📱 MOBILE NAV TOGGLE */
+    .mobile-nav-toggle {
+      display: none; background: none; border: 1px solid var(--border);
+      font-size: 1.3rem; cursor: pointer; padding: 6px 10px;
+      color: var(--text); border-radius: var(--radius-sm);
+      transition: var(--transition); line-height: 1;
+    }
+    .mobile-nav-toggle:hover { background: var(--primary-glow); border-color: var(--primary); color: var(--primary); }
+
+    /* 📱 MOBILE NAV DRAWER */
+    .nav-drawer-overlay {
+      display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(15,23,42,.5); backdrop-filter: blur(4px);
+      z-index: 200; opacity: 0; transition: opacity .3s;
+    }
+    .nav-drawer-overlay.active { display: block; opacity: 1; }
+    .nav-drawer {
+      position: fixed; top: 0; left: -300px; width: 280px; height: 100vh; height: 100dvh;
+      background: var(--surface); z-index: 201;
+      transition: left .3s cubic-bezier(.4,0,.2,1);
+      box-shadow: 4px 0 32px rgba(0,0,0,.15);
+      padding: 1.5rem 1rem; display: flex; flex-direction: column; gap: 4px;
+      overflow-y: auto;
+    }
+    .nav-drawer.active { left: 0; }
+    .nav-drawer-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 8px 16px; border-bottom: 1px solid var(--border); margin-bottom: 8px;
+    }
+    .nav-drawer-title { font-size: 1rem; font-weight: 700; color: var(--text); }
+    .nav-drawer-close {
+      background: none; border: none; font-size: 1.4rem; cursor: pointer;
+      color: var(--text-muted); padding: 4px 8px; border-radius: var(--radius-sm);
+      transition: var(--transition); line-height: 1;
+    }
+    .nav-drawer-close:hover { background: var(--card-hover); color: var(--text); }
+    .nav-drawer .nav-btn {
+      display: flex; align-items: center; padding: 14px 16px;
+      font-size: .95rem; border-radius: var(--radius-sm); width: 100%; text-align: left;
+      text-decoration: none;
+    }
+    .nav-drawer .nav-btn.active::after { display: none; }
+    .nav-drawer .nav-btn.active { background: var(--primary); color: #fff; }
     
+    /* MAIN CONTENT */
     .main { padding: 2rem; max-width: 1440px; margin: 0 auto; }
     .page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem; }
     .page-title { font-size: 1.5rem; font-weight: 700; letter-spacing: -.3px; color: var(--text); }
@@ -88,7 +136,6 @@
     .badge-gray { background: rgba(100,116,139,.12); color: var(--text-muted); }
     .badge-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
     
-    /* 🎨 CLASSIC TABLE WITH ALTERNATING ROWS */
     .table-wrapper { 
       overflow-x: auto; 
       border: 1px solid var(--border); 
@@ -106,13 +153,11 @@
     td { padding: 14px 16px; border-bottom: 1px solid var(--border); vertical-align: middle; color: var(--text); }
     tr:last-child td { border-bottom: none; }
     
-    /* Alternating row colors */
     tbody tr { transition: var(--transition); cursor: pointer; }
     tbody tr:nth-child(odd) { background: var(--row-odd); }
     tbody tr:nth-child(even) { background: var(--row-even); }
     tbody tr:hover { background: var(--row-hover) !important; transform: scale(1.001); }
     
-    /* Employee card inside row */
     .employee-card { display: flex; gap: 1rem; align-items: center; }
     .employee-avatar { 
       width: 48px; height: 48px; border-radius: 50%; 
@@ -121,9 +166,9 @@
       flex-shrink: 0; border: 2px solid white; box-shadow: 0 2px 8px rgba(0,0,0,.08);
     }
     .employee-avatar img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
-    .employee-info { flex: 1; }
-    .employee-name { font-weight: 700; font-size: .95rem; margin-bottom: 2px; color: var(--text); }
-    .employee-title { font-size: .78rem; color: var(--text-muted); margin-bottom: 4px; }
+    .employee-info { flex: 1; min-width: 0; }
+    .employee-name { font-weight: 700; font-size: .95rem; margin-bottom: 2px; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .employee-title { font-size: .78rem; color: var(--text-muted); margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .employee-code { 
       font-family: 'SF Mono', Monaco, monospace; font-size: .7rem; 
       background: var(--card-hover); padding: 2px 8px; border-radius: 4px; 
@@ -184,6 +229,22 @@
       content: ''; position: absolute; bottom: -30%; left: -10%; width: 150px; height: 150px;
       background: rgba(255,255,255,.08); border-radius: 50%;
     }
+    
+    /* 🚀 DRAFTS LOGO IN WALLET */
+    .wallet-logo-container {
+      display: flex; align-items: center; gap: 12px; margin-bottom: 1.5rem; 
+      position: relative; z-index: 1;
+    }
+    .wallet-logo-container img {
+      height: 42px; width: auto; object-fit: contain; 
+      background: rgba(255,255,255,.95); padding: 4px; border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,.1);
+    }
+    .wallet-logo-container .wallet-brand {
+      font-size: 1.3rem; font-weight: 800; letter-spacing: -.5px; color: white;
+      text-shadow: 0 1px 2px rgba(0,0,0,.1);
+    }
+
     .wallet-employee {
       display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem;
       position: relative; z-index: 1;
@@ -235,7 +296,6 @@
     
     .empty-history { text-align: center; padding: 2rem; color: var(--text-muted); font-size: .85rem; }
     
-    /* Withdraw Modal */
     .withdraw-modal { max-width: 400px; }
     .withdraw-amount-display {
       text-align: center; padding: 1.5rem; background: var(--row-odd);
@@ -243,13 +303,148 @@
     }
     .withdraw-amount-label { font-size: .75rem; color: var(--text-muted); text-transform: uppercase; margin-bottom: 4px; }
     .withdraw-amount-value { font-size: 1.8rem; font-weight: 800; color: var(--accent); }
-    
+
+    /* 📱 RESPONSIVE: TABLET */
     @media (max-width: 1024px) {
       .header { padding: 0 1rem; height: 80px; }
       .logo-img { height: 52px; }
       .nav { gap: 0; flex-wrap: wrap; }
       .nav-btn { padding: 8px 12px; font-size: .78rem; }
       .main { padding: 1rem; }
+    }
+
+    /* 📱 RESPONSIVE: MOBILE */
+    @media (max-width: 768px) {
+      .header { padding: 0 1rem; height: 64px; }
+      .logo-img { height: 44px; }
+      .nav { display: none; }
+      .mobile-nav-toggle { display: flex; align-items: center; justify-content: center; }
+      .main { padding: 1rem; padding-bottom: 2rem; }
+      
+      .page-header { 
+        margin-bottom: 1rem; 
+        flex-direction: column; 
+        align-items: flex-start; 
+      }
+      .page-title { font-size: 1.25rem; }
+      .page-desc { font-size: .78rem; }
+      .btn { padding: 8px 16px; font-size: .8rem; }
+      
+      /* Header buttons full width */
+      .page-header > div:last-child {
+        width: 100%;
+        display: flex;
+        gap: 0.5rem;
+      }
+      .page-header .btn { flex: 1; }
+
+      /* Modal full screen on mobile */
+      #employeeModal .modal, #walletModal .modal, #withdrawModal .modal, #credentialsModal .modal {
+        width: 100% !important; max-width: 100% !important; 
+        height: 100dvh !important; max-height: 100dvh !important; 
+        border-radius: 0 !important; border: none !important;
+      }
+
+      /* Wallet Modal Mobile Adjustments */
+      .wallet-header { padding: 1.5rem; }
+      .wallet-balance-amount { font-size: 2rem; }
+      .wallet-actions { flex-wrap: wrap; padding: 1rem; }
+      .wallet-action-btn { flex: 1 1 calc(50% - 0.5rem); font-size: .8rem; padding: 10px; }
+      .wallet-action-btn .icon { font-size: 1.2rem; }
+      .wallet-history { padding: 1rem; }
+
+      /* 📱 MOBILE TABLE TO CARDS */
+      .table-wrapper {
+        border: none;
+        background: transparent;
+        overflow: visible;
+      }
+      .table-wrapper table, 
+      .table-wrapper thead, 
+      .table-wrapper tbody, 
+      .table-wrapper th, 
+      .table-wrapper td, 
+      .table-wrapper tr {
+        display: block;
+      }
+      .table-wrapper thead tr {
+        position: absolute; top: -9999px; left: -9999px;
+      }
+      .table-wrapper tr {
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        margin-bottom: 1rem;
+        background: var(--surface);
+        padding: 1rem;
+        box-shadow: var(--shadow);
+        overflow: hidden;
+      }
+      
+      /* Status colors on cards */
+      .table-wrapper tr[data-status="active"] { border-left: 4px solid var(--accent); }
+      .table-wrapper tr[data-status="inactive"] { border-left: 4px solid var(--text-muted); opacity: 0.85; }
+      .table-wrapper tr[data-status="suspended"] { border-left: 4px solid var(--danger); }
+      
+      .table-wrapper td {
+        border: none;
+        position: relative;
+        padding: 8px 0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        text-align: right;
+      }
+      .table-wrapper td::before {
+        content: attr(data-label);
+        font-weight: 600;
+        color: var(--text-muted);
+        font-size: .72rem;
+        text-transform: uppercase;
+        letter-spacing: .5px;
+        flex-shrink: 0;
+        margin-right: 1rem;
+        text-align: left;
+      }
+      
+      /* Employee Header Cell */
+      .table-wrapper td.emp-header-cell {
+        flex-direction: column;
+        align-items: flex-start;
+        border-bottom: 1px solid var(--border);
+        padding-bottom: 12px;
+        margin-bottom: 8px;
+      }
+      .table-wrapper td.emp-header-cell::before { margin-bottom: 6px; }
+      .table-wrapper td.emp-header-cell .emp-header-content {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      .table-wrapper td.emp-header-cell .emp-header-info {
+        flex: 1;
+        min-width: 0;
+      }
+      .table-wrapper td.emp-header-cell .employee-name {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      /* Actions Cell */
+      .table-wrapper td.actions-cell {
+        justify-content: flex-end;
+        border-top: 1px solid var(--border);
+        margin-top: 8px;
+        padding-top: 12px;
+      }
+      .table-wrapper td.actions-cell::before { display: none; }
+    }
+
+    /* 📱 VERY SMALL MOBILE */
+    @media (max-width: 380px) {
+      .main { padding: .75rem; }
+      .page-title { font-size: 1.1rem; }
     }
   </style>
 </head>
@@ -270,10 +465,28 @@
     <a href="employees.html" class="nav-btn active">Employees</a>
   </nav>
   <div class="header-right">
+    <button class="mobile-nav-toggle" id="mobileNavToggle" aria-label="Open navigation menu">☰</button>
     <div class="status-dot"></div>
     <span class="status-text">Online</span>
   </div>
 </header>
+
+<!-- 📱 MOBILE NAV DRAWER -->
+<div class="nav-drawer-overlay" id="navDrawerOverlay"></div>
+<div class="nav-drawer" id="navDrawer" role="dialog" aria-label="Navigation menu">
+  <div class="nav-drawer-header">
+    <span class="nav-drawer-title">Menu</span>
+    <button class="nav-drawer-close" id="navDrawerClose" aria-label="Close menu">✕</button>
+  </div>
+  <a href="index.html" class="nav-btn">📊 Dashboard</a>
+  <a href="projects.html" class="nav-btn">📁 Projects</a>
+  <a href="payments.html" class="nav-btn">💳 Payments</a>
+  <a href="clients.html" class="nav-btn">👥 Clients</a>
+  <a href="reports.html" class="nav-btn">📈 Reports</a>
+  <a href="performance.html" class="nav-btn">⚡ Performance</a>
+  <a href="finance.html" class="nav-btn">💰 Finance</a>
+  <a href="employees.html" class="nav-btn active">🧑‍💼 Employees</a>
+</div>
 
 <div class="toast-container" id="toastContainer"></div>
 
@@ -291,16 +504,14 @@
       <thead>
         <tr>
           <th>Employee</th>
-          <th>Title</th>
           <th>Code</th>
           <th>Balance</th>
           <th>Commission</th>
-          <th>Status</th>
           <th>Actions</th>
         </tr>
       </thead>
       <tbody id="employeesTable">
-        <tr><td colspan="7"><div class="empty-state"><div class="empty-icon">👥</div><p>Loading employees...</p></div></td></tr>
+        <tr><td colspan="5"><div class="empty-state"><div class="empty-icon">👥</div><p>Loading employees...</p></div></td></tr>
       </tbody>
     </table>
   </div>
@@ -370,6 +581,13 @@
   <div class="modal wallet-modal">
     <div class="wallet-header">
       <button class="modal-close" id="closeWalletModal" style="color: white; position: absolute; top: 1rem; right: 1rem;">✕</button>
+      
+      <!-- 🚀 DRAFTS OFFICIAL LOGO -->
+      <div class="wallet-logo-container">
+        <img src="https://i.ibb.co/p6GCfY1x/Screenshot-2026-05-30-at-17-06-41.png" alt="Drafts Logo">
+        <div class="wallet-brand">Employee Wallet</div>
+      </div>
+
       <div class="wallet-employee">
         <div class="wallet-avatar" id="walletAvatar">E</div>
         <div>
@@ -489,7 +707,36 @@
       let currentEmployeeId = null;
       let currentEmployeeData = null;
 
+      // === MOBILE NAV DRAWER ===
+      const navToggle = document.getElementById('mobileNavToggle');
+      const navDrawer = document.getElementById('navDrawer');
+      const navOverlay = document.getElementById('navDrawerOverlay');
+      const navClose = document.getElementById('navDrawerClose');
+
+      function openDrawer() {
+        navDrawer.classList.add('active');
+        navOverlay.classList.add('active');
+        document.body.style.overflow = 'hidden';
+      }
+      function closeDrawer() {
+        navDrawer.classList.remove('active');
+        navOverlay.classList.remove('active');
+        document.body.style.overflow = '';
+      }
+
+      navToggle.addEventListener('click', openDrawer);
+      navClose.addEventListener('click', closeDrawer);
+      navOverlay.addEventListener('click', closeDrawer);
+      document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeDrawer(); });
+
       // === UTILS ===
+      function escapeHtml(str) {
+        if (!str) return '';
+        return String(str).replace(/[&<>"']/g, m => ({
+          '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+        }[m]));
+      }
+
       function generateId() {
         if (crypto?.randomUUID) return crypto.randomUUID();
         return 'id-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
@@ -511,9 +758,7 @@
       function generatePassword(length = 12) {
         const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*';
         let result = '';
-        for (let i = 0; i < length; i++) {
-          result += chars.charAt(Math.floor(Math.random() * chars.length));
-        }
+        for (let i = 0; i < length; i++) result += chars.charAt(Math.floor(Math.random() * chars.length));
         return result;
       }
       
@@ -525,58 +770,53 @@
         return 'EMP-' + String(Math.floor(Math.random() * 9000) + 1000);
       }
 
-      // === LOAD EMPLOYEES TABLE ===
       async function loadEmployees() {
         try {
           const { data, error } = await supabase.from('employees').select('*').order('created_at', { ascending: false });
           const tbody = document.getElementById('employeesTable');
           
           if (error) {
-            console.error('Load error:', error);
-            tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state"><div class="empty-icon">⚠️</div><p>Failed to load: ${error.message}</p></div></td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="5"><div class="empty-state"><div class="empty-icon">⚠️</div><p>Failed to load: ${escapeHtml(error.message)}</p></div></td></tr>`;
             return;
           }
-          
           if (!data || data.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state"><div class="empty-icon">👥</div><p>No employees found. Add your first employee.</p></div></td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="5"><div class="empty-state"><div class="empty-icon">👥</div><p>No employees found.</p></div></td></tr>`;
             return;
           }
           
           tbody.innerHTML = data.map(e => {
             const statusBadge = e.status === 'active' ? 'badge-green' : e.status === 'inactive' ? 'badge-gray' : 'badge-red';
             const initials = e.name?.split(' ').map(n => n[0]).join('').toUpperCase() || 'E';
-            const avatar = e.profile_photo_url 
-              ? `<img src="${e.profile_photo_url}" alt="${e.name}" />` 
-              : `<span>${initials}</span>`;
-            
+            const avatar = e.profile_photo_url ? `<img src="${escapeHtml(e.profile_photo_url)}" alt="${escapeHtml(e.name)}" />` : `<span>${initials}</span>`;
             const overallRate = ((e.overall_commission_rate || 0) * 100).toFixed(1);
             const referralRate = ((e.referral_commission_rate || 0) * 100).toFixed(1);
             
-            return `<tr data-id="${e.id}">
-              <td>
-                <div class="employee-card">
+            return `<tr data-id="${e.id}" data-status="${e.status}">
+              <td class="emp-header-cell" data-label="Employee">
+                <div class="emp-header-content">
                   <div class="employee-avatar">${avatar}</div>
-                  <div class="employee-info">
-                    <div class="employee-name">${e.name || 'Untitled'}</div>
-                    <div class="employee-title">${e.title || '—'}</div>
+                  <div class="emp-header-info">
+                    <div class="employee-name">${escapeHtml(e.name) || 'Untitled'}</div>
+                    <div class="employee-title">${escapeHtml(e.title) || '—'}</div>
                   </div>
+                  <span class="badge ${statusBadge}" style="flex-shrink:0;"><span class="badge-dot"></span>${escapeHtml(e.status)}</span>
                 </div>
               </td>
-              <td>${e.title || '—'}</td>
-              <td><span class="employee-code">${e.employee_code}</span></td>
-              <td>
-                <strong class="text-green">${formatUGX(e.account_balance)}</strong><br>
-                <span class="text-muted" style="font-size:.75rem">${formatUSD(e.account_balance)}</span>
+              <td data-label="Code"><span class="employee-code">${escapeHtml(e.employee_code)}</span></td>
+              <td data-label="Balance">
+                <div style="text-align:right;">
+                  <strong class="text-green">${formatUGX(e.account_balance)}</strong><br>
+                  <span class="text-muted" style="font-size:.75rem">${formatUSD(e.account_balance)}</span>
+                </div>
               </td>
-              <td>
-                <div style="font-size:.8rem; line-height: 1.6;">
+              <td data-label="Commission">
+                <div style="text-align:right; font-size:.8rem; line-height: 1.6;">
                   <div>Overall: <strong>${overallRate}%</strong></div>
                   <div>Referral: <strong class="text-green">${referralRate}%</strong></div>
                 </div>
               </td>
-              <td><span class="badge ${statusBadge}"><span class="badge-dot"></span>${e.status}</span></td>
-              <td>
-                <div class="flex gap-1 wrap" onclick="event.stopPropagation()">
+              <td class="actions-cell">
+                <div class="flex gap-1 wrap" style="justify-content: flex-end;">
                   <button class="btn btn-sm btn-outline edit-btn" data-id="${e.id}">Edit</button>
                   <button class="btn btn-sm btn-outline text-red delete-btn" data-id="${e.id}">Del</button>
                 </div>
@@ -590,7 +830,6 @@
         }
       }
 
-      // === OPEN WALLET POPUP ===
       async function openWalletPopup(empId) {
         try {
           const { data: emp, error } = await supabase.from('employees').select('*').eq('id', empId).single();
@@ -599,39 +838,26 @@
           currentEmployeeId = empId;
           currentEmployeeData = emp;
           
-          // Populate header
           const initials = emp.name?.split(' ').map(n => n[0]).join('').toUpperCase() || 'E';
           const avatarEl = document.getElementById('walletAvatar');
-          if (emp.profile_photo_url) {
-            avatarEl.innerHTML = `<img src="${emp.profile_photo_url}" alt="${emp.name}" />`;
-          } else {
-            avatarEl.textContent = initials;
-          }
+          avatarEl.innerHTML = emp.profile_photo_url ? `<img src="${escapeHtml(emp.profile_photo_url)}" alt="${escapeHtml(emp.name)}" />` : initials;
+          
           document.getElementById('walletName').textContent = emp.name || 'Employee';
           document.getElementById('walletCode').textContent = emp.employee_code;
           document.getElementById('walletBalance').textContent = formatUGX(emp.account_balance);
           document.getElementById('walletBalanceUsd').textContent = formatUSD(emp.account_balance);
           
-          // Load withdrawal history
           await loadWithdrawalHistory(empId);
-          
           openModal('walletModal');
         } catch (err) {
           showToast('Error: ' + err.message, 'error');
         }
       }
 
-      // === LOAD WITHDRAWAL HISTORY ===
       async function loadWithdrawalHistory(empId) {
         try {
-          const { data, error } = await supabase
-            .from('employee_withdrawals')
-            .select('*')
-            .eq('employee_id', empId)
-            .order('created_at', { ascending: false });
-          
+          const { data, error } = await supabase.from('employee_withdrawals').select('*').eq('employee_id', empId).order('created_at', { ascending: false });
           const historyEl = document.getElementById('walletHistory');
-          
           if (error) throw error;
           
           if (!data || data.length === 0) {
@@ -644,72 +870,52 @@
             return `<div class="wallet-history-item">
               <div class="wallet-history-info">
                 <div class="wallet-history-date">${new Date(w.withdrawal_date).toLocaleDateString()} at ${new Date(w.created_at).toLocaleTimeString()}</div>
-                <div class="wallet-history-notes">${w.notes || 'Withdrawal'}</div>
+                <div class="wallet-history-notes">${escapeHtml(w.notes) || 'Withdrawal'}</div>
               </div>
               <div class="wallet-history-amount">-${formatUGX(w.amount)}</div>
               <div class="wallet-history-status">
-                <span class="badge ${statusBadge}"><span class="badge-dot"></span>${w.status}</span>
+                <span class="badge ${statusBadge}"><span class="badge-dot"></span>${escapeHtml(w.status)}</span>
               </div>
             </div>`;
           }).join('');
         } catch (err) {
-          console.error('History load error:', err);
           document.getElementById('walletHistory').innerHTML = '<div class="empty-history">Failed to load history</div>';
         }
       }
 
-      // === WITHDRAW FUNDS ===
       async function processWithdrawal() {
         const amount = parseFloat(document.getElementById('withdrawAmount').value);
         const notes = document.getElementById('withdrawNotes').value.trim();
         
-        if (!amount || amount <= 0) {
-          showToast('Please enter a valid amount', 'error');
-          return;
-        }
-        
-        if (amount > (currentEmployeeData.account_balance || 0)) {
-          showToast('Insufficient balance', 'error');
-          return;
-        }
+        if (!amount || amount <= 0) { showToast('Please enter a valid amount', 'error'); return; }
+        if (amount > (currentEmployeeData.account_balance || 0)) { showToast('Insufficient balance', 'error'); return; }
         
         const btn = document.getElementById('confirmWithdraw');
-        btn.disabled = true;
-        btn.textContent = 'Processing...';
+        btn.disabled = true; btn.textContent = 'Processing...';
         
         try {
-          // Create withdrawal record
           const { error: withdrawErr } = await supabase.from('employee_withdrawals').insert({
-            id: generateId(),
-            employee_id: currentEmployeeId,
-            amount: amount,
+            id: generateId(), employee_id: currentEmployeeId, amount: amount,
             withdrawal_date: new Date().toISOString().split('T')[0],
-            status: 'completed',
-            notes: notes || 'Withdrawal',
-            created_at: new Date().toISOString()
+            status: 'completed', notes: notes || 'Withdrawal', created_at: new Date().toISOString()
           });
           if (withdrawErr) throw withdrawErr;
           
-          // Update employee balance
           const newBalance = (currentEmployeeData.account_balance || 0) - amount;
           const { error: updateErr } = await supabase.from('employees').update({ account_balance: newBalance }).eq('id', currentEmployeeId);
           if (updateErr) throw updateErr;
           
           showToast(`Withdrawal of ${formatUGX(amount)} successful!`);
           closeModal('withdrawModal');
-          
-          // Refresh wallet popup
           await openWalletPopup(currentEmployeeId);
           await loadEmployees();
         } catch (err) {
           showToast('Withdrawal failed: ' + err.message, 'error');
         } finally {
-          btn.disabled = false;
-          btn.textContent = 'Confirm Withdrawal';
+          btn.disabled = false; btn.textContent = 'Confirm Withdrawal';
         }
       }
 
-      // === RECALCULATE BALANCE ===
       async function recalculateBalance(empId) {
         try {
           const { data: emp } = await supabase.from('employees').select('overall_commission_rate, referral_commission_rate').eq('id', empId).single();
@@ -732,15 +938,12 @@
 
           showToast(`Balance recalculated: ${formatUGX(newBalance)}`);
           await loadEmployees();
-          if (currentEmployeeId === empId) {
-            await openWalletPopup(empId);
-          }
+          if (currentEmployeeId === empId) await openWalletPopup(empId);
         } catch (err) {
           showToast('Recalculate failed: ' + err.message, 'error');
         }
       }
 
-      // === DELETE EMPLOYEE ===
       async function deleteEmployee(id) {
         if (!confirm('Delete this employee? This cannot be undone.')) return;
         try {
@@ -755,7 +958,6 @@
         }
       }
 
-      // === EDIT EMPLOYEE ===
       async function editEmployee(id) {
         try {
           const { data, error } = await supabase.from('employees').select('*').eq('id', id).single();
@@ -777,7 +979,6 @@
         }
       }
 
-      // === SHOW CREDENTIALS ===
       async function showCredentials(employeeId) {
         try {
           const { data: emp } = await supabase.from('employees').select('*').eq('id', employeeId).single();
@@ -801,13 +1002,10 @@
         }
       }
 
-      // === EVENT LISTENERS ===
       document.getElementById('logoBtn').addEventListener('click', () => window.location.href = 'index.html');
       
       document.getElementById('newEmployeeBtn').addEventListener('click', () => {
-        ['empId','empName','empTitle','empEmail','empPhone','empPhoto'].forEach(id => 
-          document.getElementById(id).value = ''
-        );
+        ['empId','empName','empTitle','empEmail','empPhone','empPhoto'].forEach(id => document.getElementById(id).value = '');
         document.getElementById('empOverallCommission').value = '2';
         document.getElementById('empReferralCommission').value = '10';
         document.getElementById('empStatus').value = 'active';
@@ -815,7 +1013,6 @@
         openModal('employeeModal');
       });
       
-      // Close modals
       document.getElementById('closeEmployeeModal').addEventListener('click', () => closeModal('employeeModal'));
       document.getElementById('cancelEmployee').addEventListener('click', () => closeModal('employeeModal'));
       document.getElementById('closeWalletModal').addEventListener('click', () => closeModal('walletModal'));
@@ -825,18 +1022,16 @@
       document.getElementById('cancelWithdraw').addEventListener('click', () => closeModal('withdrawModal'));
       
       document.querySelectorAll('.modal-overlay').forEach(overlay => {
-        overlay.addEventListener('click', (e) => {
-          if (e.target === overlay) overlay.classList.remove('open');
-        });
+        overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.classList.remove('open'); });
       });
 
-      // Table row click -> open wallet popup
+      // 🚀 FIXED EVENT LISTENER: Now properly catches Edit/Delete clicks!
       document.getElementById('employeesTable').addEventListener('click', (e) => {
         const editBtn = e.target.closest('.edit-btn');
         const deleteBtn = e.target.closest('.delete-btn');
         
         if (editBtn) {
-          e.stopPropagation();
+          e.stopPropagation(); // Stops the click from bubbling up to open the wallet
           editEmployee(editBtn.dataset.id);
           return;
         }
@@ -852,7 +1047,6 @@
         }
       });
 
-      // Wallet actions
       document.getElementById('withdrawBtn').addEventListener('click', () => {
         document.getElementById('withdrawAvailable').textContent = formatUGX(currentEmployeeData.account_balance);
         document.getElementById('withdrawAmount').value = '';
@@ -860,17 +1054,10 @@
         openModal('withdrawModal');
       });
       
-      document.getElementById('recalcBtn').addEventListener('click', () => {
-        recalculateBalance(currentEmployeeId);
-      });
-      
-      document.getElementById('viewCredsBtn').addEventListener('click', () => {
-        showCredentials(currentEmployeeId);
-      });
-      
+      document.getElementById('recalcBtn').addEventListener('click', () => recalculateBalance(currentEmployeeId));
+      document.getElementById('viewCredsBtn').addEventListener('click', () => showCredentials(currentEmployeeId));
       document.getElementById('confirmWithdraw').addEventListener('click', processWithdrawal);
 
-      // Copy credentials
       document.getElementById('copyUsername').onclick = async function() {
         await navigator.clipboard.writeText(document.getElementById('credUsername').textContent);
         showToast('Username copied!');
@@ -880,7 +1067,6 @@
         showToast('Password copied!');
       };
 
-      // === SAVE EMPLOYEE ===
       document.getElementById('saveEmployee').addEventListener('click', async function() {
         if (isSaving) return;
         isSaving = true;
